@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4.1 Advanced Testing — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link"><span class="nav-link-icon">🏠</span>Главная</a>
+                    <a href="setup.html" class="nav-link"><span class="nav-link-icon">⚙️</span>Настройка проекта</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
+                    <a href="part1_schema.html" class="nav-link"><span class="nav-link-icon">📊</span>1.1 Схема и хранение</a>
+                    <a href="part1_transactions.html" class="nav-link"><span class="nav-link-icon">🔄</span>1.2 Транзакции</a>
+                    <a href="part1_indexes.html" class="nav-link"><span class="nav-link-icon">🔍</span>1.3 Индексы</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 2: Архитектура</div>
+                    <a href="part2_litestar.html" class="nav-link"><span class="nav-link-icon">🚀</span>2.1 Litestar + DDD</a>
+                    <a href="part2_dishka.html" class="nav-link"><span class="nav-link-icon">💉</span>2.2 DI с Dishka</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 3: Распределённые</div>
+                    <a href="part3_faststream.html" class="nav-link"><span class="nav-link-icon">📨</span>3.1 RabbitMQ + Faststream</a>
+                    <a href="part3_redis.html" class="nav-link"><span class="nav-link-icon">⚡</span>3.2 Redis Patterns</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 4: Надёжность</div>
+                    <a href="part4_testing.html" class="nav-link active"><span class="nav-link-icon">🧪</span>4.1 Advanced Testing</a>
+                    <a href="part4_resiliency.html" class="nav-link"><span class="nav-link-icon">🛡️</span>4.2 Resiliency</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 5: Observability</div>
+                    <a href="part5_logging.html" class="nav-link"><span class="nav-link-icon">📝</span>5.1 Логирование</a>
+                    <a href="part5_clickhouse.html" class="nav-link"><span class="nav-link-icon">📈</span>5.2 ClickHouse</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 6: Production</div>
+                    <a href="part6_migrations.html" class="nav-link"><span class="nav-link-icon">🔀</span>6.1 Zero-Downtime</a>
+                    <a href="part6_quality.html" class="nav-link"><span class="nav-link-icon">✅</span>6.2 Code Quality</a>
+                    <a href="part6_django.html" class="nav-link"><span class="nav-link-icon">🔗</span>6.3 Django Admin</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 4</span>
+                    <span>/</span>
+                    <span>4.1 Advanced Testing</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 4.1: Продвинутое тестирование</h1>
+                <p class="lead">
+                    Testcontainers, Hypothesis, сложные фикстуры — тестируем как профессионалы.
+                </p>
+
+                <h2>Пирамида тестирования</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Уровень</th>
+                            <th>Скорость</th>
+                            <th>Изоляция</th>
+                            <th>Что тестируем</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Unit</strong></td>
+                            <td>⚡ Мгновенно</td>
+                            <td>Полная</td>
+                            <td>Доменная логика, Value Objects</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Integration</strong></td>
+                            <td>🚗 Секунды</td>
+                            <td>Частичная</td>
+                            <td>Репозитории, внешние сервисы</td>
+                        </tr>
+                        <tr>
+                            <td><strong>E2E</strong></td>
+                            <td>🐢 Минуты</td>
+                            <td>Минимальная</td>
+                            <td>Полный flow через API</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>Testcontainers: реальные зависимости</h2>
+                
+                <p>
+                    Моки БД — это ложное чувство безопасности. 
+                    Testcontainers запускает реальный PostgreSQL в Docker.
+                </p>
+
+<pre><code><span class="comment"># tests/conftest.py</span>
+<span class="keyword">import</span> pytest
+<span class="keyword">from</span> testcontainers.postgres <span class="keyword">import</span> PostgresContainer
+<span class="keyword">from</span> testcontainers.rabbitmq <span class="keyword">import</span> RabbitMqContainer
+<span class="keyword">from</span> testcontainers.redis <span class="keyword">import</span> RedisContainer
+<span class="keyword">from</span> sqlalchemy.ext.asyncio <span class="keyword">import</span> create_async_engine, async_sessionmaker
+
+
+<span class="decorator">@pytest.fixture</span>(scope=<span class="string">"session"</span>)
+<span class="keyword">def</span> <span class="function">postgres_container</span>():
+    <span class="string">"""
+    PostgreSQL контейнер для всей тестовой сессии.
+    scope="session" — один контейнер на все тесты (быстрее).
+    """</span>
+    <span class="keyword">with</span> PostgresContainer(<span class="string">"postgres:16-alpine"</span>) <span class="keyword">as</span> postgres:
+        <span class="keyword">yield</span> postgres
+
+
+<span class="decorator">@pytest.fixture</span>(scope=<span class="string">"session"</span>)
+<span class="keyword">def</span> <span class="function">redis_container</span>():
+    <span class="string">"""Redis контейнер."""</span>
+    <span class="keyword">with</span> RedisContainer(<span class="string">"redis:7-alpine"</span>) <span class="keyword">as</span> redis:
+        <span class="keyword">yield</span> redis
+
+
+<span class="decorator">@pytest.fixture</span>(scope=<span class="string">"session"</span>)
+<span class="keyword">def</span> <span class="function">rabbitmq_container</span>():
+    <span class="string">"""RabbitMQ контейнер."""</span>
+    <span class="keyword">with</span> RabbitMqContainer(<span class="string">"rabbitmq:3.13-management-alpine"</span>) <span class="keyword">as</span> rabbitmq:
+        <span class="keyword">yield</span> rabbitmq
+
+
+<span class="decorator">@pytest.fixture</span>(scope=<span class="string">"session"</span>)
+<span class="keyword">async def</span> <span class="function">engine</span>(postgres_container):
+    <span class="string">"""SQLAlchemy engine для тестов."""</span>
+    url = postgres_container.get_connection_url().replace(
+        <span class="string">"postgresql://"</span>, <span class="string">"postgresql+asyncpg://"</span>
+    )
+    engine = create_async_engine(url, echo=<span class="keyword">False</span>)
+    
+    <span class="comment"># Создаём таблицы</span>
+    <span class="keyword">async with</span> engine.begin() <span class="keyword">as</span> conn:
+        <span class="keyword">await</span> conn.run_sync(Base.metadata.create_all)
+    
+    <span class="keyword">yield</span> engine
+    
+    <span class="keyword">await</span> engine.dispose()
+
+
+<span class="decorator">@pytest.fixture</span>
+<span class="keyword">async def</span> <span class="function">session</span>(engine):
+    <span class="string">"""
+    Сессия для одного теста.
+    
+    scope="function" — новая сессия для каждого теста.
+    Rollback в конце — тесты не влияют друг на друга.
+    """</span>
+    <span class="keyword">async with</span> engine.connect() <span class="keyword">as</span> conn:
+        <span class="comment"># Начинаем транзакцию</span>
+        <span class="keyword">await</span> conn.begin()
+        
+        session_factory = async_sessionmaker(
+            bind=conn,
+            expire_on_commit=<span class="keyword">False</span>,
+        )
+        
+        <span class="keyword">async with</span> session_factory() <span class="keyword">as</span> session:
+            <span class="keyword">yield</span> session
+        
+        <span class="comment"># Откатываем — данные теста не сохраняются</span>
+        <span class="keyword">await</span> conn.rollback()</code></pre>
+
+                <h2>Фикстуры: фабрики сущностей</h2>
+
+<pre><code><span class="comment"># tests/factories.py</span>
+<span class="keyword">from</span> decimal <span class="keyword">import</span> Decimal
+<span class="keyword">import</span> factory
+<span class="keyword">from</span> factory <span class="keyword">import</span> fuzzy
+
+<span class="keyword">from</span> scaletrade.domain.entities.order <span class="keyword">import</span> Order, OrderSide, OrderStatus
+<span class="keyword">from</span> scaletrade.domain.value_objects <span class="keyword">import</span> OrderId, UserId, Money, Currency
+
+
+<span class="keyword">class</span> <span class="class-name">OrderFactory</span>(factory.Factory):
+    <span class="string">"""Фабрика для создания тестовых ордеров."""</span>
+    
+    <span class="keyword">class</span> <span class="class-name">Meta</span>:
+        model = Order
+    
+    id = factory.LazyFunction(<span class="keyword">lambda</span>: OrderId.generate())
+    user_id = factory.LazyFunction(<span class="keyword">lambda</span>: UserId(factory.Faker(<span class="string">"pyint"</span>)))
+    symbol = fuzzy.FuzzyChoice([<span class="string">"BTC/USD"</span>, <span class="string">"ETH/USD"</span>, <span class="string">"SOL/USD"</span>])
+    side = fuzzy.FuzzyChoice([OrderSide.BUY, OrderSide.SELL])
+    quantity = factory.LazyFunction(
+        <span class="keyword">lambda</span>: Money(Decimal(<span class="string">"0.5"</span>), Currency.USD)
+    )
+    price = factory.LazyFunction(
+        <span class="keyword">lambda</span>: Money(Decimal(<span class="string">"50000.00"</span>), Currency.USD)
+    )
+    status = OrderStatus.PENDING
+
+
+<span class="comment"># tests/conftest.py</span>
+<span class="decorator">@pytest.fixture</span>
+<span class="keyword">def</span> <span class="function">order_factory</span>():
+    <span class="string">"""Фабрика ордеров для тестов."""</span>
+    <span class="keyword">return</span> OrderFactory
+
+
+<span class="decorator">@pytest.fixture</span>
+<span class="keyword">def</span> <span class="function">pending_order</span>(order_factory):
+    <span class="string">"""Готовый pending ордер."""</span>
+    <span class="keyword">return</span> order_factory(status=OrderStatus.PENDING)
+
+
+<span class="decorator">@pytest.fixture</span>
+<span class="keyword">def</span> <span class="function">filled_order</span>(order_factory):
+    <span class="string">"""Готовый filled ордер."""</span>
+    order = order_factory(status=OrderStatus.PENDING)
+    order.fill()
+    <span class="keyword">return</span> order</code></pre>
+
+                <h2>Unit тесты: доменная логика</h2>
+
+<pre><code><span class="comment"># tests/unit/domain/test_order.py</span>
+<span class="keyword">import</span> pytest
+<span class="keyword">from</span> decimal <span class="keyword">import</span> Decimal
+
+<span class="keyword">from</span> scaletrade.domain.entities.order <span class="keyword">import</span> Order, OrderStatus
+<span class="keyword">from</span> scaletrade.domain.exceptions.order <span class="keyword">import</span> (
+    OrderAlreadyFilledError,
+    OrderAlreadyCancelledError,
+)
+
+
+<span class="keyword">class</span> <span class="class-name">TestOrderFill</span>:
+    <span class="string">"""Тесты исполнения ордера."""</span>
+    
+    <span class="keyword">def</span> <span class="function">test_fill_pending_order</span>(self, pending_order):
+        <span class="comment"># Act</span>
+        pending_order.fill()
+        
+        <span class="comment"># Assert</span>
+        <span class="keyword">assert</span> pending_order.status == OrderStatus.FILLED
+        <span class="keyword">assert</span> pending_order.filled_at <span class="keyword">is not None</span>
+    
+    <span class="keyword">def</span> <span class="function">test_fill_already_filled_raises</span>(self, filled_order):
+        <span class="comment"># Act & Assert</span>
+        <span class="keyword">with</span> pytest.raises(OrderAlreadyFilledError):
+            filled_order.fill()
+    
+    <span class="keyword">def</span> <span class="function">test_fill_cancelled_raises</span>(self, order_factory):
+        <span class="comment"># Arrange</span>
+        order = order_factory()
+        order.cancel()
+        
+        <span class="comment"># Act & Assert</span>
+        <span class="keyword">with</span> pytest.raises(OrderAlreadyCancelledError):
+            order.fill()
+
+
+<span class="keyword">class</span> <span class="class-name">TestOrderCancel</span>:
+    <span class="string">"""Тесты отмены ордера."""</span>
+    
+    <span class="keyword">def</span> <span class="function">test_cancel_pending_order</span>(self, pending_order):
+        pending_order.cancel()
+        <span class="keyword">assert</span> pending_order.status == OrderStatus.CANCELLED
+    
+    <span class="keyword">def</span> <span class="function">test_cancel_filled_raises</span>(self, filled_order):
+        <span class="keyword">with</span> pytest.raises(OrderAlreadyFilledError):
+            filled_order.cancel()
+
+
+<span class="keyword">class</span> <span class="class-name">TestOrderTotalValue</span>:
+    <span class="string">"""Тесты расчёта стоимости."""</span>
+    
+    <span class="keyword">def</span> <span class="function">test_total_value_calculation</span>(self, order_factory):
+        order = order_factory(
+            quantity=Money(Decimal(<span class="string">"2.5"</span>), Currency.USD),
+            price=Money(Decimal(<span class="string">"100.00"</span>), Currency.USD),
+        )
+        
+        <span class="keyword">assert</span> order.total_value.amount == Decimal(<span class="string">"250.00"</span>)</code></pre>
+
+                <h2>Integration тесты: репозитории</h2>
+
+<pre><code><span class="comment"># tests/integration/test_order_repository.py</span>
+<span class="keyword">import</span> pytest
+<span class="keyword">from</span> scaletrade.infrastructure.database.repositories <span class="keyword">import</span> SQLAlchemyOrderRepository
+
+
+<span class="decorator">@pytest.mark.asyncio</span>
+<span class="keyword">class</span> <span class="class-name">TestOrderRepository</span>:
+    
+    <span class="keyword">async def</span> <span class="function">test_save_and_get</span>(self, session, order_factory):
+        <span class="comment"># Arrange</span>
+        repo = SQLAlchemyOrderRepository(session)
+        order = order_factory()
+        
+        <span class="comment"># Act</span>
+        <span class="keyword">await</span> repo.save(order)
+        <span class="keyword">await</span> session.flush()
+        
+        retrieved = <span class="keyword">await</span> repo.get_by_id(order.id)
+        
+        <span class="comment"># Assert</span>
+        <span class="keyword">assert</span> retrieved <span class="keyword">is not None</span>
+        <span class="keyword">assert</span> retrieved.id == order.id
+        <span class="keyword">assert</span> retrieved.symbol == order.symbol
+    
+    <span class="keyword">async def</span> <span class="function">test_get_active_by_user</span>(self, session, order_factory):
+        <span class="comment"># Arrange</span>
+        repo = SQLAlchemyOrderRepository(session)
+        user_id = UserId(<span class="number">123</span>)
+        
+        <span class="comment"># Создаём 3 ордера: 2 pending, 1 filled</span>
+        orders = [
+            order_factory(user_id=user_id, status=OrderStatus.PENDING),
+            order_factory(user_id=user_id, status=OrderStatus.PENDING),
+            order_factory(user_id=user_id, status=OrderStatus.FILLED),
+        ]
+        <span class="keyword">for</span> o <span class="keyword">in</span> orders:
+            <span class="keyword">await</span> repo.save(o)
+        <span class="keyword">await</span> session.flush()
+        
+        <span class="comment"># Act</span>
+        active = <span class="keyword">await</span> repo.get_active_by_user(user_id)
+        
+        <span class="comment"># Assert</span>
+        <span class="keyword">assert</span> len(active) == <span class="number">2</span>
+        <span class="keyword">assert</span> all(o.status == OrderStatus.PENDING <span class="keyword">for</span> o <span class="keyword">in</span> active)</code></pre>
+
+                <h2>Property-based Testing с Hypothesis</h2>
+                
+                <p>
+                    Hypothesis генерирует тысячи тестовых случаев, находя edge cases, 
+                    которые ты бы не придумал.
+                </p>
+
+<pre><code><span class="comment"># tests/unit/domain/test_money_hypothesis.py</span>
+<span class="keyword">from</span> decimal <span class="keyword">import</span> Decimal
+<span class="keyword">from</span> hypothesis <span class="keyword">import</span> given, strategies <span class="keyword">as</span> st
+
+<span class="keyword">from</span> scaletrade.domain.value_objects.money <span class="keyword">import</span> Money, Currency
+
+
+<span class="comment"># Стратегия для генерации Money</span>
+money_strategy = st.builds(
+    Money,
+    amount=st.decimals(
+        min_value=Decimal(<span class="string">"0"</span>),
+        max_value=Decimal(<span class="string">"1000000"</span>),
+        places=<span class="number">4</span>,
+        allow_nan=<span class="keyword">False</span>,
+        allow_infinity=<span class="keyword">False</span>,
+    ),
+    currency=st.just(Currency.USD),
+)
+
+
+<span class="keyword">class</span> <span class="class-name">TestMoneyProperties</span>:
+    <span class="string">"""Property-based тесты для Money."""</span>
+    
+    <span class="decorator">@given</span>(money_strategy, money_strategy)
+    <span class="keyword">def</span> <span class="function">test_addition_is_commutative</span>(self, a: Money, b: Money):
+        <span class="string">"""a + b == b + a"""</span>
+        <span class="keyword">assert</span> a + b == b + a
+    
+    <span class="decorator">@given</span>(money_strategy, money_strategy, money_strategy)
+    <span class="keyword">def</span> <span class="function">test_addition_is_associative</span>(self, a: Money, b: Money, c: Money):
+        <span class="string">"""(a + b) + c == a + (b + c)"""</span>
+        <span class="keyword">assert</span> (a + b) + c == a + (b + c)
+    
+    <span class="decorator">@given</span>(money_strategy)
+    <span class="keyword">def</span> <span class="function">test_addition_identity</span>(self, m: Money):
+        <span class="string">"""m + 0 == m"""</span>
+        zero = Money.zero(m.currency)
+        <span class="keyword">assert</span> m + zero == m
+    
+    <span class="decorator">@given</span>(money_strategy, st.integers(min_value=<span class="number">1</span>, max_value=<span class="number">100</span>))
+    <span class="keyword">def</span> <span class="function">test_multiplication_is_distributive</span>(self, m: Money, n: <span class="type">int</span>):
+        <span class="string">"""m * n == m + m + ... (n раз)"""</span>
+        result = Money.zero(m.currency)
+        <span class="keyword">for</span> _ <span class="keyword">in</span> range(n):
+            result = result + m
+        <span class="keyword">assert</span> m * n == result</code></pre>
+
+                <h2>Mocking внешних API (respx)</h2>
+
+<pre><code><span class="comment"># tests/integration/test_external_api.py</span>
+<span class="keyword">import</span> pytest
+<span class="keyword">import</span> respx
+<span class="keyword">from</span> httpx <span class="keyword">import</span> Response
+
+<span class="keyword">from</span> scaletrade.infrastructure.external.price_service <span class="keyword">import</span> PriceService
+
+
+<span class="decorator">@pytest.mark.asyncio</span>
+<span class="keyword">class</span> <span class="class-name">TestPriceService</span>:
+    
+    <span class="decorator">@respx.mock</span>
+    <span class="keyword">async def</span> <span class="function">test_get_price_success</span>(self):
+        <span class="comment"># Arrange</span>
+        respx.get(<span class="string">"https://api.exchange.com/price/BTC"</span>).mock(
+            return_value=Response(
+                <span class="number">200</span>,
+                json={<span class="string">"symbol"</span>: <span class="string">"BTC"</span>, <span class="string">"price"</span>: <span class="string">"50000.00"</span>}
+            )
+        )
+        
+        service = PriceService()
+        
+        <span class="comment"># Act</span>
+        price = <span class="keyword">await</span> service.get_price(<span class="string">"BTC"</span>)
+        
+        <span class="comment"># Assert</span>
+        <span class="keyword">assert</span> price == Decimal(<span class="string">"50000.00"</span>)
+    
+    <span class="decorator">@respx.mock</span>
+    <span class="keyword">async def</span> <span class="function">test_get_price_api_error_retries</span>(self):
+        <span class="comment"># Мокаем 2 ошибки, потом успех</span>
+        route = respx.get(<span class="string">"https://api.exchange.com/price/BTC"</span>)
+        route.side_effect = [
+            Response(<span class="number">500</span>),
+            Response(<span class="number">500</span>),
+            Response(<span class="number">200</span>, json={<span class="string">"price"</span>: <span class="string">"50000.00"</span>}),
+        ]
+        
+        service = PriceService()
+        price = <span class="keyword">await</span> service.get_price(<span class="string">"BTC"</span>)
+        
+        <span class="keyword">assert</span> price == Decimal(<span class="string">"50000.00"</span>)
+        <span class="keyword">assert</span> route.call_count == <span class="number">3</span></code></pre>
+
+                <h2>Freezegun: контроль времени</h2>
+
+<pre><code><span class="comment"># tests/unit/test_time_sensitive.py</span>
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime, timedelta
+<span class="keyword">from</span> freezegun <span class="keyword">import</span> freeze_time
+
+
+<span class="keyword">class</span> <span class="class-name">TestOrderExpiration</span>:
+    
+    <span class="decorator">@freeze_time</span>(<span class="string">"2024-01-15 12:00:00"</span>)
+    <span class="keyword">def</span> <span class="function">test_order_not_expired</span>(self, order_factory):
+        order = order_factory()
+        <span class="keyword">assert not</span> order.is_expired
+    
+    <span class="keyword">def</span> <span class="function">test_order_expires_after_24h</span>(self, order_factory):
+        <span class="keyword">with</span> freeze_time(<span class="string">"2024-01-15 12:00:00"</span>):
+            order = order_factory()
+        
+        <span class="comment"># Перематываем время на 25 часов вперёд</span>
+        <span class="keyword">with</span> freeze_time(<span class="string">"2024-01-16 13:00:00"</span>):
+            <span class="keyword">assert</span> order.is_expired</code></pre>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Over-Mocking</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если в вашем тесте моков больше, чем реального кода — вы тестируете свои фантазии о том, как работает код, а не сам код. Если вы замокали БД, Redis и HTTP-клиент, то что вы тестируете? Логику склейки моков? Стремитесь использовать Testcontainers для интеграционных тестов.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Flaky Tests (Моргающие тесты)</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Тест, который то проходит, то падает (из-за <code>random</code>, порядка выполнения, гонки в БД) — хуже, чем отсутствие теста. Он подрывает доверие к CI. Если тест начал "моргать" — чините его немедленно или удаляйте.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. Общее состояние</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Никогда не полагайтесь на порядок запуска тестов. Каждый тест должен сам себе готовить данные и (в идеале) чистить за собой. Если тест А вставил запись в БД, а тест Б упал, потому что ожидал пустую таблицу — это плохие тесты.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Hypothesis:</strong> Используйте Property-based testing. Вместо того, чтобы писать <code>assert add(2, 2) == 4</code>, вы описываете свойство: <code>для любых a и b: add(a, b) == add(b, a)</code>. Hypothesis сгенерирует сотни краевых случаев (ноли, бесконечности, unicode) и попробует сломать ваш код.</li>
+                    <li><strong>Mutation Testing:</strong> Инструменты типа <code>mutmut</code> меняют ваш код (например, <code>></code> на <code>>=</code>) и запускают тесты. Если тесты прошли ("мутант выжил") — значит, ваш тест недостаточно строг.</li>
+                    <li><strong>Pytest Plugins:</strong>
+                        <ul>
+                            <li><code>pytest-xdist</code>: запуск тестов параллельно на всех ядрах.</li>
+                            <li><code>pytest-deadfixtures</code>: поиск неиспользуемых фикстур.</li>
+                            <li><code>pytest-cov</code>: покрытие (не гонитесь за 100%, 80-90% достаточно).</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>📋 Задание</h4>
+                    <ul class="task-list">
+                        <li>Настрой Testcontainers для PostgreSQL и Redis</li>
+                        <li>Создай фабрику для Order с factory_boy</li>
+                        <li>Напиши unit тесты для доменной логики Order</li>
+                        <li>Напиши integration тесты для OrderRepository</li>
+                        <li>Добавь property-based тесты для Money с Hypothesis</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="part3_redis.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 3.2 Redis Patterns</div>
+                        </div>
+                    </a>
+                    <a href="part4_resiliency.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">4.2 Resiliency →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

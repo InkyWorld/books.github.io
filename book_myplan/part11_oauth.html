@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11.1 OAuth2 & JWT — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <!-- Part 11 -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 11: Security</div>
+                    <a href="part11_oauth.html" class="nav-link active">11.1 OAuth2 & JWT</a>
+                    <a href="part11_vault.html" class="nav-link">11.2 HashiCorp Vault</a>
+                    <a href="part11_owasp.html" class="nav-link">11.3 OWASP Top 10</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 11</span>
+                    <span>/</span>
+                    <span>11.1 OAuth2</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 11.1: OAuth2, OIDC и JWT</h1>
+                <p class="lead">Аутентификация — это сложно. Не пишите свою криптографию. Используйте стандарты.</p>
+
+                <h2>JWT (JSON Web Token)</h2>
+                <p>Токен без состояния. Сервер подписывает данные (payload), клиент носит их с собой.</p>
+                <p><strong>Структура:</strong> <code>Header.Payload.Signature</code></p>
+                
+<pre><code class="language-json">// Payload
+{
+  "sub": "1234567890", // User ID
+  "name": "Alex",
+  "role": "admin",     // Права доступа
+  "iat": 1516239022,   // Issued At
+  "exp": 1516242622    // Expiration Time
+}</code></pre>
+
+                <h2>Access Token vs Refresh Token</h2>
+                <div class="comparison-table">
+                    <div class="comparison-col">
+                        <h4>Access Token (JWT)</h4>
+                        <ul>
+                            <li>Короткоживущий (5-15 мин).</li>
+                            <li>Даёт доступ к API.</li>
+                            <li><strong>Stateless:</strong> Обычно не проверяется в БД при каждом запросе (экономия ресурсов).</li>
+                            <li>Если украли — злоумышленник имеет доступ 15 мин.</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-col good">
+                        <h4>Refresh Token</h4>
+                        <ul>
+                            <li>Долгоживущий (дни/недели).</li>
+                            <li>Нужен ТОЛЬКО для получения нового Access Token.</li>
+                            <li><strong>Stateful:</strong> Хранится в БД (или Redis whitelist). Можно отозвать!</li>
+                            <li>Если украли — можно заблокировать юзера.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2>Refresh Token Rotation</h2>
+                <p>Защита от кражи Refresh токена. При КАЖДОМ использовании Refresh Token'а мы:</p>
+                <ol>
+                    <li>Выдаем новый Access Token.</li>
+                    <li>Выдаем <strong>НОВЫЙ</strong> Refresh Token.</li>
+                    <li>Старый Refresh Token инвалидируем.</li>
+                </ol>
+                <p>Если злоумышленник украл Refresh Token и использовал его, а потом легальный юзер тоже попробовал его использовать — система видит "Double Spend" и банит <strong>ВСЮ цепочку</strong> токенов юзера (разлогинивает везде).</p>
+
+                <h2>OAuth2 Flows</h2>
+                <ul>
+                    <li><strong>Authorization Code Flow (+ PKCE):</strong> Золотой стандарт для мобильных приложений и SPA. Клиент не видит пароль, получает временный код, меняет код на токены.</li>
+                    <li><strong>Client Credentials:</strong> Для общения сервис-сервис (Machine-to-Machine). Без юзера.</li>
+                </ul>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Проблема отзыва JWT (Revocation)</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Главный минус JWT — его нельзя отозвать. Если вы забанили юзера, его Access Token все еще валиден 15 минут. Решение: делать токены короткоживущими (5 мин) или проверять "blacklist" в Redis (но это убивает stateless).</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Раздувание размера токена</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если запихнуть в JWT все права и роли пользователя, хедер запроса станет огромным (4KB+). Это замедляет каждый запрос. Передавайте только ID, а права кэшируйте в сервисах.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. Hardcoded Secret Key</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Никогда не храните секрет для подписи токенов в коде. Если он утечет, хакер сможет генерировать любые токены. Используйте переменную окружения или Vault. Лучше переходите на асимметричные ключи (RS256 / JWKS).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>BFF Pattern (Backend For Frontend):</strong> Не храните токены в SPA (Local Storage — это дыра). Пусть ваш BFF (Node.js/Nginx) держит сессию в Secure Cookie с браузером, а при запросах к бэкенду подставляет JWT заголовок.</li>
+                    <li><strong>Phantom Token:</strong> Клиент получает непрозрачный UUID (Reference Token), а API Gateway на лету меняет его на полноценный JWT для внутренних сервисов. Это скрывает внутреннюю структуру токена от внешнего мира.</li>
+                    <li><strong>jwt-cli:</strong> Установите CLI утилиту для быстрой расшифровки токенов в терминале: <code>jwt decode eyJ...</code>.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>🎯 Практика</h4>
+                    <ul class="task-list">
+                        <li>Реализуй выдачу пары Access/Refresh токенов</li>
+                        <li>Настрой Refresh Token Rotation (бан цепочки при краже)</li>
+                        <li>Сделай хранение Refresh токена в HttpOnly Cookie</li>
+                        <li>Сгенерируй RS256 ключи и настрой подпись через них</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.1 RabbitMQ + Faststream — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link"><span class="nav-link-icon">🏠</span>Главная</a>
+                    <a href="setup.html" class="nav-link"><span class="nav-link-icon">⚙️</span>Настройка проекта</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
+                    <a href="part1_schema.html" class="nav-link"><span class="nav-link-icon">📊</span>1.1 Схема и хранение</a>
+                    <a href="part1_transactions.html" class="nav-link"><span class="nav-link-icon">🔄</span>1.2 Транзакции</a>
+                    <a href="part1_indexes.html" class="nav-link"><span class="nav-link-icon">🔍</span>1.3 Индексы</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 2: Архитектура</div>
+                    <a href="part2_litestar.html" class="nav-link"><span class="nav-link-icon">🚀</span>2.1 Litestar + DDD</a>
+                    <a href="part2_dishka.html" class="nav-link"><span class="nav-link-icon">💉</span>2.2 DI с Dishka</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 3: Распределённые</div>
+                    <a href="part3_faststream.html" class="nav-link active"><span class="nav-link-icon">📨</span>3.1 RabbitMQ + Faststream</a>
+                    <a href="part3_redis.html" class="nav-link"><span class="nav-link-icon">⚡</span>3.2 Redis Patterns</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 4: Надёжность</div>
+                    <a href="part4_testing.html" class="nav-link"><span class="nav-link-icon">🧪</span>4.1 Advanced Testing</a>
+                    <a href="part4_resiliency.html" class="nav-link"><span class="nav-link-icon">🛡️</span>4.2 Resiliency</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 5: Observability</div>
+                    <a href="part5_logging.html" class="nav-link"><span class="nav-link-icon">📝</span>5.1 Логирование</a>
+                    <a href="part5_clickhouse.html" class="nav-link"><span class="nav-link-icon">📈</span>5.2 ClickHouse</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 6: Production</div>
+                    <a href="part6_migrations.html" class="nav-link"><span class="nav-link-icon">🔀</span>6.1 Zero-Downtime</a>
+                    <a href="part6_quality.html" class="nav-link"><span class="nav-link-icon">✅</span>6.2 Code Quality</a>
+                    <a href="part6_django.html" class="nav-link"><span class="nav-link-icon">🔗</span>6.3 Django Admin</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 3</span>
+                    <span>/</span>
+                    <span>3.1 RabbitMQ + Faststream</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 3.1: Message Broker и Faststream</h1>
+                <p class="lead">
+                    Event-Driven Architecture: асинхронное взаимодействие между сервисами, 
+                    гарантии доставки и Transactional Outbox Pattern.
+                </p>
+
+                <h2>Зачем Message Broker?</h2>
+                
+                <p>Синхронные HTTP вызовы между сервисами имеют проблемы:</p>
+                <ul>
+                    <li><strong>Связность:</strong> Сервис A ждёт ответа от B — оба заняты</li>
+                    <li><strong>Отказоустойчивость:</strong> B упал — A тоже сломан</li>
+                    <li><strong>Масштабирование:</strong> Пики нагрузки ложат всю цепочку</li>
+                </ul>
+
+                <div class="info-box info">
+                    <div class="info-box-title">💡 Event-Driven Architecture</div>
+                    <p>
+                        Сервисы общаются через события. Отправитель не ждёт ответа. 
+                        Получатель обрабатывает, когда готов. Брокер гарантирует доставку.
+                    </p>
+                </div>
+
+                <h2>RabbitMQ: Exchange Types</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Exchange</th>
+                            <th>Маршрутизация</th>
+                            <th>Сценарий</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Direct</strong></td>
+                            <td>Точное совпадение routing key</td>
+                            <td>Команды, точечная доставка</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Fanout</strong></td>
+                            <td>Все привязанные очереди</td>
+                            <td>Broadcast, уведомления всем</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Topic</strong></td>
+                            <td>Паттерн matching (*.logs.#)</td>
+                            <td>Логи, события по категориям</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Headers</strong></td>
+                            <td>По заголовкам сообщения</td>
+                            <td>Сложная маршрутизация</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>Faststream: современный фреймворк</h2>
+                
+                <p>Faststream — это как FastAPI, но для очередей сообщений:</p>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/messaging/app.py</span>
+<span class="keyword">from</span> faststream <span class="keyword">import</span> FastStream
+<span class="keyword">from</span> faststream.rabbit <span class="keyword">import</span> RabbitBroker
+<span class="keyword">from</span> pydantic <span class="keyword">import</span> BaseModel
+
+<span class="keyword">from</span> scaletrade.config <span class="keyword">import</span> get_settings
+
+settings = get_settings()
+broker = RabbitBroker(<span class="type">str</span>(settings.rabbitmq_url))
+app = FastStream(broker)
+
+
+<span class="comment"># === Pydantic модели для сообщений ===</span>
+
+<span class="keyword">class</span> <span class="class-name">OrderCreatedEvent</span>(BaseModel):
+    <span class="string">"""Событие: ордер создан."""</span>
+    order_id: <span class="type">str</span>
+    user_id: <span class="type">int</span>
+    symbol: <span class="type">str</span>
+    side: <span class="type">str</span>
+    quantity: <span class="type">str</span>
+    price: <span class="type">str</span>
+    timestamp: <span class="type">str</span>
+
+
+<span class="keyword">class</span> <span class="class-name">OrderFilledEvent</span>(BaseModel):
+    <span class="string">"""Событие: ордер исполнен."""</span>
+    order_id: <span class="type">str</span>
+    user_id: <span class="type">int</span>
+    filled_price: <span class="type">str</span>
+    filled_at: <span class="type">str</span></code></pre>
+
+                <h3>Publisher: отправка событий</h3>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/messaging/publisher.py</span>
+<span class="keyword">from</span> faststream.rabbit <span class="keyword">import</span> RabbitBroker, RabbitExchange, ExchangeType
+
+<span class="comment"># Определяем exchanges</span>
+order_events_exchange = RabbitExchange(
+    name=<span class="string">"order.events"</span>,
+    type=ExchangeType.TOPIC,
+    durable=<span class="keyword">True</span>,
+)
+
+
+<span class="keyword">class</span> <span class="class-name">OrderEventPublisher</span>:
+    <span class="string">"""Публикация событий ордеров."""</span>
+    
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, broker: RabbitBroker) -> <span class="keyword">None</span>:
+        self._broker = broker
+    
+    <span class="keyword">async def</span> <span class="function">publish_order_created</span>(self, event: OrderCreatedEvent) -> <span class="keyword">None</span>:
+        <span class="string">"""Публикуем событие создания ордера."""</span>
+        <span class="keyword">await</span> self._broker.publish(
+            event,
+            exchange=order_events_exchange,
+            routing_key=<span class="string">f"order.created.</span>{event.symbol.replace('/', '.')}<span class="string">"</span>,
+            <span class="comment"># order.created.BTC.USD</span>
+        )
+    
+    <span class="keyword">async def</span> <span class="function">publish_order_filled</span>(self, event: OrderFilledEvent) -> <span class="keyword">None</span>:
+        <span class="keyword">await</span> self._broker.publish(
+            event,
+            exchange=order_events_exchange,
+            routing_key=<span class="string">"order.filled"</span>,
+        )</code></pre>
+
+                <h3>Subscriber: обработка событий</h3>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/messaging/subscribers.py</span>
+<span class="keyword">from</span> faststream.rabbit <span class="keyword">import</span> RabbitRouter, RabbitQueue
+<span class="keyword">from</span> scaletrade.infrastructure.messaging.app <span class="keyword">import</span> broker
+
+router = RabbitRouter()
+
+<span class="comment"># Очередь для аналитики (получает все события ордеров)</span>
+analytics_queue = RabbitQueue(
+    name=<span class="string">"analytics.orders"</span>,
+    durable=<span class="keyword">True</span>,
+    arguments={
+        <span class="string">"x-dead-letter-exchange"</span>: <span class="string">"dlx.analytics"</span>,
+        <span class="string">"x-message-ttl"</span>: <span class="number">86400000</span>,  <span class="comment"># 24h</span>
+    }
+)
+
+
+<span class="decorator">@router.subscriber</span>(
+    queue=analytics_queue,
+    exchange=order_events_exchange,
+    routing_key=<span class="string">"order.#"</span>,  <span class="comment"># Все события order.*</span>
+)
+<span class="keyword">async def</span> <span class="function">handle_order_event</span>(event: OrderCreatedEvent | OrderFilledEvent) -> <span class="keyword">None</span>:
+    <span class="string">"""
+    Обработчик событий ордеров для аналитики.
+    
+    Faststream автоматически:
+    - Валидирует сообщение через Pydantic
+    - Делает ACK после успешной обработки
+    - Делает NACK при исключении (requeue)
+    """</span>
+    <span class="keyword">match</span> event:
+        <span class="keyword">case</span> OrderCreatedEvent():
+            <span class="keyword">await</span> save_to_clickhouse(event)
+        <span class="keyword">case</span> OrderFilledEvent():
+            <span class="keyword">await</span> update_analytics(event)
+
+
+<span class="comment"># Очередь для уведомлений</span>
+notifications_queue = RabbitQueue(name=<span class="string">"notifications.orders"</span>, durable=<span class="keyword">True</span>)
+
+
+<span class="decorator">@router.subscriber</span>(
+    queue=notifications_queue,
+    exchange=order_events_exchange,
+    routing_key=<span class="string">"order.filled"</span>,
+)
+<span class="keyword">async def</span> <span class="function">notify_order_filled</span>(event: OrderFilledEvent) -> <span class="keyword">None</span>:
+    <span class="string">"""Отправляем уведомление пользователю."""</span>
+    <span class="keyword">await</span> send_push_notification(
+        user_id=event.user_id,
+        message=<span class="string">f"Ваш ордер {event.order_id} исполнен!"</span>,
+    )
+
+
+broker.include_router(router)</code></pre>
+
+                <h2>Transactional Outbox Pattern</h2>
+                
+                <p><strong>Проблема:</strong> Как гарантировать, что событие отправится ТОЛЬКО если транзакция прошла?</p>
+
+                <div class="comparison-table">
+                    <div class="comparison-col bad">
+                        <h4>❌ Проблема</h4>
+<pre><code><span class="keyword">async def</span> <span class="function">create_order</span>(...):
+    <span class="keyword">async with</span> session.begin():
+        session.add(order)
+        <span class="comment"># Транзакция ещё не закоммичена!</span>
+    
+    <span class="comment"># А если здесь сервер упадёт?</span>
+    <span class="keyword">await</span> broker.publish(event)
+    <span class="comment"># Событие уйдёт, но ордера нет!</span></code></pre>
+                    </div>
+                    <div class="comparison-col good">
+                        <h4>✅ Outbox Pattern</h4>
+<pre><code><span class="keyword">async def</span> <span class="function">create_order</span>(...):
+    <span class="keyword">async with</span> session.begin():
+        session.add(order)
+        <span class="comment"># Сохраняем событие в ту же транзакцию</span>
+        session.add(OutboxMessage(
+            payload=event.json()
+        ))
+    <span class="comment"># Фоновый процесс отправит</span></code></pre>
+                    </div>
+                </div>
+
+                <h3>Реализация Outbox</h3>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/database/models/outbox.py</span>
+<span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> BigInteger, String, Text, Boolean
+<span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> Mapped, mapped_column
+
+<span class="keyword">from</span> scaletrade.infrastructure.database.models.base <span class="keyword">import</span> Base
+
+
+<span class="keyword">class</span> <span class="class-name">OutboxMessage</span>(Base):
+    <span class="string">"""Таблица исходящих сообщений (Transactional Outbox)."""</span>
+    
+    __tablename__ = <span class="string">"outbox_messages"</span>
+    
+    id: Mapped[<span class="type">int</span>] = mapped_column(BigInteger, primary_key=<span class="keyword">True</span>)
+    
+    <span class="comment"># Routing</span>
+    exchange: Mapped[<span class="type">str</span>] = mapped_column(String(255))
+    routing_key: Mapped[<span class="type">str</span>] = mapped_column(String(255))
+    
+    <span class="comment"># Payload</span>
+    payload: Mapped[<span class="type">str</span>] = mapped_column(Text)  <span class="comment"># JSON</span>
+    
+    <span class="comment"># Status</span>
+    processed: Mapped[<span class="type">bool</span>] = mapped_column(Boolean, default=<span class="keyword">False</span>, index=<span class="keyword">True</span>)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())</code></pre>
+
+                <h3>Публикация через Outbox</h3>
+
+<pre><code><span class="comment"># src/scaletrade/application/services/order_service.py</span>
+<span class="keyword">class</span> <span class="class-name">OrderService</span>:
+    <span class="keyword">async def</span> <span class="function">create_order</span>(self, dto: CreateOrderDTO) -> OrderDTO:
+        <span class="keyword">async with</span> self.uow:
+            <span class="comment"># Создаём ордер</span>
+            order = Order.create(...)
+            <span class="keyword">await</span> self.uow.orders.save(order)
+            
+            <span class="comment"># Создаём событие в той же транзакции</span>
+            event = OrderCreatedEvent(
+                order_id=<span class="type">str</span>(order.id),
+                user_id=order.user_id.value,
+                symbol=order.symbol,
+                side=order.side.value,
+                quantity=<span class="type">str</span>(order.quantity.amount),
+                price=<span class="type">str</span>(order.price.amount),
+                timestamp=datetime.utcnow().isoformat(),
+            )
+            
+            <span class="comment"># Сохраняем в outbox (атомарно с ордером!)</span>
+            <span class="keyword">await</span> self.uow.outbox.add(
+                exchange=<span class="string">"order.events"</span>,
+                routing_key=<span class="string">f"order.created.</span>{order.symbol.replace('/', '.')}<span class="string">"</span>,
+                payload=event.model_dump_json(),
+            )
+            
+            <span class="keyword">await</span> self.uow.commit()
+            
+            <span class="keyword">return</span> OrderDTO.from_domain(order)</code></pre>
+
+                <h3>Outbox Worker</h3>
+
+<pre><code><span class="comment"># src/scaletrade/workers/outbox_worker.py</span>
+<span class="keyword">import</span> asyncio
+<span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> select, update
+
+<span class="keyword">from</span> scaletrade.infrastructure.database.models <span class="keyword">import</span> OutboxMessage
+<span class="keyword">from</span> scaletrade.infrastructure.messaging.app <span class="keyword">import</span> broker
+
+
+<span class="keyword">async def</span> <span class="function">process_outbox</span>(session: AsyncSession) -> <span class="type">int</span>:
+    <span class="string">"""
+    Обрабатываем непрочитанные сообщения из outbox.
+    
+    Используем SKIP LOCKED для параллельной обработки
+    несколькими воркерами.
+    """</span>
+    <span class="comment"># Берём batch сообщений с блокировкой</span>
+    stmt = (
+        select(OutboxMessage)
+        .where(OutboxMessage.processed == <span class="keyword">False</span>)
+        .order_by(OutboxMessage.created_at)
+        .limit(<span class="number">100</span>)
+        .with_for_update(skip_locked=<span class="keyword">True</span>)
+    )
+    
+    result = <span class="keyword">await</span> session.execute(stmt)
+    messages = result.scalars().all()
+    
+    <span class="keyword">for</span> msg <span class="keyword">in</span> messages:
+        <span class="keyword">try</span>:
+            <span class="comment"># Отправляем в RabbitMQ</span>
+            <span class="keyword">await</span> broker.publish(
+                msg.payload,
+                exchange=msg.exchange,
+                routing_key=msg.routing_key,
+            )
+            
+            <span class="comment"># Помечаем как обработанное</span>
+            msg.processed = <span class="keyword">True</span>
+            
+        <span class="keyword">except</span> Exception <span class="keyword">as</span> e:
+            <span class="comment"># Логируем, но не падаем</span>
+            logger.error(<span class="string">f"Failed to publish message {msg.id}: {e}"</span>)
+    
+    <span class="keyword">await</span> session.commit()
+    <span class="keyword">return</span> len(messages)
+
+
+<span class="keyword">async def</span> <span class="function">outbox_worker_loop</span>() -> <span class="keyword">None</span>:
+    <span class="string">"""Бесконечный цикл обработки outbox."""</span>
+    <span class="keyword">async with</span> async_sessionmaker() <span class="keyword">as</span> session:
+        <span class="keyword">while</span> <span class="keyword">True</span>:
+            processed = <span class="keyword">await</span> process_outbox(session)
+            
+            <span class="keyword">if</span> processed == <span class="number">0</span>:
+                <span class="comment"># Нет сообщений — ждём</span>
+                <span class="keyword">await</span> asyncio.sleep(<span class="number">1</span>)
+            <span class="keyword">else</span>:
+                logger.info(<span class="string">f"Processed {processed} outbox messages"</span>)</code></pre>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">✅ Преимущества Outbox</div>
+                    <ul>
+                        <li><strong>Атомарность:</strong> Сообщение создаётся в той же транзакции, что и данные</li>
+                        <li><strong>Идемпотентность:</strong> Можно безопасно перезапускать воркер</li>
+                        <li><strong>Отказоустойчивость:</strong> Брокер может быть недоступен — сообщения не потеряются</li>
+                        <li><strong>Порядок:</strong> Сообщения отправляются в порядке создания</li>
+                    </ul>
+                </div>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. At-least-once delivery</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Брокеры сообщений (RabbitMQ, Kafka) гарантируют доставку "хотя бы раз". Это значит, что ваш консьюмер может получить одно и то же сообщение дважды (например, если ACK не дошел до брокера). Ваш код <strong>обязан</strong> быть идемпотентным.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Большие сообщения</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>RabbitMQ начинает "кашлять", если гонять через него мегабайтные JSON'ы. Если данных много — положите их в S3/DB, а в сообщение положите только ID. Брокер — для сигнализации, а не для передачи файлов.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. Бесконечные ретраи (Poison Pill)</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если сообщение вызывает падение консьюмера (например, кривой JSON), брокер вернет его в очередь, и консьюмер упадет снова. Это цикл смерти. Настройте Dead Letter Exchange (DLX) и ограничьте количество попыток (x-delivery-limit).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Gzip/Brotli:</strong> Если JSON большой, ужмите его на уровне приложения перед отправкой. CPU дешевле, чем сеть и память брокера.</li>
+                    <li><strong>Consistent Hashing:</strong> Если важен порядок событий для одного юзера, используйте <code>user_id</code> как routing key (или partition key в Kafka). Тогда все события юзера пойдут в один шард и обработаются последовательно.</li>
+                    <li><strong>Outbox Cleaner:</strong> Таблица outbox быстро пухнет. Не удаляйте записи по одной сразу после отправки (лишняя нагрузка на WAL). Помечайте <code>processed=true</code>, а раз в ночь удаляйте пачкой (<code>DELETE FROM outbox WHERE processed AND created_at < NOW() - INTERVAL '1 day'</code>).</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>📋 Задание</h4>
+                    <ul class="task-list">
+                        <li>Настрой RabbitMQ с Topic exchange для событий ордеров</li>
+                        <li>Реализуй Publisher и Subscriber с Faststream</li>
+                        <li>Создай таблицу <code>outbox_messages</code> и репозиторий</li>
+                        <li>Интегрируй Outbox в <code>OrderService.create_order</code></li>
+                        <li>Напиши воркер для обработки outbox с SKIP LOCKED</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="part2_dishka.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 2.2 DI с Dishka</div>
+                        </div>
+                    </a>
+                    <a href="part3_redis.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">3.2 Redis Patterns →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

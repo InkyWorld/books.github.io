@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18.1 Estimations — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 18: Soft Skills</div>
+                    <a href="part18_estimation.html" class="nav-link active">18.1 Estimations</a>
+                    <a href="part18_burnout.html" class="nav-link">18.2 Burnout</a>
+                    <a href="part18_interview.html" class="nav-link">18.3 Interview</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 18</span>
+                    <span>/</span>
+                    <span>18.1 Estimations</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 18.1: Искусство ошибаться в сроках</h1>
+                <p class="lead">"Hofstadter's Law: It always takes longer than you expect, even when you take into account Hofstadter's Law."</p>
+
+                <h2>Почему мы не умеем оценивать?</h2>
+                <ul>
+                    <li><strong>Оптимизм:</strong> Мы представляем идеальный путь (Happy Path), забывая про баги, рефакторинг, code review и внезапные митинги.</li>
+                    <li><strong>Нарезка задач:</strong> "Сделать авторизацию" — это не 4 часа. Это: дизайн API, схема БД, ручка Login, ручка Refresh, тесты, документация, фронтенд интеграция.</li>
+                    <li><strong>Неизвестность:</strong> Новая библиотека всегда требует времени на "потыкать".</li>
+                </ul>
+
+                <h2>Методы оценки</h2>
+
+                <h3>1. Декомпозиция (WBS - Work Breakdown Structure)</h3>
+                <p>Разбивайте задачу до атомарных кусков (не более 4 часов). Если кусок больше дня — делите еще. Сумма оценок мелких задач всегда точнее, чем оценка одной большой.</p>
+
+                <h3>2. Коэффициенты неопределенности</h3>
+                <ul>
+                    <li>Задача понятна, делал 100 раз: x1.2</li>
+                    <li>Понятна, но новый фреймворк: x1.5</li>
+                    <li>Мутная задача,Legacy код: x3.0</li>
+                </ul>
+
+                <h3>3. PERT (Program Evaluation and Review Technique)</h3>
+                <p>O = Оптимистичная, R = Реалистичная, P = Пессимистичная.</p>
+                <div class="code-block">
+                    <pre><code>Estimate = (O + 4*R + P) / 6</code></pre>
+                </div>
+                <p>Пример: (2ч + 4*4ч + 8ч) / 6 = 4.33 часа.</p>
+
+                <h2>💡 Лайфхак: Underpromise, Overdeliver</h2>
+                <p>Называйте срок с запасом. Если сделаете раньше — вы герой. Если вовремя — профессионал. Если назовете оптимистичный срок и опоздаете на час — вы ненадежны.</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

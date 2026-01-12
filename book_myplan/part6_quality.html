@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6.2 Code Quality — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link"><span class="nav-link-icon">🏠</span>Главная</a>
+                    <a href="setup.html" class="nav-link"><span class="nav-link-icon">⚙️</span>Настройка проекта</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
+                    <a href="part1_schema.html" class="nav-link"><span class="nav-link-icon">📊</span>1.1 Схема и хранение</a>
+                    <a href="part1_transactions.html" class="nav-link"><span class="nav-link-icon">🔄</span>1.2 Транзакции</a>
+                    <a href="part1_indexes.html" class="nav-link"><span class="nav-link-icon">🔍</span>1.3 Индексы</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 2: Архитектура</div>
+                    <a href="part2_litestar.html" class="nav-link"><span class="nav-link-icon">🚀</span>2.1 Litestar + DDD</a>
+                    <a href="part2_dishka.html" class="nav-link"><span class="nav-link-icon">💉</span>2.2 DI с Dishka</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 3: Распределённые</div>
+                    <a href="part3_faststream.html" class="nav-link"><span class="nav-link-icon">📨</span>3.1 RabbitMQ + Faststream</a>
+                    <a href="part3_redis.html" class="nav-link"><span class="nav-link-icon">⚡</span>3.2 Redis Patterns</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 4: Надёжность</div>
+                    <a href="part4_testing.html" class="nav-link"><span class="nav-link-icon">🧪</span>4.1 Advanced Testing</a>
+                    <a href="part4_resiliency.html" class="nav-link"><span class="nav-link-icon">🛡️</span>4.2 Resiliency</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 5: Observability</div>
+                    <a href="part5_logging.html" class="nav-link"><span class="nav-link-icon">📝</span>5.1 Логирование</a>
+                    <a href="part5_clickhouse.html" class="nav-link"><span class="nav-link-icon">📈</span>5.2 ClickHouse</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 6: Production</div>
+                    <a href="part6_migrations.html" class="nav-link"><span class="nav-link-icon">🔀</span>6.1 Zero-Downtime</a>
+                    <a href="part6_quality.html" class="nav-link active"><span class="nav-link-icon">✅</span>6.2 Code Quality</a>
+                    <a href="part6_django.html" class="nav-link"><span class="nav-link-icon">🔗</span>6.3 Django Admin</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 6</span>
+                    <span>/</span>
+                    <span>6.2 Code Quality</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 6.2: Code Quality & Security</h1>
+                <p class="lead">
+                    Ruff, strict Mypy, JWT/RBAC, профилирование — промышленное качество кода.
+                </p>
+
+                <h2>Ruff: быстрый линтер</h2>
+                
+                <p>
+                    Ruff заменяет flake8, isort, black, pyupgrade — и работает в 10-100x быстрее.
+                </p>
+
+<pre><code><span class="comment"># pyproject.toml</span>
+[tool.ruff]
+target-version = <span class="string">"py311"</span>
+line-length = <span class="number">88</span>
+exclude = [
+    <span class="string">".git"</span>,
+    <span class="string">".venv"</span>,
+    <span class="string">"__pycache__"</span>,
+    <span class="string">"migrations"</span>,
+]
+
+[tool.ruff.lint]
+select = [
+    <span class="string">"E"</span>,      <span class="comment"># pycodestyle errors</span>
+    <span class="string">"W"</span>,      <span class="comment"># pycodestyle warnings</span>
+    <span class="string">"F"</span>,      <span class="comment"># pyflakes</span>
+    <span class="string">"I"</span>,      <span class="comment"># isort</span>
+    <span class="string">"B"</span>,      <span class="comment"># flake8-bugbear</span>
+    <span class="string">"C4"</span>,     <span class="comment"># flake8-comprehensions</span>
+    <span class="string">"UP"</span>,     <span class="comment"># pyupgrade</span>
+    <span class="string">"ARG"</span>,    <span class="comment"># flake8-unused-arguments</span>
+    <span class="string">"SIM"</span>,    <span class="comment"># flake8-simplify</span>
+    <span class="string">"TCH"</span>,    <span class="comment"># flake8-type-checking</span>
+    <span class="string">"PTH"</span>,    <span class="comment"># flake8-use-pathlib</span>
+    <span class="string">"RUF"</span>,    <span class="comment"># ruff-specific rules</span>
+    <span class="string">"ASYNC"</span>,  <span class="comment"># flake8-async</span>
+    <span class="string">"S"</span>,      <span class="comment"># flake8-bandit (security)</span>
+]
+ignore = [
+    <span class="string">"E501"</span>,   <span class="comment"># line too long (handled by formatter)</span>
+    <span class="string">"B008"</span>,   <span class="comment"># function call in default argument (OK for Depends)</span>
+]
+
+[tool.ruff.lint.per-file-ignores]
+<span class="string">"tests/*"</span> = [<span class="string">"S101"</span>]  <span class="comment"># assert OK in tests</span>
+
+[tool.ruff.lint.isort]
+known-first-party = [<span class="string">"scaletrade"</span>]
+
+[tool.ruff.format]
+quote-style = <span class="string">"double"</span>
+indent-style = <span class="string">"space"</span></code></pre>
+
+                <h2>Strict Mypy: статическая типизация</h2>
+
+<pre><code><span class="comment"># pyproject.toml</span>
+[tool.mypy]
+python_version = <span class="string">"3.11"</span>
+strict = <span class="keyword">true</span>
+
+<span class="comment"># Включаем все strict проверки</span>
+warn_return_any = <span class="keyword">true</span>
+warn_unused_configs = <span class="keyword">true</span>
+warn_redundant_casts = <span class="keyword">true</span>
+warn_unused_ignores = <span class="keyword">true</span>
+no_implicit_reexport = <span class="keyword">true</span>
+strict_equality = <span class="keyword">true</span>
+strict_concatenate = <span class="keyword">true</span>
+
+<span class="comment"># Disallow untyped</span>
+disallow_untyped_defs = <span class="keyword">true</span>
+disallow_untyped_calls = <span class="keyword">true</span>
+disallow_incomplete_defs = <span class="keyword">true</span>
+disallow_untyped_decorators = <span class="keyword">true</span>
+
+<span class="comment"># Plugins</span>
+plugins = [
+    <span class="string">"pydantic.mypy"</span>,
+    <span class="string">"sqlalchemy.ext.mypy.plugin"</span>,
+]
+
+<span class="comment"># Per-module overrides</span>
+[[tool.mypy.overrides]]
+module = [
+    <span class="string">"tests.*"</span>,
+]
+disallow_untyped_defs = <span class="keyword">false</span>
+
+[[tool.mypy.overrides]]
+module = [
+    <span class="string">"clickhouse_connect.*"</span>,
+]
+ignore_missing_imports = <span class="keyword">true</span></code></pre>
+
+                <h2>Типизация: практические примеры</h2>
+
+<pre><code><span class="comment"># src/scaletrade/domain/entities/order.py</span>
+<span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass, field
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+<span class="keyword">from</span> typing <span class="keyword">import</span> Self  <span class="comment"># Python 3.11+</span>
+
+
+<span class="decorator">@dataclass</span>
+<span class="keyword">class</span> <span class="class-name">Order</span>:
+    id: OrderId
+    user_id: UserId
+    symbol: <span class="type">str</span>
+    side: OrderSide
+    quantity: Money
+    price: Money
+    status: OrderStatus = OrderStatus.PENDING
+    created_at: datetime = field(default_factory=datetime.utcnow)
+    filled_at: datetime | <span class="keyword">None</span> = <span class="keyword">None</span>
+    
+    <span class="decorator">@classmethod</span>
+    <span class="keyword">def</span> <span class="function">create</span>(
+        cls,
+        user_id: UserId,
+        symbol: <span class="type">str</span>,
+        side: OrderSide,
+        quantity: Money,
+        price: Money,
+    ) -> Self:
+        <span class="string">"""Factory method с правильной типизацией."""</span>
+        <span class="keyword">return</span> cls(
+            id=OrderId.generate(),
+            user_id=user_id,
+            symbol=symbol,
+            side=side,
+            quantity=quantity,
+            price=price,
+        )
+    
+    <span class="keyword">def</span> <span class="function">fill</span>(self) -> <span class="keyword">None</span>:
+        <span class="string">"""Исполнить ордер."""</span>
+        <span class="keyword">if</span> self.status == OrderStatus.FILLED:
+            <span class="keyword">raise</span> OrderAlreadyFilledError(self.id)
+        <span class="keyword">if</span> self.status == OrderStatus.CANCELLED:
+            <span class="keyword">raise</span> OrderAlreadyCancelledError(self.id)
+        
+        self.status = OrderStatus.FILLED
+        self.filled_at = datetime.utcnow()
+
+
+<span class="comment"># Generic Repository с типами</span>
+<span class="keyword">from</span> typing <span class="keyword">import</span> Generic, TypeVar, Protocol
+<span class="keyword">from</span> abc <span class="keyword">import</span> ABC, abstractmethod
+
+T = TypeVar(<span class="string">"T"</span>)
+ID = TypeVar(<span class="string">"ID"</span>)
+
+
+<span class="keyword">class</span> <span class="class-name">Repository</span>(ABC, Generic[T, ID]):
+    <span class="string">"""Generic repository interface."""</span>
+    
+    <span class="decorator">@abstractmethod</span>
+    <span class="keyword">async def</span> <span class="function">get_by_id</span>(self, id: ID) -> T | <span class="keyword">None</span>:
+        ...
+    
+    <span class="decorator">@abstractmethod</span>
+    <span class="keyword">async def</span> <span class="function">save</span>(self, entity: T) -> <span class="keyword">None</span>:
+        ...
+    
+    <span class="decorator">@abstractmethod</span>
+    <span class="keyword">async def</span> <span class="function">delete</span>(self, entity: T) -> <span class="keyword">None</span>:
+        ...</code></pre>
+
+                <h2>JWT Authentication</h2>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/auth/jwt.py</span>
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime, timedelta
+<span class="keyword">from</span> typing <span class="keyword">import</span> Any
+
+<span class="keyword">import</span> jwt
+<span class="keyword">from</span> pydantic <span class="keyword">import</span> BaseModel
+
+
+<span class="keyword">class</span> <span class="class-name">TokenPayload</span>(BaseModel):
+    <span class="string">"""JWT payload."""</span>
+    sub: <span class="type">str</span>  <span class="comment"># user_id</span>
+    exp: datetime
+    iat: datetime
+    roles: <span class="type">list</span>[<span class="type">str</span>]
+
+
+<span class="keyword">class</span> <span class="class-name">JWTService</span>:
+    <span class="string">"""JWT token management."""</span>
+    
+    <span class="keyword">def</span> <span class="function">__init__</span>(
+        self,
+        secret_key: <span class="type">str</span>,
+        algorithm: <span class="type">str</span> = <span class="string">"HS256"</span>,
+        access_token_expire: timedelta = timedelta(minutes=<span class="number">30</span>),
+        refresh_token_expire: timedelta = timedelta(days=<span class="number">7</span>),
+    ):
+        self._secret_key = secret_key
+        self._algorithm = algorithm
+        self._access_expire = access_token_expire
+        self._refresh_expire = refresh_token_expire
+    
+    <span class="keyword">def</span> <span class="function">create_access_token</span>(
+        self, 
+        user_id: <span class="type">str</span>, 
+        roles: <span class="type">list</span>[<span class="type">str</span>]
+    ) -> <span class="type">str</span>:
+        <span class="string">"""Создать access token."""</span>
+        now = datetime.utcnow()
+        payload = {
+            <span class="string">"sub"</span>: user_id,
+            <span class="string">"iat"</span>: now,
+            <span class="string">"exp"</span>: now + self._access_expire,
+            <span class="string">"roles"</span>: roles,
+            <span class="string">"type"</span>: <span class="string">"access"</span>,
+        }
+        <span class="keyword">return</span> jwt.encode(payload, self._secret_key, self._algorithm)
+    
+    <span class="keyword">def</span> <span class="function">verify_token</span>(self, token: <span class="type">str</span>) -> TokenPayload:
+        <span class="string">"""Проверить и декодировать token."""</span>
+        <span class="keyword">try</span>:
+            payload = jwt.decode(
+                token, 
+                self._secret_key, 
+                algorithms=[self._algorithm]
+            )
+            <span class="keyword">return</span> TokenPayload.model_validate(payload)
+        <span class="keyword">except</span> jwt.ExpiredSignatureError:
+            <span class="keyword">raise</span> TokenExpiredError()
+        <span class="keyword">except</span> jwt.InvalidTokenError <span class="keyword">as</span> e:
+            <span class="keyword">raise</span> InvalidTokenError(<span class="type">str</span>(e))</code></pre>
+
+                <h2>RBAC: Role-Based Access Control</h2>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/auth/rbac.py</span>
+<span class="keyword">from</span> enum <span class="keyword">import</span> Enum
+<span class="keyword">from</span> functools <span class="keyword">import</span> wraps
+<span class="keyword">from</span> typing <span class="keyword">import</span> Callable, ParamSpec, TypeVar
+
+<span class="keyword">from</span> litestar <span class="keyword">import</span> Request
+<span class="keyword">from</span> litestar.exceptions <span class="keyword">import</span> NotAuthorizedException
+
+
+<span class="keyword">class</span> <span class="class-name">Permission</span>(Enum):
+    <span class="string">"""Permissions в системе."""</span>
+    ORDER_CREATE = <span class="string">"order:create"</span>
+    ORDER_READ = <span class="string">"order:read"</span>
+    ORDER_CANCEL = <span class="string">"order:cancel"</span>
+    ADMIN_READ = <span class="string">"admin:read"</span>
+    ADMIN_WRITE = <span class="string">"admin:write"</span>
+
+
+<span class="comment"># Role → Permissions mapping</span>
+ROLE_PERMISSIONS: <span class="type">dict</span>[<span class="type">str</span>, <span class="type">set</span>[Permission]] = {
+    <span class="string">"user"</span>: {
+        Permission.ORDER_CREATE,
+        Permission.ORDER_READ,
+        Permission.ORDER_CANCEL,
+    },
+    <span class="string">"admin"</span>: {
+        Permission.ORDER_CREATE,
+        Permission.ORDER_READ,
+        Permission.ORDER_CANCEL,
+        Permission.ADMIN_READ,
+        Permission.ADMIN_WRITE,
+    },
+}
+
+
+<span class="keyword">def</span> <span class="function">get_user_permissions</span>(roles: <span class="type">list</span>[<span class="type">str</span>]) -> <span class="type">set</span>[Permission]:
+    <span class="string">"""Получить все permissions для списка ролей."""</span>
+    permissions: <span class="type">set</span>[Permission] = <span class="type">set</span>()
+    <span class="keyword">for</span> role <span class="keyword">in</span> roles:
+        <span class="keyword">if</span> role <span class="keyword">in</span> ROLE_PERMISSIONS:
+            permissions |= ROLE_PERMISSIONS[role]
+    <span class="keyword">return</span> permissions
+
+
+P = ParamSpec(<span class="string">"P"</span>)
+R = TypeVar(<span class="string">"R"</span>)
+
+
+<span class="keyword">def</span> <span class="function">require_permission</span>(permission: Permission):
+    <span class="string">"""
+    Декоратор для проверки permission.
+    
+    Usage:
+        @require_permission(Permission.ADMIN_WRITE)
+        async def delete_user(self, user_id: int) -> None:
+            ...
+    """</span>
+    <span class="keyword">def</span> <span class="function">decorator</span>(
+        func: Callable[P, R]
+    ) -> Callable[P, R]:
+        <span class="decorator">@wraps</span>(func)
+        <span class="keyword">async def</span> <span class="function">wrapper</span>(
+            *args: P.args, 
+            **kwargs: P.kwargs
+        ) -> R:
+            <span class="comment"># Получаем request из kwargs или args</span>
+            request = kwargs.get(<span class="string">"request"</span>) <span class="keyword">or</span> next(
+                (a <span class="keyword">for</span> a <span class="keyword">in</span> args <span class="keyword">if</span> isinstance(a, Request)),
+                <span class="keyword">None</span>
+            )
+            
+            <span class="keyword">if not</span> request <span class="keyword">or not</span> request.user:
+                <span class="keyword">raise</span> NotAuthorizedException()
+            
+            user_permissions = get_user_permissions(request.user.roles)
+            
+            <span class="keyword">if</span> permission <span class="keyword">not in</span> user_permissions:
+                <span class="keyword">raise</span> NotAuthorizedException(
+                    f<span class="string">"Permission '{permission.value}' required"</span>
+                )
+            
+            <span class="keyword">return await</span> func(*args, **kwargs)
+        
+        <span class="keyword">return</span> wrapper
+    <span class="keyword">return</span> decorator</code></pre>
+
+                <h2>Guards в Litestar</h2>
+
+<pre><code><span class="comment"># src/scaletrade/interface/http/guards.py</span>
+<span class="keyword">from</span> litestar <span class="keyword">import</span> Request
+<span class="keyword">from</span> litestar.connection <span class="keyword">import</span> ASGIConnection
+<span class="keyword">from</span> litestar.handlers <span class="keyword">import</span> BaseRouteHandler
+<span class="keyword">from</span> litestar.exceptions <span class="keyword">import</span> NotAuthorizedException
+
+
+<span class="keyword">def</span> <span class="function">require_authenticated</span>(
+    connection: ASGIConnection,
+    _: BaseRouteHandler,
+) -> <span class="keyword">None</span>:
+    <span class="string">"""Guard: требует аутентификации."""</span>
+    <span class="keyword">if not</span> connection.user:
+        <span class="keyword">raise</span> NotAuthorizedException(<span class="string">"Authentication required"</span>)
+
+
+<span class="keyword">def</span> <span class="function">require_admin</span>(
+    connection: ASGIConnection,
+    _: BaseRouteHandler,
+) -> <span class="keyword">None</span>:
+    <span class="string">"""Guard: требует роль admin."""</span>
+    <span class="keyword">if not</span> connection.user:
+        <span class="keyword">raise</span> NotAuthorizedException()
+    
+    <span class="keyword">if</span> <span class="string">"admin"</span> <span class="keyword">not in</span> connection.user.roles:
+        <span class="keyword">raise</span> NotAuthorizedException(<span class="string">"Admin role required"</span>)
+
+
+<span class="comment"># Использование</span>
+<span class="keyword">from</span> litestar <span class="keyword">import</span> Controller, get, post
+
+
+<span class="keyword">class</span> <span class="class-name">AdminController</span>(Controller):
+    path = <span class="string">"/admin"</span>
+    guards = [require_authenticated, require_admin]  <span class="comment"># Применяется ко всем routes</span>
+    
+    <span class="decorator">@get</span>(<span class="string">"/users"</span>)
+    <span class="keyword">async def</span> <span class="function">list_users</span>(self) -> <span class="type">list</span>[UserDTO]:
+        ...
+    
+    <span class="decorator">@post</span>(<span class="string">"/users/{user_id}/ban"</span>)
+    <span class="keyword">async def</span> <span class="function">ban_user</span>(self, user_id: <span class="type">int</span>) -> <span class="keyword">None</span>:
+        ...</code></pre>
+
+                <h2>Profiling с py-spy</h2>
+
+<pre><code><span class="comment"># Запуск профилирования production процесса</span>
+$ py-spy record -o profile.svg --pid <span class="number">12345</span>
+
+<span class="comment"># Или при запуске</span>
+$ py-spy record -o profile.svg -- python -m scaletrade
+
+<span class="comment"># Top-like view в реальном времени</span>
+$ py-spy top --pid <span class="number">12345</span></code></pre>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">💡 py-spy Tips</div>
+                    <ul>
+                        <li><strong>--native</strong> — показывает C-уровень (SQLAlchemy, asyncpg)</li>
+                        <li><strong>--subprocesses</strong> — включает subprocess workers</li>
+                        <li><strong>Flame graphs</strong> — открой SVG в браузере для интерактивного анализа</li>
+                    </ul>
+                </div>
+
+                <h2>Pre-commit Hooks</h2>
+
+<pre><code><span class="comment"># .pre-commit-config.yaml</span>
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - pydantic
+          - sqlalchemy[mypy]
+  
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: detect-private-key  <span class="comment"># Security!</span></code></pre>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Any — враг типизации</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если вы пишете <code>def foo(x: Any) -> Any</code>, вы просто выключаете проверку типов. <code>Any</code> заразен: он распространяется по коду, как вирус. Используйте <code>Any</code> только в самом крайнем случае, когда типы действительно динамические.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. type: ignore без комментария</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если вы глушите ошибку линтера/тайпчекера, всегда пишите почему. <code># type: ignore # dynamic attribute from library X</code>. Иначе через полгода никто не рискнет это тронуть, и ошибка останется там навсегда.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Ruff:</strong> Это не просто линтер. Это замена Black, Isort, Flake8, Pylint и еще десятка утилит. Он написан на Rust и работает мгновенно. Переходите на Ruff и удаляйте лишние зависимости.</li>
+                    <li><strong>Deptry:</strong> Утилита, которая проверяет ваши <code>requirements.txt/pyproject.toml</code>. Она находит неиспользуемые зависимости и (что важнее) зависимости, которые вы импортируете, но забыли добавить в явный список (transitive dependencies).</li>
+                    <li><strong>Strict Mypy:</strong> Включайте <code>strict = true</code> сразу на старте проекта. Внедрить его в легаси кодовую базу — задача на месяцы боли и унижений.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>📋 Задание</h4>
+                    <ul class="task-list">
+                        <li>Настрой Ruff со всеми правилами</li>
+                        <li>Включи strict mode в Mypy</li>
+                        <li>Реализуй JWT authentication</li>
+                        <li>Добавь RBAC с permissions</li>
+                        <li>Настрой pre-commit hooks</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="part6_migrations.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 6.1 Zero-Downtime</div>
+                        </div>
+                    </a>
+                    <a href="part6_django.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">6.3 Django Admin →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

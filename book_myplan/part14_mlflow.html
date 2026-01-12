@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>14.1 MLflow Basics — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 14: ML Ops</div>
+                    <a href="part14_mlflow.html" class="nav-link active">14.1 MLflow</a>
+                    <a href="part14_embeddings.html" class="nav-link">14.2 Embeddings</a>
+                    <a href="part14_llm.html" class="nav-link">14.3 LLM & RAG</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 14</span>
+                    <span>/</span>
+                    <span>14.1 MLflow</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 14.1: MLflow и жизненный цикл модели</h1>
+                <p class="lead">ML в продакшене — это не "Jupyter Notebook на сервере". Это версионирование данных, экспериментов и самих моделей. MLOps спасает от хаоса.</p>
+
+                <h2>Зачем нужен MLflow?</h2>
+                <p>Когда вы обучаете модель, вы меняете гиперпараметры (learning rate, depth). Через неделю вы нашли лучшую модель, но забыли, с какими параметрами она обучалась. MLflow решает эту проблему.</p>
+
+                <h2>Компоненты MLflow</h2>
+
+                <h3>1. Tracking</h3>
+                <p>Логирует параметры, метрики и артефакты.</p>
+                <div class="code-block">
+                    <pre><code>import mlflow
+
+mlflow.set_tracking_uri("http://localhost:5000")
+
+with mlflow.start_run():
+    mlflow.log_param("alpha", 0.5)
+    mlflow.log_metric("rmse", 0.89)
+    # Сохраняем саму модель
+    mlflow.sklearn.log_model(sk_model, "my_model")</code></pre>
+                </div>
+
+                <h3>2. Projects</h3>
+                <p>Стандарт упаковки кода ML (обычно Conda environment или Docker + точка входа в YAML), чтобы его можно было воспроизвести на другой машине.</p>
+
+                <h3>3. Models</h3>
+                <p>Универсальный формат хранения моделей ("flavor"). Модель, сохраненную через MLflow, можно загрузить как python-функцию, как Spark UDF или развернуть как REST API одной командой.</p>
+                <div class="code-block">
+                    <pre><code>mlflow models serve -m runs:/<HOST_ID>/model -p 1234</code></pre>
+                </div>
+
+                <h3>4. Model Registry</h3>
+                <p>Центральное хранилище. Позволяет управлять стадиями:</p>
+                <ul>
+                    <li><strong>Staging:</strong> Модель прошла автотесты, ждет проверки QA.</li>
+                    <li><strong>Production:</strong> Текущая боевая модель.</li>
+                    <li><strong>Archived:</strong> Старые версии.</li>
+                </ul>
+
+                <h2>Архитектура ML Pipeline</h2>
+                <ol>
+                    <li><strong>Data Engineering:</strong> Airflow/Prefect забирает данные, чистит, кладет в Feature Store.</li>
+                    <li><strong>Training:</strong> Скрипт запускается (например, в Kubernetes Job), берет данные, обучает модель, логирует метрики в MLflow.</li>
+                    <li><strong>Evaluation:</strong> Если метрики лучше текущей Production модели -> переводим в Staging.</li>
+                    <li><strong>Serving:</strong> Сервис (FastAPI) подтягивает новую модель из Registry (или передеплоивается).</li>
+                </ol>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

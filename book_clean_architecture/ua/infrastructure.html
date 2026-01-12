@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Глава 4: Infrastructure Layer - Clean Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
+        p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
+        
+        .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
+        .sidebar-title { color: #f8fafc; }
+        .sidebar-subtitle { color: #60a5fa; }
+        .nav-section { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem 1rem 0.5rem; }
+        .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
+
+        /* Code Styling */
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+        .code-comment { color: #94a3b8; font-style: italic; }
+        .code-keyword { color: #c084fc; font-weight: bold; } 
+        .code-class { color: #fbbf24; font-weight: bold; }   
+        .code-func { color: #60a5fa; font-weight: bold; }    
+        .code-str { color: #a3e635; }                        
+        .code-dec { color: #f472b6; } 
+
+        .badge { display: inline-flex; align-items: center; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 0.5rem; }
+        .badge-blue { background-color: #dbeafe; color: #1e40af; }
+        .badge-red { background-color: #fee2e2; color: #b91c1c; }
+        .badge-yellow { background-color: #fef9c3; color: #854d0e; }
+        
+        .card { background: white; border-radius: 1rem; padding: 2.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem; border: 1px solid #e2e8f0; }
+        
+        details > summary { list-style: none; cursor: pointer; font-weight: 700; color: #2563eb; outline: none; padding: 1rem; background: #f8fafc; border-radius: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #e2e8f0; }
+        details[open] > summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0; background: #eff6ff; }
+        details > div { padding: 1.5rem; border: 1px solid #e2e8f0; border-top: 0; border-bottom-left-radius: 0.5rem; border-bottom-right-radius: 0.5rem; background: #fff; }
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar hidden md:block">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
+            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+        </div>
+        <nav class="py-4">
+            <div class="px-4 mb-4">
+                <div class="flex gap-2 text-xs font-bold text-slate-400">
+                    <a href="../ru/infrastructure.html" class="hover:text-white transition">RU</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../en/infrastructure.html" class="hover:text-white transition">EN</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="infrastructure.html" class="text-blue-400 font-bold">UA</a>
+                </div>
+            </div>
+
+            <div class="nav-section">Основи</div>
+            <a href="index.html" class="nav-link ">📘 Вступ</a>
+            
+            <div class="nav-section">Шари архітектури</div>
+            <a href="domain.html" class="nav-link ">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link ">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link active">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link ">🌐 Presentation Layer</a>
+            
+            <div class="nav-section">Принципи та патерни</div>
+            <a href="solid.html" class="nav-link ">📐 SOLID принципи</a>
+            <a href="invariants.html" class="nav-link ">🛡️ Інваріанти</a>
+            <a href="dependency.html" class="nav-link ">💉 Dependency Injection</a>
+            <a href="cqrs_es.html" class="nav-link ">⚡ CQRS і ES</a>
+            
+            <div class="nav-section">Security & Production</div>
+            <a href="security.html" class="nav-link ">🔐 Auth & Permissions</a>
+            <a href="concurrency.html" class="nav-link ">🛑 Concurrency & Migrations</a>
+            <a href="background_tasks.html" class="nav-link ">⏳ Background Tasks</a>
+            <a href="error_handling.html" class="nav-link ">🚫 Error Handling</a>
+            <a href="config_logging.html" class="nav-link ">⚙️ Config & Observability</a>
+
+            <div class="nav-section">DDD Patterns</div>
+            <a href="bounded_context.html" class="nav-link ">🌍 Bounded Contexts</a>
+            <a href="modular_monolith.html" class="nav-link ">🏗️ Modular Monolith</a>
+            <a href="aggregates.html" class="nav-link ">📦 Aggregates</a>
+            <a href="value_objects.html" class="nav-link ">💎 Value Objects</a>
+            <a href="repository_uow.html" class="nav-link ">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link ">📋 Specification</a>
+
+            <div class="nav-section">EDA & Dist. Systems</div>
+            <a href="domain_events.html" class="nav-link ">📣 Domain Events</a>
+            <a href="saga.html" class="nav-link ">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link ">📮 Outbox Pattern</a>
+
+            <div class="nav-section">Frameworks & Практика</div>
+            <a href="frameworks_django.html" class="nav-link ">🐍 Django & Others</a>
+            <a href="advanced_techniques.html" class="nav-link ">🚀 Advanced Tech</a>
+            <a href="deployment.html" class="nav-link ">🚀 Deployment & Protection</a>
+            <a href="testing.html" class="nav-link ">🧪 Тестування</a>
+            <a href="projects.html" class="nav-link ">🚀 Міні-проєкти</a>
+            <a href="antipatterns.html" class="nav-link ">⚠️ Антипатерни</a>
+        </nav>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
+        
+        <header id="intro" class="mb-12 pb-6 border-b border-gray-200">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Шар 3</span>
+                <span class="text-gray-400 text-sm font-mono">SQLAlchemy / Redis / Requests</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Infrastructure Layer (Шар Інфраструктури)</h1>
+            <p class="text-xl text-gray-500 mt-4 font-light">
+                Тут абстракції зустрічаються з реальністю. Це єдиний шар, де дозволено писати <code>import sqlalchemy</code>.
+            </p>
+        </header>
+
+        <!-- ANATOMY -->
+        <section class="card">
+            <h2 class="text-2xl font-bold mb-6">Анатомія Шару</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="flex items-center gap-2 font-bold text-blue-800 mb-4 border-b border-blue-200 pb-2 w-full">
+                        ✅ MUST HAVE (Має бути)
+                    </h3>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex items-start">
+                            <span class="badge badge-blue mt-1">Impl</span>
+                            <div><strong>Implementation:</strong> Реалізація інтерфейсів (`SqlAlchemyOrderRepository`, `SmtpEmailService`).</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="badge badge-blue mt-1">DB</span>
+                            <div><strong>Database:</strong> Моделі ORM, міграції (Alembic), сесії, raw SQL.</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="badge badge-blue mt-1">Ext</span>
+                            <div><strong>External Tools:</strong> Клієнти для Redis, Kafka, Stripe, зовнішніх API.</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="flex items-center gap-2 font-bold text-red-800 mb-4 border-b border-red-200 pb-2 w-full">
+                        ⛔ FORBIDDEN (Суворо заборонено)
+                    </h3>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex items-start">
+                            <span class="badge badge-red mt-1">Logic</span>
+                            <div><strong>Бізнес-правила:</strong> Не можна перевіряти інваріанти тут ("не можна створити замовлення з ціною < 0"). Це відповідальність Домену.</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="badge badge-red mt-1">Flow</span>
+                            <div><strong>Use Cases:</strong> Інфраструктура не повинна викликати інші Use Case. Вона "тупий виконавець".</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- DATA MAPPER -->
+        <section id="mapper" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">2. Проблема Data Mapper</h2>
+            <p>Найбільший біль новачків: <span class="font-bold bg-yellow-100 px-1">SQL Model != Domain Entity</span>.</p>
+            <p><strong>Чому не можна використовувати ORM модель як Сутність?</strong></p>
+            <ul class="list-disc pl-5 mb-4 text-sm">
+                <li>ORM модель прив'язана до БД (ForeignKey, Integer).</li>
+                <li>Доменна сутність прив'язана до бізнесу (Value Objects, логіка).</li>
+                <li>Якщо ви зміните структуру таблиці, ви не повинні зламати бізнес-логіку.</li>
+            </ul>
+
+<pre><code class="language-python"><span class="code-comment"># infrastructure/db/models.py</span>
+<span class="code-keyword">from</span> sqlalchemy <span class="code-keyword">import</span> Column, String, Float, Boolean, JSON
+<span class="code-keyword">from</span> sqlalchemy.orm <span class="code-keyword">import</span> declarative_base
+
+Base = declarative_base()
+
+<span class="code-comment"># Це "брудна" модель для БД</span>
+<span class="code-keyword">class</span> <span class="code-class">OrderModel</span>(Base):
+    __tablename__ = <span class="code-str">"orders"</span>
+    
+    id = Column(String, primary_key=<span class="code-keyword">True</span>)
+    email = Column(String, index=<span class="code-keyword">True</span>) <span class="code-comment"># Просто рядок, не VO</span>
+    amount = Column(Float)             <span class="code-comment"># Просто число, не Money</span>
+    currency = Column(String)
+    items = Column(JSON)               <span class="code-comment"># JSON поле замість таблиці для простоти</span>
+    is_paid = Column(Boolean, default=<span class="code-keyword">False</span>)
+</code></pre>
+        </section>
+
+        <!-- REPO VARIANTS -->
+        <section id="repo" class="mb-16">
+            <h2 class="text-2xl font-bold mb-6">3. Repository Pattern: 4 Реалізації</h2>
+            <p class="mb-6">Репозиторій — це міст. Він бере <strong>Сутність</strong>, розбирає її на частини і кладе в <strong>ORM Модель</strong>. І навпаки.</p>
+
+            <!-- VARIANT 1 -->
+            <details>
+                <summary>Варіант 1: Простійший CRUD (Без UoW)</summary>
+                <div>
+                    <p class="text-sm mb-4">Підходить для простих додатків. Мінус: `commit` відбувається всередині методу, транзакційність тільки в межах одного виклику.</p>
+<pre><code class="language-python"><span class="code-keyword">from</span> domain.entities <span class="code-keyword">import</span> Order, Money, Email
+<span class="code-keyword">from</span> application.interfaces <span class="code-keyword">import</span> OrderRepository
+<span class="code-keyword">from</span> .models <span class="code-keyword">import</span> OrderModel
+
+<span class="code-keyword">class</span> <span class="code-class">SqlAlchemyOrderRepository</span>(OrderRepository):
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, session):
+        self.session = session
+
+    <span class="code-keyword">def</span> <span class="code-func">save</span>(self, order: Order):
+        <span class="code-comment"># 1. MAPPING: Domain -> DB Model</span>
+        order_model = OrderModel(
+            id=str(order.id),
+            email=order.customer.value, <span class="code-comment"># Дістаємо примітив з VO</span>
+            amount=order.total_price.amount,
+            currency=order.total_price.currency,
+            items=[{<span class="code-str">'name'</span>: i[<span class="code-str">'name'</span>], <span class="code-str">'price'</span>: i[<span class="code-str">'price'</span>].amount} <span class="code-keyword">for</span> i <span class="code-keyword">in</span> order.items],
+            is_paid=order.is_paid
+        )
+        
+        <span class="code-comment"># 2. Upsert (Insert or Update)</span>
+        self.session.merge(order_model)
+        
+        <span class="code-comment"># 3. Commit (Відразу фіксуємо)</span>
+        self.session.commit()
+</code></pre>
+                </div>
+            </details>
+
+            <!-- VARIANT 2 -->
+            <details>
+                <summary>Варіант 2: З підтримкою Unit of Work (Рекомендований)</summary>
+                <div>
+                    <p class="text-sm mb-4">Тут ми робимо `flush()` замість `commit()`. Коміт буде робити клас UnitOfWork. Це дозволяє змінити замовлення і списати баланс користувача в <strong>одній атомарній транзакції</strong>.</p>
+<pre><code class="language-python"><span class="code-keyword">class</span> <span class="code-class">SqlAlchemyOrderRepository</span>(OrderRepository):
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, session):
+        self.session = session
+
+    <span class="code-keyword">def</span> <span class="code-func">save</span>(self, order: Order):
+        <span class="code-comment"># ... mapping (див. вище) ...</span>
+        model = self._map_to_model(order)
+        
+        self.session.merge(model)
+        self.session.flush() <span class="code-comment"># Відправляємо в БД, але чекаємо загального коміту</span>
+
+    <span class="code-keyword">def</span> <span class="code-func">get_by_id</span>(self, oid) -> Order:
+        model = self.session.query(OrderModel).get(str(oid))
+        <span class="code-keyword">if</span> <span class="code-keyword">not</span> model:
+            <span class="code-keyword">return</span> <span class="code-keyword">None</span>
+        
+        <span class="code-comment"># MAPPING: DB Model -> Domain Entity</span>
+        <span class="code-comment"># Відтворюємо об'єкти. Важливо не викликати бізнес-логіку тут!</span>
+        <span class="code-comment"># Можна використовувати "брудний хак" або фабричний метод.</span>
+        order = Order(uuid.UUID(model.id), Email(model.email))
+        
+        <span class="code-comment"># Відновлюємо приватний стан (Python дозволяє це робити)</span>
+        order._is_paid = model.is_paid
+        <span class="code-comment"># ... відновлення items ...</span>
+        
+        <span class="code-keyword">return</span> order
+</code></pre>
+                </div>
+            </details>
+
+            <!-- VARIANT 3 -->
+            <details>
+                <summary>Варіант 3: З Кешуванням (Decorator Pattern)</summary>
+                <div>
+                    <p class="text-sm mb-4">Ми не змінюємо код SQL репозиторію. Ми обгортаємо його в декоратор. Принцип Open/Closed.</p>
+<pre><code class="language-python"><span class="code-keyword">import</span> json
+
+<span class="code-keyword">class</span> <span class="code-class">CachedOrderRepository</span>(OrderRepository):
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, decoratee: OrderRepository, redis):
+        self._decoratee = decoratee
+        self._redis = redis
+
+    <span class="code-keyword">def</span> <span class="code-func">get_by_id</span>(self, oid) -> Order:
+        <span class="code-comment"># 1. Намагаємося взяти з кешу</span>
+        cache_key = <span class="code-str">f"order:{oid}"</span>
+        data = self._redis.get(cache_key)
+        
+        <span class="code-keyword">if</span> data:
+            <span class="code-keyword">return</span> self._deserialize(json.loads(data))
+        
+        <span class="code-comment"># 2. Якщо немає - йдемо в реальну БД</span>
+        order = self._decoratee.get_by_id(oid)
+        
+        <span class="code-comment"># 3. Зберігаємо в кеш на 1 годину</span>
+        <span class="code-keyword">if</span> order:
+            self._redis.setex(cache_key, 3600, self._serialize(order))
+            
+        <span class="code-keyword">return</span> order
+
+    <span class="code-keyword">def</span> <span class="code-func">save</span>(self, order: Order):
+        <span class="code-comment"># Спочатку зберігаємо в БД</span>
+        self._decoratee.save(order)
+        <span class="code-comment"># Інвалідуємо кеш (видаляємо старе значення)</span>
+        self._redis.delete(<span class="code-str">f"order:{order.id}"</span>)
+</code></pre>
+                </div>
+            </details>
+
+            <!-- VARIANT 4 -->
+            <details>
+                <summary>Варіант 4: З обробкою Подій (Domain Events)</summary>
+                <div>
+                    <p class="text-sm mb-4">Репозиторій (або UoW) збирає події з сутності перед збереженням.</p>
+<pre><code class="language-python"><span class="code-keyword">class</span> <span class="code-class">EventDispatcherRepository</span>(OrderRepository):
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, decoratee: OrderRepository, bus):
+        self._decoratee = decoratee
+        self._bus = bus <span class="code-comment"># Message Bus</span>
+
+    <span class="code-keyword">def</span> <span class="code-func">save</span>(self, order: Order):
+        <span class="code-comment"># 1. Зберігаємо дані</span>
+        self._decoratee.save(order)
+        
+        <span class="code-comment"># 2. Забираємо події (OrderPaid)</span>
+        events = order.collect_events()
+        
+        <span class="code-comment"># 3. Відправляємо їх в шину подій</span>
+        <span class="code-keyword">for</span> event <span class="code-keyword">in</span> events:
+            self._bus.publish(event)
+</code></pre>
+                </div>
+            </details>
+        </section>
+
+        <!-- UNIT OF WORK -->
+        <section id="uow" class="card bg-gray-50 border-gray-200">
+            <h2 class="text-2xl font-bold mb-4">4. Unit of Work (Одиниця роботи)</h2>
+            <p>Патерн для управління транзакціями. Гарантує, що <strong>все або нічого</strong> буде збережено.</p>
+            
+<pre><code class="language-python"><span class="code-keyword">class</span> <span class="code-class">SqlAlchemyUnitOfWork</span>:
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, session_factory):
+        self.session_factory = session_factory
+
+    <span class="code-keyword">def</span> <span class="code-func">__enter__</span>(self):
+        <span class="code-comment"># Початок транзакції</span>
+        self.session = self.session_factory()
+        <span class="code-comment"># Ініціалізуємо репозиторії цією сесією</span>
+        self.orders = SqlAlchemyOrderRepository(self.session)
+        <span class="code-keyword">return</span> self
+
+    <span class="code-keyword">def</span> <span class="code-func">__exit__</span>(self, exc_type, exc_val, exc_tb):
+        <span class="code-keyword">if</span> exc_type:
+            self.session.rollback() <span class="code-comment"># Помилка? Відкат!</span>
+        <span class="code-keyword">else</span>:
+            self.session.commit() <span class="code-comment"># Все ок? Фіксуємо!</span>
+        self.session.close()
+
+<span class="code-comment"># Використання в UseCase:</span>
+<span class="code-comment"># with self.uow:</span>
+<span class="code-comment">#     self.uow.orders.save(order1)</span>
+<span class="code-comment">#     self.uow.orders.save(order2)</span>
+<span class="code-comment">#     # commit відбудеться автоматично тут</span>
+</code></pre>
+        </section>
+
+        <!-- ADAPTERS -->
+        <section id="adapters" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">5. Adapters (Зовнішні сервіси)</h2>
+            <p>Тут ми реалізуємо інтерфейси типу `EmailService`. Використовуємо реальні бібліотеки.</p>
+
+<pre><code class="language-python"><span class="code-comment"># infrastructure/adapters/email.py</span>
+<span class="code-keyword">import</span> smtplib
+<span class="code-keyword">from</span> email.mime.text <span class="code-keyword">import</span> MIMEText
+<span class="code-keyword">from</span> application.interfaces <span class="code-keyword">import</span> EmailService
+
+<span class="code-keyword">class</span> <span class="code-class">SmtpEmailAdapter</span>(EmailService):
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, host, port, user, password):
+        self.host = host
+        self.port = port
+        <span class="code-comment"># ... credentials ...</span>
+
+    <span class="code-keyword">def</span> <span class="code-func">send_order_confirmation</span>(self, email: str, order_id: str):
+        msg = MIMEText(f<span class="code-str">"Ваше замовлення {order_id} створено!"</span>)
+        msg[<span class="code-str">'Subject'</span>] = <span class="code-str">"Замовлення створено"</span>
+        msg[<span class="code-str">'From'</span>] = <span class="code-str">"robot@shop.com"</span>
+        msg[<span class="code-str">'To'</span>] = email
+
+        <span class="code-comment"># Реальна відправка</span>
+        <span class="code-keyword">with</span> smtplib.SMTP(self.host, self.port) <span class="code-keyword">as</span> server:
+            server.login(...)
+            server.send_message(msg)
+</code></pre>
+        </section>
+
+        <!-- ANTIPATTERNS -->
+        <section id="antipatterns">
+            <h2 class="text-2xl font-bold text-red-700 mb-6">⚠️ Антипатерни Інфраструктури</h2>
+            
+            <div class="space-y-4">
+                <div class="p-4 border border-red-200 rounded bg-white">
+                    <h3 class="font-bold text-red-800">1. God Repository</h3>
+                    <p class="text-sm">Репозиторій з методами `calculate_stats()`, `send_email_to_users()`, `clean_old_logs()`. Репозиторій повинен тільки: Save, Get, Delete, Find.</p>
+                </div>
+                
+                <div class="p-4 border border-red-200 rounded bg-white">
+                    <h3 class="font-bold text-red-800">2. Leaky Abstraction (Витік абстракції)</h3>
+                    <p class="text-sm">Якщо ваш репозиторій повертає об'єкт `SQLAlchemy Model`, а не `Domain Entity`, ви прив'язали весь додаток до бази даних. Якщо завтра ви захочете перейти на MongoDB, доведеться переписувати весь додаток.</p>
+                </div>
+            </div>
+        </section>
+
+    
+        <!-- NAVIGATION FOOTER -->
+        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="application.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Назад</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Application</span></a><a href="presentation.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далі</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Presentation &rarr;</span></a></div></div>
+    </main>
+</body>
+</html>

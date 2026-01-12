@@ -1,0 +1,252 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Layer - Clean Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
+        p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
+        
+        .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
+        .sidebar-title { color: #f8fafc; }
+        .sidebar-subtitle { color: #60a5fa; }
+        .nav-section { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem 1rem 0.5rem; }
+        .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
+
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar hidden md:block">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
+            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+        </div>
+        <nav class="py-4">
+            <div class="px-4 mb-4">
+                <div class="flex gap-2 text-xs font-bold text-slate-400">
+                    <a href="../ru/domain.html" class="hover:text-white transition">RU</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="domain.html" class="text-blue-400 font-bold">EN</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../ua/domain.html" class="hover:text-white transition">UA</a>
+                </div>
+            </div>
+
+            <div class="nav-section">Basics</div>
+            <a href="index.html" class="nav-link ">📘 Introduction</a>
+            
+            <div class="nav-section">Architecture Layers</div>
+            <a href="domain.html" class="nav-link active">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link ">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link ">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link ">🌐 Presentation Layer</a>
+            
+            <div class="nav-section">Principles & Patterns</div>
+            <a href="solid.html" class="nav-link ">📐 SOLID Principles</a>
+            <a href="invariants.html" class="nav-link ">🛡️ Invariants</a>
+            <a href="dependency.html" class="nav-link ">💉 Dependency Injection</a>
+            <a href="cqrs_es.html" class="nav-link ">⚡ CQRS & ES</a>
+            
+            <div class="nav-section">Security & Production</div>
+            <a href="security.html" class="nav-link ">🔐 Auth & Permissions</a>
+            <a href="concurrency.html" class="nav-link ">🛑 Concurrency & Migrations</a>
+            <a href="background_tasks.html" class="nav-link ">⏳ Background Tasks</a>
+            <a href="error_handling.html" class="nav-link ">🚫 Error Handling</a>
+            <a href="config_logging.html" class="nav-link ">⚙️ Config & Observability</a>
+
+            <div class="nav-section">DDD Patterns</div>
+            <a href="bounded_context.html" class="nav-link ">🌍 Bounded Contexts</a>
+            <a href="modular_monolith.html" class="nav-link ">🏗️ Modular Monolith</a>
+            <a href="aggregates.html" class="nav-link ">📦 Aggregates</a>
+            <a href="value_objects.html" class="nav-link ">💎 Value Objects</a>
+            <a href="repository_uow.html" class="nav-link ">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link ">📋 Specification</a>
+
+            <div class="nav-section">EDA & Dist. Systems</div>
+            <a href="domain_events.html" class="nav-link ">📣 Domain Events</a>
+            <a href="saga.html" class="nav-link ">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link ">📮 Outbox Pattern</a>
+
+            <div class="nav-section">Frameworks & Practice</div>
+            <a href="frameworks_django.html" class="nav-link ">🐍 Django & Others</a>
+            <a href="advanced_techniques.html" class="nav-link ">🚀 Advanced Tech</a>
+            <a href="deployment.html" class="nav-link ">🚀 Deployment & Protection</a>
+            <a href="testing.html" class="nav-link ">🧪 Testing</a>
+            <a href="projects.html" class="nav-link ">🚀 Mini-projects</a>
+            <a href="antipatterns.html" class="nav-link ">⚠️ Antipatterns</a>
+        </nav>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
+        <header class="mb-12 pb-8 border-b border-gray-200">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Domain Layer</h1>
+            <p class="text-xl text-gray-600">The heart of your application. Pure business logic, isolated from the outside world.</p>
+        </header>
+
+        <!-- Section 1: Definition -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">What lives here?</h2>
+            <p class="mb-4 text-gray-700">
+                The Domain Layer contains <strong>Enterprise Business Rules</strong>. These are rules that would exist even if you didn't have a computer. 
+                This code reflects the real world of your business.
+            </p>
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6">
+                <h3 class="font-bold text-yellow-700">Iron Rule:</h3>
+                <p class="text-yellow-800">NO external imports. No SQLAlchemy, Pydantic, Requests, Django. Only Python standard library (dataclasses, typing, datetime, uuid).</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Value Objects -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">1. Value Objects</h2>
+            <p class="mb-4 text-gray-700">
+                Small immutable objects. They describe properties of things. Two Value Objects are equal if their data is equal.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-4">
+                <div>
+                    <h4 class="font-bold text-red-600 mb-2">❌ Primitive Obsession</h4>
+                    <pre><code class="language-python"># Email passed as a simple string
+# Validation scattered across code
+def register(email: str):
+    if "@" not in email:
+        raise ValueError("Invalid")
+    ...</code></pre>
+                </div>
+                <div>
+                    <h4 class="font-bold text-green-600 mb-2">✅ Value Object</h4>
+                    <pre><code class="language-python">@dataclass(frozen=True)
+class Email:
+    value: str
+
+    def __post_init__(self):
+        if "@" not in self.value:
+            raise ValueError("Invalid email")
+
+def register(email: Email):
+    ...</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Entities -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">2. Entities</h2>
+            <p class="mb-4 text-gray-700">
+                Objects with unique IDs. They live through time, changing their state. 
+                Avoid <strong>Anemic Domain Model</strong> — when classes contain only data and logic lives in services.
+            </p>
+            
+            <div class="mb-6">
+                <h4 class="font-bold text-gray-900 mb-2">Rich Model Example:</h4>
+<pre><code class="language-python">import uuid
+from dataclasses import dataclass, field
+from datetime import datetime
+from typing import List
+
+# Value Object
+@dataclass(frozen=True)
+class Money:
+    amount: float
+    currency: str = "USD"
+
+@dataclass
+class OrderLine:
+    product_id: str
+    quantity: int
+    price: Money
+
+# Entity
+@dataclass
+class Order:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    lines: List[OrderLine] = field(default_factory=list)
+    status: str = "NEW"
+    
+    # ⭐️ BUSINESS LOGIC LIVES HERE, NOT IN A SERVICE
+    def add_line(self, product_id: str, quantity: int, price: Money):
+        if self.status != "NEW":
+            raise DomainException("Cannot modify confirmed order")
+        
+        self.lines.append(OrderLine(product_id, quantity, price))
+
+    def mark_paid(self):
+        if not self.lines:
+            raise DomainException("Cannot pay for empty order")
+        self.status = "PAID"
+</code></pre>
+            </div>
+        </section>
+
+        <!-- Section 4: Domain Services -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">3. Domain Services</h2>
+            <p class="mb-4 text-gray-700">
+                When logic involves multiple entities and doesn't belong to any one of them.
+                For example: transferring money between accounts (doesn't belong to account A or account B).
+            </p>
+            <pre><code class="language-python">class CurrencyConverter:
+    # This is a Domain Service
+    def convert(self, money: Money, target_currency: str) -> Money:
+        # Conversion logic
+        ...</code></pre>
+        </section>
+
+        <!-- Section 5: Domain Events -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">4. Domain Events</h2>
+            <p class="mb-4 text-gray-700">
+                These are side-effects of business logic. An entity shouldn't send emails or write logs itself. It should say: "This happened".
+                Events are simple DTOs.
+            </p>
+            <pre><code class="language-python">@dataclass(frozen=True)
+class OrderPaid: # Name in past tense!
+    order_id: str
+    paid_at: datetime
+
+@dataclass
+class Order:
+    # ... fields ...
+    events: List[object] = field(default_factory=list, init=False)
+
+    def pay(self):
+        self.status = "PAID"
+        # Invariant checked, state changed. Record the fact.
+        self.events.append(OrderPaid(self.id, datetime.now()))
+</code></pre>
+            <p class="text-sm text-gray-600 mt-2">
+                Processing these events is handled by Infrastructure (UnitOfWork) or Application layer, not the Entity itself.
+            </p>
+        </section>
+
+        
+        <!-- NAVIGATION FOOTER -->
+        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="index.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Back</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Index</span></a><a href="application.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Next</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Application &rarr;</span></a></div></div>
+    </main>
+</body>
+</html>

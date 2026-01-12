@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройка проекта — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">
+                        <span class="nav-link-icon">🏠</span>
+                        Главная
+                    </a>
+                    <a href="setup.html" class="nav-link active">
+                        <span class="nav-link-icon">⚙️</span>
+                        Настройка проекта
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
+                    <a href="part1_schema.html" class="nav-link">
+                        <span class="nav-link-icon">📊</span>
+                        1.1 Схема и хранение
+                    </a>
+                    <a href="part1_transactions.html" class="nav-link">
+                        <span class="nav-link-icon">🔄</span>
+                        1.2 Транзакции
+                    </a>
+                    <a href="part1_indexes.html" class="nav-link">
+                        <span class="nav-link-icon">🔍</span>
+                        1.3 Индексы
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 2: Архитектура</div>
+                    <a href="part2_litestar.html" class="nav-link">
+                        <span class="nav-link-icon">🚀</span>
+                        2.1 Litestar + DDD
+                    </a>
+                    <a href="part2_dishka.html" class="nav-link">
+                        <span class="nav-link-icon">💉</span>
+                        2.2 DI с Dishka
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 3: Распределённые</div>
+                    <a href="part3_faststream.html" class="nav-link">
+                        <span class="nav-link-icon">📨</span>
+                        3.1 RabbitMQ + Faststream
+                    </a>
+                    <a href="part3_redis.html" class="nav-link">
+                        <span class="nav-link-icon">⚡</span>
+                        3.2 Redis Patterns
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 4: Надёжность</div>
+                    <a href="part4_testing.html" class="nav-link">
+                        <span class="nav-link-icon">🧪</span>
+                        4.1 Advanced Testing
+                    </a>
+                    <a href="part4_resiliency.html" class="nav-link">
+                        <span class="nav-link-icon">🛡️</span>
+                        4.2 Resiliency
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 5: Observability</div>
+                    <a href="part5_logging.html" class="nav-link">
+                        <span class="nav-link-icon">📝</span>
+                        5.1 Логирование
+                    </a>
+                    <a href="part5_clickhouse.html" class="nav-link">
+                        <span class="nav-link-icon">📈</span>
+                        5.2 ClickHouse
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 6: Production</div>
+                    <a href="part6_migrations.html" class="nav-link">
+                        <span class="nav-link-icon">🔀</span>
+                        6.1 Zero-Downtime
+                    </a>
+                    <a href="part6_quality.html" class="nav-link">
+                        <span class="nav-link-icon">✅</span>
+                        6.2 Code Quality
+                    </a>
+                    <a href="part6_django.html" class="nav-link">
+                        <span class="nav-link-icon">🔗</span>
+                        6.3 Django Admin
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Настройка проекта</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Настройка проекта</h1>
+                <p class="lead">
+                    Создаём профессиональную структуру проекта с Poetry, правильной организацией модулей 
+                    и Docker-окружением для разработки.
+                </p>
+
+                <h2>Структура проекта</h2>
+                <p>
+                    Мы используем <strong>монорепозиторий</strong> с чётким разделением на слои. 
+                    Это не микросервисы — это монолит с правильной архитектурой.
+                </p>
+
+                <div class="file-tree">
+<span class="folder">scaletrade/</span>
+├── <span class="config">pyproject.toml</span>
+├── <span class="config">docker-compose.yml</span>
+├── <span class="config">docker-compose.dev.yml</span>
+├── <span class="config">.env.example</span>
+├── <span class="config">alembic.ini</span>
+├── <span class="folder">src/</span>
+│   └── <span class="folder">scaletrade/</span>
+│       ├── <span class="file">__init__.py</span>
+│       ├── <span class="file">main.py</span>              <span class="comment"># Точка входа Litestar</span>
+│       ├── <span class="file">config.py</span>            <span class="comment"># Pydantic Settings</span>
+│       │
+│       ├── <span class="folder">domain/</span>              <span class="comment"># Чистый домен (без зависимостей)</span>
+│       │   ├── <span class="file">__init__.py</span>
+│       │   ├── <span class="folder">entities/</span>        <span class="comment"># Dataclasses, бизнес-сущности</span>
+│       │   │   ├── <span class="file">order.py</span>
+│       │   │   ├── <span class="file">user.py</span>
+│       │   │   └── <span class="file">account.py</span>
+│       │   ├── <span class="folder">value_objects/</span>   <span class="comment"># Money, OrderId и т.д.</span>
+│       │   │   └── <span class="file">money.py</span>
+│       │   └── <span class="folder">exceptions/</span>      <span class="comment"># Доменные исключения</span>
+│       │       └── <span class="file">order.py</span>
+│       │
+│       ├── <span class="folder">infrastructure/</span>      <span class="comment"># Реализации (БД, брокеры)</span>
+│       │   ├── <span class="file">__init__.py</span>
+│       │   ├── <span class="folder">database/</span>
+│       │   │   ├── <span class="file">models.py</span>       <span class="comment"># SQLAlchemy модели</span>
+│       │   │   ├── <span class="file">session.py</span>      <span class="comment"># Engine, Session Factory</span>
+│       │   │   └── <span class="file">repositories/</span>   <span class="comment"># Репозитории</span>
+│       │   │       ├── <span class="file">base.py</span>
+│       │   │       └── <span class="file">order.py</span>
+│       │   ├── <span class="folder">messaging/</span>       <span class="comment"># RabbitMQ, Faststream</span>
+│       │   │   ├── <span class="file">publisher.py</span>
+│       │   │   └── <span class="file">subscribers.py</span>
+│       │   └── <span class="folder">cache/</span>           <span class="comment"># Redis</span>
+│       │       └── <span class="file">redis.py</span>
+│       │
+│       ├── <span class="folder">application/</span>         <span class="comment"># Use Cases / Services</span>
+│       │   ├── <span class="file">__init__.py</span>
+│       │   ├── <span class="folder">services/</span>
+│       │   │   └── <span class="file">order_service.py</span>
+│       │   ├── <span class="folder">dto/</span>             <span class="comment"># Data Transfer Objects</span>
+│       │   │   └── <span class="file">order.py</span>
+│       │   └── <span class="file">uow.py</span>            <span class="comment"># Unit of Work</span>
+│       │
+│       ├── <span class="folder">interface/</span>           <span class="comment"># HTTP Controllers</span>
+│       │   ├── <span class="file">__init__.py</span>
+│       │   ├── <span class="folder">http/</span>
+│       │   │   ├── <span class="file">orders.py</span>       <span class="comment"># Litestar Controllers</span>
+│       │   │   └── <span class="file">users.py</span>
+│       │   └── <span class="folder">schemas/</span>         <span class="comment"># Pydantic Request/Response</span>
+│       │       └── <span class="file">order.py</span>
+│       │
+│       └── <span class="folder">di/</span>                  <span class="comment"># Dependency Injection</span>
+│           ├── <span class="file">__init__.py</span>
+│           └── <span class="file">providers.py</span>      <span class="comment"># Dishka Providers</span>
+│
+├── <span class="folder">migrations/</span>              <span class="comment"># Alembic миграции</span>
+│   ├── <span class="file">env.py</span>
+│   └── <span class="folder">versions/</span>
+│
+└── <span class="folder">tests/</span>
+    ├── <span class="file">conftest.py</span>
+    ├── <span class="folder">unit/</span>
+    ├── <span class="folder">integration/</span>
+    └── <span class="folder">e2e/</span>
+                </div>
+
+                <h2>Инициализация Poetry</h2>
+                
+                <p>Создаём <code>pyproject.toml</code> с правильной конфигурацией:</p>
+
+<pre><code><span class="comment"># pyproject.toml</span>
+[tool.poetry]
+name = "scaletrade"
+version = "0.1.0"
+description = "Order Execution & Analytics System"
+authors = ["Your Name &lt;you@example.com&gt;"]
+readme = "README.md"
+packages = [{include = "scaletrade", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+<span class="comment"># Web Framework</span>
+litestar = {extras = ["standard"], version = "^2.8"}
+
+<span class="comment"># Database</span>
+sqlalchemy = {extras = ["asyncio"], version = "^2.0"}
+asyncpg = "^0.29"
+alembic = "^1.13"
+
+<span class="comment"># Validation & Settings</span>
+pydantic = "^2.6"
+pydantic-settings = "^2.2"
+
+<span class="comment"># DI Container</span>
+dishka = "^1.2"
+
+<span class="comment"># Messaging</span>
+faststream = {extras = ["rabbit"], version = "^0.5"}
+
+<span class="comment"># Cache & Distributed</span>
+redis = "^5.0"
+
+<span class="comment"># Resiliency</span>
+stamina = "^24.2"
+
+<span class="comment"># Analytics</span>
+clickhouse-connect = "^0.7"
+
+<span class="comment"># Logging</span>
+structlog = "^24.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+pytest-asyncio = "^0.23"
+pytest-cov = "^4.1"
+testcontainers = {extras = ["postgres", "rabbitmq", "redis"], version = "^4.0"}
+hypothesis = "^6.98"
+respx = "^0.20"
+freezegun = "^1.4"
+
+<span class="comment"># Code Quality</span>
+ruff = "^0.3"
+mypy = "^1.9"
+pre-commit = "^3.6"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "E",     <span class="comment"># pycodestyle errors</span>
+    "W",     <span class="comment"># pycodestyle warnings</span>
+    "F",     <span class="comment"># pyflakes</span>
+    "I",     <span class="comment"># isort</span>
+    "B",     <span class="comment"># flake8-bugbear</span>
+    "C4",    <span class="comment"># flake8-comprehensions</span>
+    "UP",    <span class="comment"># pyupgrade</span>
+    "ARG",   <span class="comment"># flake8-unused-arguments</span>
+    "SIM",   <span class="comment"># flake8-simplify</span>
+]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-v --tb=short"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"</code></pre>
+
+                <h2>Docker Compose для разработки</h2>
+                
+                <p>Локальное окружение с PostgreSQL, Redis и RabbitMQ:</p>
+
+<pre><code><span class="comment"># docker-compose.dev.yml</span>
+version: "3.9"
+
+services:
+  <span class="function">postgres</span>:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: scaletrade
+      POSTGRES_PASSWORD: scaletrade_dev
+      POSTGRES_DB: scaletrade
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U scaletrade"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  <span class="function">redis</span>:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+
+  <span class="function">rabbitmq</span>:
+    image: rabbitmq:3.13-management-alpine
+    ports:
+      - "5672:5672"
+      - "15672:15672"  <span class="comment"># Management UI</span>
+    environment:
+      RABBITMQ_DEFAULT_USER: scaletrade
+      RABBITMQ_DEFAULT_PASS: scaletrade_dev
+
+  <span class="function">clickhouse</span>:
+    image: clickhouse/clickhouse-server:24.2
+    ports:
+      - "8123:8123"  <span class="comment"># HTTP interface</span>
+      - "9000:9000"  <span class="comment"># Native protocol</span>
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+
+volumes:
+  postgres_data:
+  redis_data:
+  clickhouse_data:</code></pre>
+
+                <h2>Конфигурация приложения</h2>
+                
+                <p>Используем <code>pydantic-settings</code> для типизированной конфигурации:</p>
+
+<pre><code><span class="comment"># src/scaletrade/config.py</span>
+<span class="keyword">from</span> functools <span class="keyword">import</span> lru_cache
+<span class="keyword">from</span> pydantic <span class="keyword">import</span> PostgresDsn, RedisDsn, AmqpDsn
+<span class="keyword">from</span> pydantic_settings <span class="keyword">import</span> BaseSettings, SettingsConfigDict
+
+
+<span class="keyword">class</span> <span class="class-name">Settings</span>(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=<span class="string">".env"</span>,
+        env_file_encoding=<span class="string">"utf-8"</span>,
+        extra=<span class="string">"ignore"</span>,
+    )
+
+    <span class="comment"># Application</span>
+    app_name: <span class="type">str</span> = <span class="string">"ScaleTrade"</span>
+    debug: <span class="type">bool</span> = <span class="keyword">False</span>
+    
+    <span class="comment"># Database</span>
+    database_url: PostgresDsn
+    database_pool_size: <span class="type">int</span> = <span class="number">10</span>
+    database_pool_overflow: <span class="type">int</span> = <span class="number">20</span>
+    
+    <span class="comment"># Redis</span>
+    redis_url: RedisDsn
+    
+    <span class="comment"># RabbitMQ</span>
+    rabbitmq_url: AmqpDsn
+    
+    <span class="comment"># ClickHouse</span>
+    clickhouse_host: <span class="type">str</span> = <span class="string">"localhost"</span>
+    clickhouse_port: <span class="type">int</span> = <span class="number">8123</span>
+
+    <span class="decorator">@property</span>
+    <span class="keyword">def</span> <span class="function">async_database_url</span>(self) -> <span class="type">str</span>:
+        <span class="string">"""Преобразуем postgresql:// в postgresql+asyncpg://"""</span>
+        <span class="keyword">return</span> <span class="type">str</span>(self.database_url).replace(
+            <span class="string">"postgresql://"</span>, <span class="string">"postgresql+asyncpg://"</span>
+        )
+
+
+<span class="decorator">@lru_cache</span>
+<span class="keyword">def</span> <span class="function">get_settings</span>() -> Settings:
+    <span class="keyword">return</span> Settings()</code></pre>
+
+                <h2>Команды для старта</h2>
+
+<pre><code><span class="comment"># Создаём проект</span>
+mkdir scaletrade && cd scaletrade
+poetry init
+
+<span class="comment"># Устанавливаем зависимости</span>
+poetry install
+
+<span class="comment"># Запускаем инфраструктуру</span>
+docker-compose -f docker-compose.dev.yml up -d
+
+<span class="comment"># Проверяем</span>
+docker-compose -f docker-compose.dev.yml ps</code></pre>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">✅ Почему такая структура?</div>
+                    <p>
+                        <strong>Domain</strong> не зависит ни от чего — чистая бизнес-логика.<br>
+                        <strong>Infrastructure</strong> реализует абстракции (репозитории, брокеры).<br>
+                        <strong>Application</strong> оркестрирует бизнес-логику через сервисы.<br>
+                        <strong>Interface</strong> — точка входа HTTP, ничего не знает о БД.
+                    </p>
+                </div>
+
+                <div class="task-box">
+                    <h4>📋 Задание</h4>
+                    <ul class="task-list">
+                        <li>Создай структуру папок по схеме выше</li>
+                        <li>Настрой <code>pyproject.toml</code> и установи зависимости</li>
+                        <li>Запусти Docker Compose и убедись, что все сервисы работают</li>
+                        <li>Создай файл <code>.env</code> с реальными значениями</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="index.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← Главная</div>
+                        </div>
+                    </a>
+                    <a href="part1_schema.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">1.1 Схема и хранение →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

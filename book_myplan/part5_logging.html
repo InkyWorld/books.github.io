@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5.1 Структурированное логирование — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link"><span class="nav-link-icon">🏠</span>Главная</a>
+                    <a href="setup.html" class="nav-link"><span class="nav-link-icon">⚙️</span>Настройка проекта</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
+                    <a href="part1_schema.html" class="nav-link"><span class="nav-link-icon">📊</span>1.1 Схема и хранение</a>
+                    <a href="part1_transactions.html" class="nav-link"><span class="nav-link-icon">🔄</span>1.2 Транзакции</a>
+                    <a href="part1_indexes.html" class="nav-link"><span class="nav-link-icon">🔍</span>1.3 Индексы</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 2: Архитектура</div>
+                    <a href="part2_litestar.html" class="nav-link"><span class="nav-link-icon">🚀</span>2.1 Litestar + DDD</a>
+                    <a href="part2_dishka.html" class="nav-link"><span class="nav-link-icon">💉</span>2.2 DI с Dishka</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 3: Распределённые</div>
+                    <a href="part3_faststream.html" class="nav-link"><span class="nav-link-icon">📨</span>3.1 RabbitMQ + Faststream</a>
+                    <a href="part3_redis.html" class="nav-link"><span class="nav-link-icon">⚡</span>3.2 Redis Patterns</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 4: Надёжность</div>
+                    <a href="part4_testing.html" class="nav-link"><span class="nav-link-icon">🧪</span>4.1 Advanced Testing</a>
+                    <a href="part4_resiliency.html" class="nav-link"><span class="nav-link-icon">🛡️</span>4.2 Resiliency</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 5: Observability</div>
+                    <a href="part5_logging.html" class="nav-link active"><span class="nav-link-icon">📝</span>5.1 Логирование</a>
+                    <a href="part5_clickhouse.html" class="nav-link"><span class="nav-link-icon">📈</span>5.2 ClickHouse</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 6: Production</div>
+                    <a href="part6_migrations.html" class="nav-link"><span class="nav-link-icon">🔀</span>6.1 Zero-Downtime</a>
+                    <a href="part6_quality.html" class="nav-link"><span class="nav-link-icon">✅</span>6.2 Code Quality</a>
+                    <a href="part6_django.html" class="nav-link"><span class="nav-link-icon">🔗</span>6.3 Django Admin</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 5</span>
+                    <span>/</span>
+                    <span>5.1 Логирование</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 5.1: Структурированное логирование</h1>
+                <p class="lead">
+                    JSON логи, structlog, correlation IDs, Vector pipeline — observability на практике.
+                </p>
+
+                <h2>Почему структурированные логи?</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Text logs</th>
+                            <th>Structured JSON logs</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>Order 123 created for user 456</code></td>
+                            <td><code>{"event": "order_created", "order_id": 123, "user_id": 456}</code></td>
+                        </tr>
+                        <tr>
+                            <td>❌ Grep по тексту</td>
+                            <td>✅ SQL-подобные запросы</td>
+                        </tr>
+                        <tr>
+                            <td>❌ Нет фильтрации по полям</td>
+                            <td>✅ <code>WHERE user_id = 456</code></td>
+                        </tr>
+                        <tr>
+                            <td>❌ Сложно агрегировать</td>
+                            <td>✅ COUNT, GROUP BY, AVG</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>Structlog: основы</h2>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/logging/setup.py</span>
+<span class="keyword">import</span> logging
+<span class="keyword">import</span> structlog
+<span class="keyword">from</span> structlog.types <span class="keyword">import</span> Processor
+
+
+<span class="keyword">def</span> <span class="function">setup_logging</span>(
+    json_output: <span class="type">bool</span> = <span class="keyword">True</span>,
+    log_level: <span class="type">str</span> = <span class="string">"INFO"</span>,
+) -> <span class="keyword">None</span>:
+    <span class="string">"""
+    Настройка structlog для приложения.
+    
+    Args:
+        json_output: True для production (JSON), False для dev (pretty)
+        log_level: Уровень логирования
+    """</span>
+    
+    <span class="comment"># Общие процессоры</span>
+    shared_processors: <span class="type">list</span>[Processor] = [
+        <span class="comment"># Добавляем timestamp</span>
+        structlog.processors.TimeStamper(fmt=<span class="string">"iso"</span>),
+        <span class="comment"># Добавляем уровень лога</span>
+        structlog.processors.add_log_level,
+        <span class="comment"># Добавляем caller info (file, line, function)</span>
+        structlog.processors.CallsiteParameterAdder(
+            [
+                structlog.processors.CallsiteParameter.FILENAME,
+                structlog.processors.CallsiteParameter.LINENO,
+                structlog.processors.CallsiteParameter.FUNC_NAME,
+            ],
+        ),
+        <span class="comment"># Stack info для errors</span>
+        structlog.processors.StackInfoRenderer(),
+        <span class="comment"># Exception info</span>
+        structlog.processors.format_exc_info,
+    ]
+    
+    <span class="keyword">if</span> json_output:
+        <span class="comment"># Production: JSON output</span>
+        processors = shared_processors + [
+            structlog.processors.JSONRenderer(),
+        ]
+    <span class="keyword">else</span>:
+        <span class="comment"># Development: pretty colored output</span>
+        processors = shared_processors + [
+            structlog.dev.ConsoleRenderer(colors=<span class="keyword">True</span>),
+        ]
+    
+    <span class="comment"># Конфигурируем structlog</span>
+    structlog.configure(
+        processors=processors,
+        wrapper_class=structlog.make_filtering_bound_logger(
+            logging.getLevelName(log_level)
+        ),
+        context_class=<span class="type">dict</span>,
+        logger_factory=structlog.PrintLoggerFactory(),
+        cache_logger_on_first_use=<span class="keyword">True</span>,
+    )
+    
+    <span class="comment"># Перенаправляем stdlib logging в structlog</span>
+    logging.basicConfig(
+        format=<span class="string">"%(message)s"</span>,
+        level=logging.getLevelName(log_level),
+    )</code></pre>
+
+                <h2>Использование логгера</h2>
+
+<pre><code><span class="comment"># src/scaletrade/application/services/order_service.py</span>
+<span class="keyword">import</span> structlog
+
+<span class="comment"># Получаем логгер (singleton)</span>
+logger = structlog.get_logger()
+
+
+<span class="keyword">class</span> <span class="class-name">OrderService</span>:
+    
+    <span class="keyword">async def</span> <span class="function">create_order</span>(
+        self, 
+        user_id: UserId,
+        data: CreateOrderDTO,
+    ) -> Order:
+        <span class="comment"># Логируем с контекстом</span>
+        logger.info(
+            <span class="string">"Creating order"</span>,
+            user_id=<span class="type">str</span>(user_id),
+            symbol=data.symbol,
+            side=data.side.value,
+            quantity=<span class="type">str</span>(data.quantity),
+        )
+        
+        <span class="keyword">try</span>:
+            order = Order.create(user_id, data)
+            <span class="keyword">await</span> self._repository.save(order)
+            
+            logger.info(
+                <span class="string">"Order created successfully"</span>,
+                order_id=<span class="type">str</span>(order.id),
+                user_id=<span class="type">str</span>(user_id),
+            )
+            
+            <span class="keyword">return</span> order
+            
+        <span class="keyword">except</span> InsufficientBalanceError <span class="keyword">as</span> e:
+            logger.warning(
+                <span class="string">"Order creation failed: insufficient balance"</span>,
+                user_id=<span class="type">str</span>(user_id),
+                required=<span class="type">str</span>(e.required),
+                available=<span class="type">str</span>(e.available),
+            )
+            <span class="keyword">raise</span>
+        
+        <span class="keyword">except</span> Exception:
+            <span class="comment"># exc_info=True добавляет stack trace</span>
+            logger.exception(
+                <span class="string">"Unexpected error creating order"</span>,
+                user_id=<span class="type">str</span>(user_id),
+            )
+            <span class="keyword">raise</span></code></pre>
+
+                <h2>Correlation ID: трекинг запросов</h2>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/logging/correlation.py</span>
+<span class="keyword">import</span> uuid
+<span class="keyword">from</span> contextvars <span class="keyword">import</span> ContextVar
+<span class="keyword">import</span> structlog
+
+<span class="comment"># Context variable для correlation ID</span>
+correlation_id_var: ContextVar[<span class="type">str</span> | <span class="keyword">None</span>] = ContextVar(
+    <span class="string">"correlation_id"</span>, 
+    default=<span class="keyword">None</span>
+)
+
+
+<span class="keyword">def</span> <span class="function">get_correlation_id</span>() -> <span class="type">str</span>:
+    <span class="string">"""Получить текущий correlation ID или сгенерировать новый."""</span>
+    cid = correlation_id_var.get()
+    <span class="keyword">if</span> cid <span class="keyword">is None</span>:
+        cid = <span class="type">str</span>(uuid.uuid4())
+        correlation_id_var.set(cid)
+    <span class="keyword">return</span> cid
+
+
+<span class="keyword">def</span> <span class="function">add_correlation_id</span>(
+    logger: structlog.BoundLogger,
+    method_name: <span class="type">str</span>,
+    event_dict: <span class="type">dict</span>,
+) -> <span class="type">dict</span>:
+    <span class="string">"""Structlog processor для добавления correlation ID."""</span>
+    event_dict[<span class="string">"correlation_id"</span>] = get_correlation_id()
+    <span class="keyword">return</span> event_dict</code></pre>
+
+                <h2>Middleware для Litestar</h2>
+
+<pre><code><span class="comment"># src/scaletrade/interface/http/middleware/logging.py</span>
+<span class="keyword">from</span> litestar <span class="keyword">import</span> Request
+<span class="keyword">from</span> litestar.middleware <span class="keyword">import</span> AbstractMiddleware
+<span class="keyword">from</span> litestar.types <span class="keyword">import</span> ASGIApp, Receive, Scope, Send
+<span class="keyword">import</span> structlog
+<span class="keyword">import</span> time
+
+<span class="keyword">from</span> scaletrade.infrastructure.logging.correlation <span class="keyword">import</span> (
+    correlation_id_var,
+    get_correlation_id,
+)
+
+logger = structlog.get_logger()
+
+
+<span class="keyword">class</span> <span class="class-name">LoggingMiddleware</span>(AbstractMiddleware):
+    <span class="string">"""
+    Middleware для логирования HTTP запросов.
+    
+    Добавляет:
+    - Correlation ID из заголовка или генерирует новый
+    - Логирование request/response
+    - Duration метрику
+    """</span>
+    
+    <span class="keyword">async def</span> <span class="function">__call__</span>(
+        self, 
+        scope: Scope, 
+        receive: Receive, 
+        send: Send
+    ) -> <span class="keyword">None</span>:
+        <span class="keyword">if</span> scope[<span class="string">"type"</span>] != <span class="string">"http"</span>:
+            <span class="keyword">await</span> self.app(scope, receive, send)
+            <span class="keyword">return</span>
+        
+        request = Request(scope)
+        
+        <span class="comment"># Получаем correlation ID из заголовка или генерируем</span>
+        correlation_id = request.headers.get(
+            <span class="string">"X-Correlation-ID"</span>,
+            <span class="type">str</span>(uuid.uuid4()),
+        )
+        correlation_id_var.set(correlation_id)
+        
+        start_time = time.perf_counter()
+        
+        <span class="comment"># Логируем входящий запрос</span>
+        logger.info(
+            <span class="string">"Request started"</span>,
+            method=request.method,
+            path=request.url.path,
+            query=<span class="type">str</span>(request.query_params),
+            client_ip=request.client.host <span class="keyword">if</span> request.client <span class="keyword">else None</span>,
+        )
+        
+        <span class="comment"># Перехватываем response status</span>
+        response_status = <span class="number">500</span>
+        
+        <span class="keyword">async def</span> <span class="function">send_wrapper</span>(message):
+            <span class="keyword">nonlocal</span> response_status
+            <span class="keyword">if</span> message[<span class="string">"type"</span>] == <span class="string">"http.response.start"</span>:
+                response_status = message[<span class="string">"status"</span>]
+            <span class="keyword">await</span> send(message)
+        
+        <span class="keyword">try</span>:
+            <span class="keyword">await</span> self.app(scope, receive, send_wrapper)
+        <span class="keyword">finally</span>:
+            duration = time.perf_counter() - start_time
+            
+            <span class="comment"># Логируем завершение запроса</span>
+            log_method = (
+                logger.info <span class="keyword">if</span> response_status < <span class="number">400</span>
+                <span class="keyword">else</span> logger.warning <span class="keyword">if</span> response_status < <span class="number">500</span>
+                <span class="keyword">else</span> logger.error
+            )
+            
+            log_method(
+                <span class="string">"Request completed"</span>,
+                method=request.method,
+                path=request.url.path,
+                status=response_status,
+                duration_ms=round(duration * <span class="number">1000</span>, <span class="number">2</span>),
+            )</code></pre>
+
+                <h2>Контекстные логгеры</h2>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/logging/context.py</span>
+<span class="keyword">from</span> contextlib <span class="keyword">import</span> contextmanager
+<span class="keyword">import</span> structlog
+
+logger = structlog.get_logger()
+
+
+<span class="decorator">@contextmanager</span>
+<span class="keyword">def</span> <span class="function">log_context</span>(**kwargs):
+    <span class="string">"""
+    Context manager для добавления контекста к логам.
+    
+    Usage:
+        with log_context(order_id="123", user_id="456"):
+            logger.info("Processing order")  # includes order_id, user_id
+    """</span>
+    <span class="keyword">with</span> structlog.contextvars.bound_contextvars(**kwargs):
+        <span class="keyword">yield</span>
+
+
+<span class="comment"># Использование в сервисе</span>
+<span class="keyword">class</span> <span class="class-name">OrderService</span>:
+    
+    <span class="keyword">async def</span> <span class="function">process_order</span>(self, order_id: OrderId) -> <span class="keyword">None</span>:
+        <span class="comment"># Все логи внутри контекста будут содержать order_id</span>
+        <span class="keyword">with</span> log_context(order_id=<span class="type">str</span>(order_id)):
+            logger.info(<span class="string">"Starting order processing"</span>)
+            
+            <span class="keyword">await</span> self._validate_order()
+            logger.debug(<span class="string">"Order validated"</span>)
+            
+            <span class="keyword">await</span> self._execute_order()
+            logger.info(<span class="string">"Order executed"</span>)
+            
+            <span class="keyword">await</span> self._notify_user()
+            logger.info(<span class="string">"User notified"</span>)</code></pre>
+
+                <h2>Vector Pipeline: сбор и доставка логов</h2>
+
+<pre><code><span class="comment"># vector.toml — конфигурация Vector</span>
+[sources.app_logs]
+type = <span class="string">"file"</span>
+include = [<span class="string">"/var/log/scaletrade/*.log"</span>]
+read_from = <span class="string">"beginning"</span>
+
+<span class="comment"># Парсим JSON логи</span>
+[transforms.parse_json]
+type = <span class="string">"remap"</span>
+inputs = [<span class="string">"app_logs"</span>]
+source = <span class="string">'''
+. = parse_json!(.message)
+.timestamp = parse_timestamp!(.timestamp, format: "%+")
+'''</span>
+
+<span class="comment"># Фильтруем и обогащаем</span>
+[transforms.enrich]
+type = <span class="string">"remap"</span>
+inputs = [<span class="string">"parse_json"</span>]
+source = <span class="string">'''
+.environment = get_env_var("ENVIRONMENT") ?? "unknown"
+.service = "scaletrade"
+.host = get_hostname()
+'''</span>
+
+<span class="comment"># Отправляем в ClickHouse</span>
+[sinks.clickhouse]
+type = <span class="string">"clickhouse"</span>
+inputs = [<span class="string">"enrich"</span>]
+endpoint = <span class="string">"http://clickhouse:8123"</span>
+database = <span class="string">"logs"</span>
+table = <span class="string">"application_logs"</span>
+skip_unknown_fields = <span class="keyword">true</span>
+batch.max_bytes = <span class="number">10485760</span>
+batch.timeout_secs = <span class="number">5</span>
+
+<span class="comment"># Алерты в Telegram для errors</span>
+[transforms.filter_errors]
+type = <span class="string">"filter"</span>
+inputs = [<span class="string">"enrich"</span>]
+condition = '.level == "error" || .level == "critical"'
+
+[sinks.telegram_alerts]
+type = <span class="string">"http"</span>
+inputs = [<span class="string">"filter_errors"</span>]
+uri = <span class="string">"https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"</span>
+method = <span class="string">"post"</span>
+encoding.codec = <span class="string">"json"</span></code></pre>
+
+                <h2>Пример JSON лога</h2>
+
+<pre><code>{
+  <span class="string">"timestamp"</span>: <span class="string">"2024-01-15T10:30:00.123Z"</span>,
+  <span class="string">"level"</span>: <span class="string">"info"</span>,
+  <span class="string">"event"</span>: <span class="string">"Order created successfully"</span>,
+  <span class="string">"correlation_id"</span>: <span class="string">"550e8400-e29b-41d4-a716-446655440000"</span>,
+  <span class="string">"order_id"</span>: <span class="string">"ord_abc123"</span>,
+  <span class="string">"user_id"</span>: <span class="string">"usr_456"</span>,
+  <span class="string">"symbol"</span>: <span class="string">"BTC/USD"</span>,
+  <span class="string">"side"</span>: <span class="string">"buy"</span>,
+  <span class="string">"quantity"</span>: <span class="string">"0.5"</span>,
+  <span class="string">"filename"</span>: <span class="string">"order_service.py"</span>,
+  <span class="string">"lineno"</span>: <span class="number">42</span>,
+  <span class="string">"func_name"</span>: <span class="string">"create_order"</span>
+}</code></pre>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. High Cardinality в Метриках</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Никогда не добавляйте <code>user_id</code>, <code>uuid</code> или детали ошибки как лейбл в Prometheus метрику. Это приведет к взрывному росту временных рядов (Series) и падению Prometheus. Для таких деталей есть логи и трейсы.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Синхронное логирование</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Запись в файл или stdout — это блокирующая операция ввода-вывода. В высоконагруженном <code>asyncio</code> приложении это может вызвать лаги. Используйте <code>structlog</code> с неблокирующим процессором или (лучше) пишите в stderr, который Docker заберет асинхронно.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. PII (Персональные данные)</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Логирование email пользователя или номера телефона — нарушение GDPR/152-ФЗ. Используйте процессоры structlog для маскирования полей (<code>email: ***@gmail.com</code>).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Correlation ID:</strong> Без этого в микросервисах не выжить. Генерируйте ID на входе в систему (Gateway) и прокидывайте через все HTTP-запросы и очереди сообщений. Используйте <code>contextvars</code> в Python для неявной передачи.</li>
+                    <li><strong>Vector:</strong> Используйте Vector.dev для сбора логов. Он написан на Rust, ест мало памяти и умеет "переваривать" логи перед отправкой в Elastic/ClickHouse (например, парсить JSON или убирать PII).</li>
+                    <li><strong>Sentry vs Logs:</strong> Не путайте. Sentry — для алертинга об ошибках (Stacktrace + Context). Логи — для понимания, "что происходило перед ошибкой". Не отправляйте каждый <code>logger.error</code> в Sentry.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>📋 Задание</h4>
+                    <ul class="task-list">
+                        <li>Настрой structlog с JSON output</li>
+                        <li>Добавь LoggingMiddleware в Litestar</li>
+                        <li>Реализуй correlation ID tracking</li>
+                        <li>Используй log_context в сервисах</li>
+                        <li>Настрой Vector для сбора логов</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="part4_resiliency.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 4.2 Resiliency</div>
+                        </div>
+                    </a>
+                    <a href="part5_clickhouse.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">5.2 ClickHouse →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

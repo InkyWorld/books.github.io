@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>4.2 Resiliency Patterns — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link"><span class="nav-link-icon">🏠</span>Главная</a>
+                    <a href="setup.html" class="nav-link"><span class="nav-link-icon">⚙️</span>Настройка проекта</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
+                    <a href="part1_schema.html" class="nav-link"><span class="nav-link-icon">📊</span>1.1 Схема и хранение</a>
+                    <a href="part1_transactions.html" class="nav-link"><span class="nav-link-icon">🔄</span>1.2 Транзакции</a>
+                    <a href="part1_indexes.html" class="nav-link"><span class="nav-link-icon">🔍</span>1.3 Индексы</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 2: Архитектура</div>
+                    <a href="part2_litestar.html" class="nav-link"><span class="nav-link-icon">🚀</span>2.1 Litestar + DDD</a>
+                    <a href="part2_dishka.html" class="nav-link"><span class="nav-link-icon">💉</span>2.2 DI с Dishka</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 3: Распределённые</div>
+                    <a href="part3_faststream.html" class="nav-link"><span class="nav-link-icon">📨</span>3.1 RabbitMQ + Faststream</a>
+                    <a href="part3_redis.html" class="nav-link"><span class="nav-link-icon">⚡</span>3.2 Redis Patterns</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 4: Надёжность</div>
+                    <a href="part4_testing.html" class="nav-link"><span class="nav-link-icon">🧪</span>4.1 Advanced Testing</a>
+                    <a href="part4_resiliency.html" class="nav-link active"><span class="nav-link-icon">🛡️</span>4.2 Resiliency</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 5: Observability</div>
+                    <a href="part5_logging.html" class="nav-link"><span class="nav-link-icon">📝</span>5.1 Логирование</a>
+                    <a href="part5_clickhouse.html" class="nav-link"><span class="nav-link-icon">📈</span>5.2 ClickHouse</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 6: Production</div>
+                    <a href="part6_migrations.html" class="nav-link"><span class="nav-link-icon">🔀</span>6.1 Zero-Downtime</a>
+                    <a href="part6_quality.html" class="nav-link"><span class="nav-link-icon">✅</span>6.2 Code Quality</a>
+                    <a href="part6_django.html" class="nav-link"><span class="nav-link-icon">🔗</span>6.3 Django Admin</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 4</span>
+                    <span>/</span>
+                    <span>4.2 Resiliency</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 4.2: Resiliency Patterns</h1>
+                <p class="lead">
+                    Stamina для ретраев, Circuit Breaker, Timeout — делаем систему устойчивой к сбоям.
+                </p>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">💡 Главный принцип</div>
+                    <p>
+                        В распределённых системах ошибки — норма, не исключение.
+                        Вопрос не "если", а "когда" что-то сломается.
+                    </p>
+                </div>
+
+                <h2>Stamina: Retry с экспоненциальным backoff</h2>
+                
+                <p>
+                    Stamina — современная библиотека для retry в Python. 
+                    Использует exponential backoff с jitter из коробки.
+                </p>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/external/price_service.py</span>
+<span class="keyword">import</span> httpx
+<span class="keyword">import</span> stamina
+<span class="keyword">from</span> decimal <span class="keyword">import</span> Decimal
+
+
+<span class="keyword">class</span> <span class="class-name">PriceServiceError</span>(Exception):
+    <span class="string">"""Базовая ошибка сервиса цен."""</span>
+    <span class="keyword">pass</span>
+
+
+<span class="keyword">class</span> <span class="class-name">PriceService</span>:
+    <span class="string">"""Сервис получения цен из внешнего API."""</span>
+    
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, base_url: <span class="type">str</span>, timeout: <span class="type">float</span> = <span class="number">5.0</span>):
+        self.base_url = base_url
+        self.timeout = timeout
+        self._client = httpx.AsyncClient(timeout=timeout)
+    
+    <span class="decorator">@stamina.retry</span>(
+        on=httpx.HTTPStatusError,  <span class="comment"># Какие исключения ретраить</span>
+        attempts=<span class="number">3</span>,                  <span class="comment"># Максимум попыток</span>
+        timeout=<span class="number">30</span>,                  <span class="comment"># Общий таймаут на все ретраи</span>
+    )
+    <span class="keyword">async def</span> <span class="function">get_price</span>(self, symbol: <span class="type">str</span>) -> Decimal:
+        <span class="string">"""
+        Получить текущую цену символа.
+        
+        Stamina автоматически:
+        - Ждёт 1s → 2s → 4s между попытками (exponential backoff)
+        - Добавляет случайный jitter (±25%)
+        - Логирует retry попытки
+        """</span>
+        response = <span class="keyword">await</span> self._client.get(
+            f<span class="string">"{self.base_url}/price/{symbol}"</span>
+        )
+        response.raise_for_status()
+        
+        data = response.json()
+        <span class="keyword">return</span> Decimal(data[<span class="string">"price"</span>])
+
+
+<span class="comment"># Продвинутая конфигурация</span>
+<span class="keyword">class</span> <span class="class-name">AdvancedPriceService</span>:
+    
+    <span class="decorator">@stamina.retry</span>(
+        on=(
+            httpx.HTTPStatusError,
+            httpx.ConnectError,
+            httpx.ReadTimeout,
+        ),
+        attempts=<span class="number">5</span>,
+        timeout=<span class="number">60</span>,
+        wait_initial=<span class="number">0.5</span>,   <span class="comment"># Начальная задержка</span>
+        wait_max=<span class="number">10</span>,         <span class="comment"># Максимальная задержка</span>
+        wait_jitter=<span class="number">0.25</span>,    <span class="comment"># Jitter ±25%</span>
+    )
+    <span class="keyword">async def</span> <span class="function">get_price</span>(self, symbol: <span class="type">str</span>) -> Decimal:
+        <span class="keyword">pass</span></code></pre>
+
+                <h2>Условный Retry: Retry Predicate</h2>
+
+<pre><code><span class="comment"># Ретраим только определённые HTTP статусы</span>
+<span class="keyword">def</span> <span class="function">is_retryable</span>(exc: Exception) -> <span class="type">bool</span>:
+    <span class="string">"""Определяем, стоит ли ретраить."""</span>
+    <span class="keyword">if</span> isinstance(exc, httpx.HTTPStatusError):
+        <span class="comment"># 429 (Rate Limit) и 5xx — ретраим</span>
+        <span class="keyword">return</span> exc.response.status_code <span class="keyword">in</span> (
+            <span class="number">429</span>, <span class="number">500</span>, <span class="number">502</span>, <span class="number">503</span>, <span class="number">504</span>
+        )
+    <span class="keyword">return</span> <span class="keyword">True</span>
+
+
+<span class="keyword">class</span> <span class="class-name">SmartPriceService</span>:
+    
+    <span class="decorator">@stamina.retry</span>(
+        on=httpx.HTTPStatusError,
+        attempts=<span class="number">3</span>,
+        <span class="comment"># Предикат для условного ретрая</span>
+        retry_on=is_retryable,
+    )
+    <span class="keyword">async def</span> <span class="function">get_price</span>(self, symbol: <span class="type">str</span>) -> Decimal:
+        <span class="string">"""4xx (кроме 429) не ретраятся — это клиентские ошибки."""</span>
+        response = <span class="keyword">await</span> self._client.get(f<span class="string">"/price/{symbol}"</span>)
+        response.raise_for_status()
+        <span class="keyword">return</span> Decimal(response.json()[<span class="string">"price"</span>])</code></pre>
+
+                <h2>Circuit Breaker Pattern</h2>
+                
+                <p>
+                    Когда сервис постоянно падает, нет смысла долбить его запросами.
+                    Circuit Breaker "размыкает цепь" после N ошибок.
+                </p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Состояние</th>
+                            <th>Поведение</th>
+                            <th>Переход</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>CLOSED</strong></td>
+                            <td>Все запросы проходят</td>
+                            <td>→ OPEN при N ошибках</td>
+                        </tr>
+                        <tr>
+                            <td><strong>OPEN</strong></td>
+                            <td>Все запросы fail fast</td>
+                            <td>→ HALF-OPEN по таймауту</td>
+                        </tr>
+                        <tr>
+                            <td><strong>HALF-OPEN</strong></td>
+                            <td>Пропускаем тестовый запрос</td>
+                            <td>→ CLOSED / OPEN</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/resiliency/circuit_breaker.py</span>
+<span class="keyword">import</span> asyncio
+<span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass, field
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime, timedelta
+<span class="keyword">from</span> enum <span class="keyword">import</span> Enum
+<span class="keyword">from</span> typing <span class="keyword">import</span> Callable, TypeVar, ParamSpec
+
+P = ParamSpec(<span class="string">"P"</span>)
+R = TypeVar(<span class="string">"R"</span>)
+
+
+<span class="keyword">class</span> <span class="class-name">CircuitState</span>(Enum):
+    CLOSED = <span class="string">"closed"</span>
+    OPEN = <span class="string">"open"</span>
+    HALF_OPEN = <span class="string">"half_open"</span>
+
+
+<span class="keyword">class</span> <span class="class-name">CircuitOpenError</span>(Exception):
+    <span class="string">"""Цепь разомкнута, запросы не пропускаются."""</span>
+    <span class="keyword">pass</span>
+
+
+<span class="decorator">@dataclass</span>
+<span class="keyword">class</span> <span class="class-name">CircuitBreaker</span>:
+    <span class="string">"""
+    Circuit Breaker для защиты от каскадных сбоев.
+    
+    Usage:
+        breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=30)
+        
+        @breaker
+        async def call_external_api():
+            ...
+    """</span>
+    failure_threshold: <span class="type">int</span> = <span class="number">5</span>          <span class="comment"># Порог ошибок для OPEN</span>
+    recovery_timeout: <span class="type">float</span> = <span class="number">30.0</span>      <span class="comment"># Секунды до HALF_OPEN</span>
+    half_open_requests: <span class="type">int</span> = <span class="number">1</span>         <span class="comment"># Запросов в HALF_OPEN</span>
+    
+    _state: CircuitState = field(default=CircuitState.CLOSED, init=<span class="keyword">False</span>)
+    _failure_count: <span class="type">int</span> = field(default=<span class="number">0</span>, init=<span class="keyword">False</span>)
+    _last_failure_time: datetime | <span class="keyword">None</span> = field(default=<span class="keyword">None</span>, init=<span class="keyword">False</span>)
+    _lock: asyncio.Lock = field(default_factory=asyncio.Lock, init=<span class="keyword">False</span>)
+    
+    <span class="decorator">@property</span>
+    <span class="keyword">def</span> <span class="function">state</span>(self) -> CircuitState:
+        <span class="keyword">return</span> self._state
+    
+    <span class="keyword">async def</span> <span class="function">_should_allow_request</span>(self) -> <span class="type">bool</span>:
+        <span class="string">"""Проверяем, можно ли пропустить запрос."""</span>
+        <span class="keyword">if</span> self._state == CircuitState.CLOSED:
+            <span class="keyword">return True</span>
+        
+        <span class="keyword">if</span> self._state == CircuitState.OPEN:
+            <span class="comment"># Проверяем таймаут для перехода в HALF_OPEN</span>
+            <span class="keyword">if</span> self._last_failure_time:
+                elapsed = (datetime.utcnow() - self._last_failure_time).total_seconds()
+                <span class="keyword">if</span> elapsed >= self.recovery_timeout:
+                    <span class="keyword">async with</span> self._lock:
+                        self._state = CircuitState.HALF_OPEN
+                    <span class="keyword">return True</span>
+            <span class="keyword">return False</span>
+        
+        <span class="comment"># HALF_OPEN — пропускаем</span>
+        <span class="keyword">return True</span>
+    
+    <span class="keyword">async def</span> <span class="function">_record_success</span>(self) -> <span class="keyword">None</span>:
+        <span class="string">"""Записываем успешный запрос."""</span>
+        <span class="keyword">async with</span> self._lock:
+            <span class="keyword">if</span> self._state == CircuitState.HALF_OPEN:
+                <span class="comment"># Успех в HALF_OPEN → закрываем цепь</span>
+                self._state = CircuitState.CLOSED
+            self._failure_count = <span class="number">0</span>
+    
+    <span class="keyword">async def</span> <span class="function">_record_failure</span>(self) -> <span class="keyword">None</span>:
+        <span class="string">"""Записываем ошибку."""</span>
+        <span class="keyword">async with</span> self._lock:
+            self._failure_count += <span class="number">1</span>
+            self._last_failure_time = datetime.utcnow()
+            
+            <span class="keyword">if</span> self._state == CircuitState.HALF_OPEN:
+                <span class="comment"># Ошибка в HALF_OPEN → обратно в OPEN</span>
+                self._state = CircuitState.OPEN
+            <span class="keyword">elif</span> self._failure_count >= self.failure_threshold:
+                <span class="comment"># Превысили порог → размыкаем</span>
+                self._state = CircuitState.OPEN
+    
+    <span class="keyword">def</span> <span class="function">__call__</span>(
+        self, 
+        func: Callable[P, R]
+    ) -> Callable[P, R]:
+        <span class="string">"""Декоратор для защиты функции."""</span>
+        <span class="keyword">async def</span> <span class="function">wrapper</span>(*args: P.args, **kwargs: P.kwargs) -> R:
+            <span class="keyword">if not await</span> self._should_allow_request():
+                <span class="keyword">raise</span> CircuitOpenError(
+                    f<span class="string">"Circuit is OPEN. Retry after {self.recovery_timeout}s"</span>
+                )
+            
+            <span class="keyword">try</span>:
+                result = <span class="keyword">await</span> func(*args, **kwargs)
+                <span class="keyword">await</span> self._record_success()
+                <span class="keyword">return</span> result
+            <span class="keyword">except</span> Exception:
+                <span class="keyword">await</span> self._record_failure()
+                <span class="keyword">raise</span>
+        
+        <span class="keyword">return</span> wrapper</code></pre>
+
+                <h2>Использование Circuit Breaker</h2>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/external/exchange_client.py</span>
+<span class="keyword">from</span> scaletrade.infrastructure.resiliency <span class="keyword">import</span> CircuitBreaker
+
+
+<span class="comment"># Создаём Circuit Breaker для exchange API</span>
+exchange_breaker = CircuitBreaker(
+    failure_threshold=<span class="number">5</span>,     <span class="comment"># 5 ошибок → OPEN</span>
+    recovery_timeout=<span class="number">60</span>,      <span class="comment"># 60 секунд до HALF_OPEN</span>
+)
+
+
+<span class="keyword">class</span> <span class="class-name">ExchangeClient</span>:
+    
+    <span class="comment"># Комбинируем Retry + Circuit Breaker</span>
+    <span class="decorator">@exchange_breaker</span>
+    <span class="decorator">@stamina.retry</span>(on=httpx.HTTPError, attempts=<span class="number">3</span>)
+    <span class="keyword">async def</span> <span class="function">place_order</span>(self, order: OrderDTO) -> OrderResult:
+        <span class="string">"""
+        Размещаем ордер на бирже.
+        
+        Flow:
+        1. Circuit Breaker проверяет состояние
+        2. Если CLOSED/HALF_OPEN — пропускаем
+        3. Stamina ретраит при ошибках
+        4. Circuit Breaker записывает результат
+        """</span>
+        response = <span class="keyword">await</span> self._client.post(
+            <span class="string">"/orders"</span>,
+            json=order.model_dump(),
+        )
+        response.raise_for_status()
+        <span class="keyword">return</span> OrderResult.model_validate(response.json())
+
+
+<span class="comment"># Controller с обработкой CircuitOpenError</span>
+<span class="keyword">from</span> litestar <span class="keyword">import</span> Controller, post
+<span class="keyword">from</span> litestar.exceptions <span class="keyword">import</span> ServiceUnavailableException
+
+
+<span class="keyword">class</span> <span class="class-name">OrderController</span>(Controller):
+    path = <span class="string">"/orders"</span>
+    
+    <span class="decorator">@post</span>()
+    <span class="keyword">async def</span> <span class="function">create_order</span>(
+        self, 
+        data: CreateOrderDTO,
+        exchange_client: ExchangeClient,
+    ) -> OrderDTO:
+        <span class="keyword">try</span>:
+            <span class="keyword">return await</span> exchange_client.place_order(data)
+        <span class="keyword">except</span> CircuitOpenError:
+            <span class="comment"># Circuit разомкнут — возвращаем 503</span>
+            <span class="keyword">raise</span> ServiceUnavailableException(
+                <span class="string">"Exchange service temporarily unavailable. Please retry later."</span>
+            )</code></pre>
+
+                <h2>Timeout Pattern</h2>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/resiliency/timeout.py</span>
+<span class="keyword">import</span> asyncio
+<span class="keyword">from</span> functools <span class="keyword">import</span> wraps
+
+
+<span class="keyword">class</span> <span class="class-name">TimeoutError</span>(Exception):
+    <span class="string">"""Операция превысила таймаут."""</span>
+    <span class="keyword">pass</span>
+
+
+<span class="keyword">def</span> <span class="function">with_timeout</span>(seconds: <span class="type">float</span>):
+    <span class="string">"""
+    Декоратор для ограничения времени выполнения.
+    
+    Usage:
+        @with_timeout(5.0)
+        async def slow_operation():
+            ...
+    """</span>
+    <span class="keyword">def</span> <span class="function">decorator</span>(func):
+        <span class="decorator">@wraps</span>(func)
+        <span class="keyword">async def</span> <span class="function">wrapper</span>(*args, **kwargs):
+            <span class="keyword">try</span>:
+                <span class="keyword">return await</span> asyncio.wait_for(
+                    func(*args, **kwargs),
+                    timeout=seconds,
+                )
+            <span class="keyword">except</span> asyncio.TimeoutError:
+                <span class="keyword">raise</span> TimeoutError(
+                    f<span class="string">"Operation timed out after {seconds}s"</span>
+                )
+        <span class="keyword">return</span> wrapper
+    <span class="keyword">return</span> decorator
+
+
+<span class="comment"># Использование</span>
+<span class="keyword">class</span> <span class="class-name">PaymentService</span>:
+    
+    <span class="decorator">@with_timeout</span>(<span class="number">10.0</span>)  <span class="comment"># Максимум 10 секунд на платёж</span>
+    <span class="keyword">async def</span> <span class="function">process_payment</span>(self, payment: Payment) -> PaymentResult:
+        <span class="comment"># Медленная операция</span>
+        <span class="keyword">return await</span> self._gateway.charge(payment)</code></pre>
+
+                <h2>Bulkhead Pattern: изоляция ресурсов</h2>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/resiliency/bulkhead.py</span>
+<span class="keyword">import</span> asyncio
+<span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass
+
+
+<span class="keyword">class</span> <span class="class-name">BulkheadFullError</span>(Exception):
+    <span class="string">"""Все слоты заняты, операция отклонена."""</span>
+    <span class="keyword">pass</span>
+
+
+<span class="decorator">@dataclass</span>
+<span class="keyword">class</span> <span class="class-name">Bulkhead</span>:
+    <span class="string">"""
+    Bulkhead ограничивает concurrent calls.
+    
+    Защищает от:
+    - Исчерпания connection pool
+    - Перегрузки downstream сервисов
+    - Каскадных сбоев
+    """</span>
+    max_concurrent: <span class="type">int</span> = <span class="number">10</span>
+    
+    <span class="keyword">def</span> <span class="function">__post_init__</span>(self):
+        self._semaphore = asyncio.Semaphore(self.max_concurrent)
+    
+    <span class="keyword">async def</span> <span class="function">acquire</span>(self) -> <span class="type">bool</span>:
+        <span class="string">"""Попытка получить слот (без блокировки)."""</span>
+        <span class="keyword">return</span> self._semaphore.locked() <span class="keyword">is False</span>
+    
+    <span class="keyword">def</span> <span class="function">__call__</span>(self, func):
+        <span class="keyword">async def</span> <span class="function">wrapper</span>(*args, **kwargs):
+            <span class="comment"># Пробуем получить слот без ожидания</span>
+            <span class="keyword">if</span> self._semaphore.locked():
+                <span class="keyword">raise</span> BulkheadFullError(
+                    f<span class="string">"Max concurrent calls ({self.max_concurrent}) reached"</span>
+                )
+            
+            <span class="keyword">async with</span> self._semaphore:
+                <span class="keyword">return await</span> func(*args, **kwargs)
+        
+        <span class="keyword">return</span> wrapper
+
+
+<span class="comment"># Использование: изоляция external API</span>
+exchange_bulkhead = Bulkhead(max_concurrent=<span class="number">20</span>)
+payment_bulkhead = Bulkhead(max_concurrent=<span class="number">5</span>)
+
+
+<span class="keyword">class</span> <span class="class-name">ExchangeClient</span>:
+    <span class="decorator">@exchange_bulkhead</span>
+    <span class="decorator">@exchange_breaker</span>
+    <span class="decorator">@stamina.retry</span>(on=httpx.HTTPError, attempts=<span class="number">3</span>)
+    <span class="keyword">async def</span> <span class="function">place_order</span>(self, order):
+        <span class="keyword">pass</span></code></pre>
+
+                <h2>Graceful Degradation</h2>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/external/price_service_fallback.py</span>
+<span class="keyword">from</span> decimal <span class="keyword">import</span> Decimal
+<span class="keyword">from</span> typing <span class="keyword">import</span> Optional
+
+
+<span class="keyword">class</span> <span class="class-name">PriceServiceWithFallback</span>:
+    <span class="string">"""
+    Сервис цен с fallback стратегией.
+    
+    Если основной API недоступен — используем кеш.
+    Если кеш пуст — используем stale данные.
+    """</span>
+    
+    <span class="keyword">def</span> <span class="function">__init__</span>(
+        self, 
+        primary_service: PriceService,
+        cache: PriceCache,
+    ):
+        self._primary = primary_service
+        self._cache = cache
+    
+    <span class="keyword">async def</span> <span class="function">get_price</span>(
+        self, 
+        symbol: <span class="type">str</span>,
+        accept_stale: <span class="type">bool</span> = <span class="keyword">True</span>,
+    ) -> Optional[Decimal]:
+        <span class="string">"""
+        Получить цену с graceful degradation.
+        
+        Strategy:
+        1. Пробуем основной API
+        2. Fallback на кеш (свежий)
+        3. Fallback на stale кеш (если accept_stale=True)
+        """</span>
+        <span class="comment"># 1. Primary source</span>
+        <span class="keyword">try</span>:
+            price = <span class="keyword">await</span> self._primary.get_price(symbol)
+            <span class="comment"># Обновляем кеш при успехе</span>
+            <span class="keyword">await</span> self._cache.set(symbol, price)
+            <span class="keyword">return</span> price
+        <span class="keyword">except</span> (CircuitOpenError, TimeoutError) <span class="keyword">as</span> e:
+            <span class="comment"># Логируем degradation</span>
+            logger.warning(f<span class="string">"Primary price service failed: {e}"</span>)
+        
+        <span class="comment"># 2. Fresh cache</span>
+        cached = <span class="keyword">await</span> self._cache.get(symbol)
+        <span class="keyword">if</span> cached <span class="keyword">and not</span> cached.is_stale:
+            logger.info(f<span class="string">"Using cached price for {symbol}"</span>)
+            <span class="keyword">return</span> cached.price
+        
+        <span class="comment"># 3. Stale cache (last resort)</span>
+        <span class="keyword">if</span> accept_stale <span class="keyword">and</span> cached:
+            logger.warning(
+                f<span class="string">"Using STALE price for {symbol}, "</span>
+                f<span class="string">"age: {cached.age_seconds}s"</span>
+            )
+            <span class="keyword">return</span> cached.price
+        
+        <span class="keyword">return None</span></code></pre>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Retry Storm</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если один сервис упал, и 1000 клиентов начали долбить его ретраями, он никогда не поднимется. Ретраи — это DDOS атака на самого себя. Всегда используйте Exponential Backoff и Jitter. И ограничивайте глобальное количество попыток.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Ретраи на 4xx ошибки</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Никогда не делайте ретрай на <code>400 Bad Request</code> или <code>403 Forbidden</code>. Ошибка не исправится сама собой. Ретраи нужны только для временных сбоев (транспорт, таймауты, 503). 429 (Too Many Requests) — особый случай, требует <code>Retry-After</code>.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. Local Circuit Breaker в K8s</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если у вас 100 подов, и CB в каждом из них "in-memory", то чтобы открыть цепь глобально, сервис должен упасть для каждого пода отдельно. В больших системах CB выносят в Service Mesh (Istio/Linkerd).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Stamina:</strong> Не пишите циклы <code>while attempts > 0</code>. Используйте библиотеку <code>stamina</code> (обертка над <code>tenacity</code>) — она типизирована и работает с <code>asyncio</code> из коробки.</li>
+                    <li><strong>Idempotency Key:</strong> Любой запрос, который вы ретраите, должен быть идемпотентным. Передавайте <code>X-Idempotency-Key</code> в заголовке, чтобы сервер мог отсеять дубли.</li>
+                    <li><strong>Timeouts:</strong> Таймаут по умолчанию = бесконечность. Это зло. Всегда ставьте таймаут на любой сетевой вызов (DB, HTTP, Redis). <code>aiohttp</code> по умолчанию имеет таймаут 5 минут — это тоже слишком много для микросервиса.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>📋 Задание</h4>
+                    <ul class="task-list">
+                        <li>Добавь Stamina retry к ExchangeClient</li>
+                        <li>Реализуй Circuit Breaker для внешних API</li>
+                        <li>Настрой Bulkhead для изоляции ресурсов</li>
+                        <li>Реализуй Graceful Degradation для PriceService</li>
+                        <li>Напиши тесты для всех resiliency patterns</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="part4_testing.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 4.1 Advanced Testing</div>
+                        </div>
+                    </a>
+                    <a href="part5_logging.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">5.1 Логирование →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

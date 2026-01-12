@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0.2 Networking & Linux — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 0: Core</div>
+                    <a href="part0_internals.html" class="nav-link">0.1 Python Internals</a>
+                    <a href="part0_networking.html" class="nav-link active">0.2 Networking & Linux</a>
+                </div>
+                 <div class="nav-section">
+                    <div class="nav-section-title">Часть 9: API</div>
+                    <a href="part9_restdesign.html" class="nav-link">9.1 REST Design</a>
+                    <a href="part9_idempotency.html" class="nav-link">9.2 Idempotency</a>
+                    <a href="part9_openapi.html" class="nav-link">9.3 OpenAPI</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 0</span>
+                    <span>/</span>
+                    <span>0.2 Networking</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 0.2: Networking, Linux & Algo</h1>
+                <p class="lead">Бэкенд — это перекладывание JSON'ов по сети. Понимать, как устроена сеть и среда выполнения (Linux), критически важно.</p>
+
+                <h2>1. HTTP Protocol</h2>
+                <p>Базовый протокол веба. Важные концепции для бэкендера:</p>
+                
+                <h3>Структура запроса</h3>
+                <ul>
+                    <li><strong>Method:</strong> GET, POST, PUT, DELETE, PATCH, HEAD...</li>
+                    <li><strong>URI:</strong> Путь к ресурсу (/api/v1/users)</li>
+                    <li><strong>Headers:</strong> Метаданные (Content-Type, Authorization)</li>
+                    <li><strong>Body:</strong> Данные (JSON, XML, Form-data) — есть не у всех методов (нет у GET/DELETE обычно).</li>
+                </ul>
+
+                <h3>Status Codes (Не только 200)</h3>
+                <div class="code-grid">
+                    <div class="grid-item">
+                        <h4>2xx (Success)</h4>
+                        <ul>
+                            <li><strong>200 OK:</strong> Всё хорошо.</li>
+                            <li><strong>201 Created:</strong> Ресурс создан (POST).</li>
+                            <li><strong>204 No Content:</strong> Успех, нет тела ответа.</li>
+                        </ul>
+                    </div>
+                    <div class="grid-item">
+                        <h4>4xx (Client Error)</h4>
+                        <ul>
+                            <li><strong>400 Bad Request:</strong> Ошибка валидации.</li>
+                            <li><strong>401 Unauthorized:</strong> Нет токена.</li>
+                            <li><strong>403 Forbidden:</strong> Есть токен, но нет прав.</li>
+                            <li><strong>409 Conflict:</strong> Дубликат, нарушение constraint.</li>
+                            <li><strong>429 Too Many Requests:</strong> Rate limit.</li>
+                        </ul>
+                    </div>
+                     <div class="grid-item">
+                        <h4>5xx (Server Error)</h4>
+                        <ul>
+                            <li><strong>500 Internal Error:</strong> Unhandled exception.</li>
+                            <li><strong>502 Bad Gateway:</strong> Upstream (бэкенд) ответил ерундой.</li>
+                            <li><strong>503 Unavailable:</strong> Сервер перегружен.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2>2. Linux CLI Survival Kit</h2>
+                <p>В production у вас не будет GUI. Только терминал.</p>
+
+                <dl>
+                    <dt><code>grep -r "error" /var/log/</code></dt>
+                    <dd>Искать текст внутри файлов рекурсивно.</dd>
+
+                    <dt><code>curl -v -X POST http://...</code></dt>
+                    <dd>Отправить запрос, -v покажет заголовки (request/response).</dd>
+                    
+                    <dt><code>htop</code></dt>
+                    <dd>Диспетчер задач. Load Average, память, CPU.</dd>
+
+                    <dt><code>ss -tulpn</code> / <code>netstat -tulpn</code></dt>
+                    <dd>Показать открытые порты и процессы, которые их слушают.</dd>
+
+                    <dt><code>lsof -i :8000</code></dt>
+                    <dd>Кто занял порт 8000?</dd>
+
+                    <dt><code>tail -f access.log</code></dt>
+                    <dd>Следить за новыми строками в файле в реальном времени.</dd>
+                </dl>
+
+                <h2>3. Big O Notation (Complexity)</h2>
+                <p>Почему ваш код тормозит на больших данных?</p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Структура</th>
+                            <th>Операция</th>
+                            <th>Сложность</th>
+                            <th>Почему</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>List</strong></td>
+                            <td>Append</td>
+                            <td>O(1)</td>
+                            <td>В конец быстро.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>List</strong></td>
+                            <td>Insert(0)</td>
+                            <td class="danger-text">O(N)</td>
+                            <td>Сдвиг всех элементов!</td>
+                        </tr>
+                        <tr>
+                            <td><strong>List</strong></td>
+                            <td>Searching (<code>x in list</code>)</td>
+                            <td class="danger-text">O(N)</td>
+                            <td>Полный перебор.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Set/Dict</strong></td>
+                            <td>Lookup (<code>key in dict</code>)</td>
+                            <td>O(1)</td>
+                            <td>Хэш-таблица.</td>
+                        </tr>
+                         <tr>
+                            <td><strong>Deque</strong></td>
+                            <td>Popleft</td>
+                            <td>O(1)</td>
+                            <td>Двусвязный список блоков.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                 <h2>🪨 Подводные камни</h2>
+                 <ul>
+                     <li><strong>HTTP 200 OK при ошибке:</strong> GraphQL этим грешит, но в REST это антипаттерн. Если ошибка — должен быть 4xx/5xx.</li>
+                     <li><strong>Использование `list` как `queue`:</strong> `pop(0)` в списке — это O(N). Для очередей используйте `collections.deque`.</li>
+                 </ul>
+
+                 <h2>💡 Лайфхаки</h2>
+                 <ul>
+                     <li><strong>jq:</strong> Утилита для парсинга и раскрашивания JSON в терминале. <code>curl ... | jq</code></li>
+                     <li><strong>Makefiles:</strong> Используйте Makefile для алиасов команд (run, test, lint) в проекте.</li>
+                 </ul>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

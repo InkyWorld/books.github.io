@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13.2 Caching — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 13: Performance</div>
+                    <a href="part13_profiling.html" class="nav-link">13.1 Profiling</a>
+                    <a href="part13_caching.html" class="nav-link active">13.2 Caching</a>
+                    <a href="part13_loadbalancing.html" class="nav-link">13.3 Load Balancing</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 13</span>
+                    <span>/</span>
+                    <span>13.2 Caching</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 13.2: Кэширование</h1>
+                <p class="lead">"There are only two hard things in Computer Science: cache invalidation and naming things." — Phil Karlton.</p>
+
+                <h2>Где кэшировать?</h2>
+                <ol>
+                    <li><strong>Браузер (Client Side):</strong> HTTP заголовки <code>Cache-Control</code>, <code>ETag</code>. Самый дешевый кэш — запрос даже не доходит до сервера.</li>
+                    <li><strong>CDN (Content Delivery Network):</strong> Cloudflare, AWS CloudFront. Кэшируют статику и ответы API на "краю" (edge) сети, ближе к пользователю.</li>
+                    <li><strong>API Gateway / Load Balancer:</strong> Nginx может кэшировать ответы бэкенда.</li>
+                    <li><strong>Application Cache:</strong> Redis / Memcached. Храним результаты тяжелых вычислений или запросов к БД.</li>
+                    <li><strong>Database Cache:</strong> Внутренние буферы БД.</li>
+                </ol>
+
+                <h2>Паттерны кэширования</h2>
+
+                <h3>1. Cache-Aside (Lazy Loading)</h3>
+                <p>Самый популярный паттерн.</p>
+                <div class="code-block">
+                    <pre><code>def get_user(user_id):
+    # 1. Читаем из кэша
+    user = cache.get(user_id)
+    if user:
+        return user
+
+    # 2. Если нет (Cache Miss), идем в БД
+    user = db.get_user(user_id)
+
+    # 3. Пишем в кэш
+    cache.set(user_id, user, timeout=600)
+    return user</code></pre>
+                </div>
+
+                <h3>2. Write-Through</h3>
+                <p>Пишем данные одновременно и в БД, и в кэш. Кэш всегда актуален, но запись медленнее.</p>
+
+                <h3>3. Write-Behind (Write-Back)</h3>
+                <p>Пишем только в кэш, а фоновый процесс асинхронно сбрасывает данные в БД. Опасно потерей данных (если кэш упадет до сброса), но очень быстро.</p>
+
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Hot Keys</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если один ключ (например, "курс доллара" или "профиль Джастина Бибера") запрашивают миллион раз в секунду, один шард Redis не справится (CPU 100%). Решение: дублировать ключ на нескольких шардах или использовать Local Cache (in-memory) на бэкендах.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Большие значения (Big Keys)</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Не храните в Redis объекты по 5-10Мб (например, HTML целой страницы). Чтение такого ключа блокирует Redis (он однопоточный) на миллисекунды, создавая очередь для других быстрых запросов. Сжимайте данные (gzip) или храните в S3/CDN.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. Maxmemory-policy</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Всегда настраивайте политику вытеснения. Если память кончится, Redis по умолчанию перестанет принимать запись (OOM). Для кэша ставьте <code>allkeys-lru</code> (удалять самые старые, даже если нет TTL).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Two-Layer Cache (L1/L2):</strong> Используйте библиотеку, которая сначала смотрит в память процесса (Dictionary, L1), а если там нет — в Redis (L2). Это снимает нагрузку с Redis и сети. (См. `aiocache`).</li>
+                    <li><strong>Redis Pipelining:</strong> Если нужно получить 50 ключей, не делайте 50 запросов. Используйте Pipeline, чтобы отправить их пачкой за 1 сетевой RTT.</li>
+                    <li><strong>Cache Defer:</strong> Не обновляйте кэш синхронно в запросе пользователя. Отправьте задачу в Celery/Dramatiq ("обнови кэш этой статьи"), чтобы не задерживать ответ.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>🎯 Практика</h4>
+                    <ul class="task-list">
+                        <li>Реализуй декоратор @cache с поддержкой Redis</li>
+                        <li>Настрой Redis Eviction Policy (lru)</li>
+                        <li>Сэмулируй Cache Stampede (50 потоков) и почини через Mutex</li>
+                        <li>Внедри Bloom Filter для защиты от запросов несуществующих ID</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

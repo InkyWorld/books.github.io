@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 6: Invariants and Errors - Clean Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
+        p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
+        
+        .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
+        .sidebar-title { color: #f8fafc; }
+        .sidebar-subtitle { color: #60a5fa; }
+        .nav-section { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem 1rem 0.5rem; }
+        .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
+
+        /* Code Styling */
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+        .code-comment { color: #94a3b8; font-style: italic; }
+        .code-keyword { color: #c084fc; font-weight: bold; } 
+        .code-class { color: #fbbf24; font-weight: bold; }   
+        .code-func { color: #60a5fa; font-weight: bold; }    
+        .code-str { color: #a3e635; }                        
+        .code-dec { color: #f472b6; } 
+        .code-err { color: #f87171; }
+
+        .card { background: white; border-radius: 1rem; padding: 2.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem; border: 1px solid #e2e8f0; }
+        
+        .alert-box { padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; font-size: 0.95rem; font-family: 'Inter', sans-serif; }
+        .alert-yellow { background: #fefce8; border: 1px solid #fde047; color: #854d0e; }
+        .alert-red { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+        .alert-green { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar hidden md:block">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
+            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+        </div>
+        <nav class="py-4">
+            <div class="px-4 mb-4">
+                <div class="flex gap-2 text-xs font-bold text-slate-400">
+                    <a href="../ru/invariants.html" class="hover:text-white transition">RU</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="invariants.html" class="text-blue-400 font-bold">EN</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../ua/invariants.html" class="hover:text-white transition">UA</a>
+                </div>
+            </div>
+
+            <div class="nav-section">Basics</div>
+            <a href="index.html" class="nav-link ">📘 Introduction</a>
+            
+            <div class="nav-section">Architecture Layers</div>
+            <a href="domain.html" class="nav-link ">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link ">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link ">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link ">🌐 Presentation Layer</a>
+            
+            <div class="nav-section">Principles & Patterns</div>
+            <a href="solid.html" class="nav-link ">📐 SOLID Principles</a>
+            <a href="invariants.html" class="nav-link active">🛡️ Invariants</a>
+            <a href="dependency.html" class="nav-link ">💉 Dependency Injection</a>
+            <a href="cqrs_es.html" class="nav-link ">⚡ CQRS and ES</a>
+            
+            <div class="nav-section">Security & Production</div>
+            <a href="security.html" class="nav-link ">🔐 Auth & Permissions</a>
+            <a href="concurrency.html" class="nav-link ">🛑 Concurrency & Migrations</a>
+            <a href="background_tasks.html" class="nav-link ">⏳ Background Tasks</a>
+            <a href="error_handling.html" class="nav-link ">🚫 Error Handling</a>
+            <a href="config_logging.html" class="nav-link ">⚙️ Config & Observability</a>
+
+            <div class="nav-section">DDD Patterns</div>
+            <a href="bounded_context.html" class="nav-link ">🌍 Bounded Contexts</a>
+            <a href="modular_monolith.html" class="nav-link ">🏗️ Modular Monolith</a>
+            <a href="aggregates.html" class="nav-link ">📦 Aggregates</a>
+            <a href="value_objects.html" class="nav-link ">💎 Value Objects</a>
+            <a href="repository_uow.html" class="nav-link ">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link ">📋 Specification</a>
+
+            <div class="nav-section">EDA & Dist. Systems</div>
+            <a href="domain_events.html" class="nav-link ">📣 Domain Events</a>
+            <a href="saga.html" class="nav-link ">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link ">📮 Outbox Pattern</a>
+
+            <div class="nav-section">Frameworks & Practice</div>
+            <a href="frameworks_django.html" class="nav-link ">🐍 Django & Others</a>
+            <a href="advanced_techniques.html" class="nav-link ">🚀 Advanced Tech</a>
+            <a href="deployment.html" class="nav-link ">🚀 Deployment & Protection</a>
+            <a href="testing.html" class="nav-link ">🧪 Testing</a>
+            <a href="projects.html" class="nav-link ">🚀 Mini-projects</a>
+            <a href="antipatterns.html" class="nav-link ">⚠️ Anti-patterns</a>
+        </nav>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
+        
+        <header id="intro" class="mb-12 pb-6 border-b border-gray-200">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Deep Dive</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Invariants and Domain Errors</h1>
+            <p class="text-xl text-gray-500 mt-4 font-light">
+                How to ensure your application never ends up in an "impossible" state.
+            </p>
+        </header>
+
+        <!-- 1. WHAT IS INVARIANT -->
+        <section class="card">
+            <h2 class="text-2xl font-bold mb-6">1. What is an Invariant?</h2>
+            <p><strong>Invariant</strong> — is a condition that must always remain true for a system or object for it to be considered valid.</p>
+            <p>These are the laws of physics of your world. If in your world "You cannot spend more than you have in your account" — this is an invariant. If it is violated, it means the program is broken.</p>
+            
+            <div class="alert-yellow">
+                <strong>Real-life example:</strong> An elevator invariant — "Doors cannot be open while the elevator is moving". If this rule is violated even for a millisecond, a catastrophe will occur.
+            </div>
+
+            <h3 class="font-bold text-gray-800 mt-4">Where to check them?</h3>
+            <ul class="list-disc pl-5 text-sm space-y-2">
+                <li>If the rule concerns <strong>data format</strong> (email must have @) — it is a <strong>Value Object</strong>.</li>
+                <li>If the rule concerns <strong>state change</strong> (cannot pay twice) — it is an <strong>Entity</strong>.</li>
+                <li>If the rule concerns <strong>uniqueness in DB</strong> (email must be unique) — it is a <strong>Domain Service</strong> or a check in the Repository (but called from a Use Case).</li>
+            </ul>
+        </section>
+
+        <!-- 2. DOMAIN ERRORS -->
+        <section id="exceptions" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">2. Error Architecture (Domain Exceptions)</h2>
+            <p>Never use built-in `ValueError`, `TypeError` or `Exception` to describe business problems. Create your own error classes.</p>
+            <p><strong>Why?</strong></p>
+            <ol class="list-decimal pl-6 text-sm mb-4">
+                <li><strong>Readability:</strong> `raise InsufficientFundsError` says more than `raise ValueError("Not enough money")`.</li>
+                <li><strong>Handling:</strong> In the Presentation layer (FastAPI), you can catch a specific error and return a nice 400 or 409 response to the user.</li>
+            </ol>
+
+<pre><code class="language-python"><span class="code-comment"># domain/exceptions.py</span>
+
+<span class="code-comment"># 1. Base class. We inherit from it.</span>
+<span class="code-keyword">class</span> <span class="code-class">DomainError</span>(Exception):
+    <span class="code-str">"""Base class for business logic errors"""</span>
+    <span class="code-keyword">pass</span>
+
+<span class="code-comment"># 2. Value Object Errors</span>
+<span class="code-keyword">class</span> <span class="code-class">InvalidEmailError</span>(DomainError):
+    <span class="code-keyword">pass</span>
+
+<span class="code-keyword">class</span> <span class="code-class">NegativeMoneyError</span>(DomainError):
+    <span class="code-keyword">pass</span>
+
+<span class="code-comment"># 3. Entity Errors</span>
+<span class="code-keyword">class</span> <span class="code-class">OrderAlreadyPaidError</span>(DomainError):
+    <span class="code-keyword">pass</span>
+
+<span class="code-keyword">class</span> <span class="code-class">OrderEmptyError</span>(DomainError):
+    <span class="code-keyword">pass</span>
+</code></pre>
+        </section>
+
+        <!-- 3. VALUE OBJECTS CHECKS -->
+        <section id="vo-check" class="card">
+            <h2 class="text-2xl font-bold mb-4">3. Checks in Value Objects</h2>
+            <p>A Value Object must be "always valid". It is impossible to create a `Money(-100)` object. Validation check must occur <strong>at the moment of creation</strong>.</p>
+            <p>In Python with `dataclasses`, the ideal place for this is the `__post_init__` method.</p>
+
+<pre><code class="language-python"><span class="code-keyword">from</span> dataclasses <span class="code-keyword">import</span> dataclass
+<span class="code-keyword">from</span> .exceptions <span class="code-keyword">import</span> NegativeMoneyError
+
+<span class="code-dec">@dataclass(frozen=True)</span>
+<span class="code-keyword">class</span> <span class="code-class">Money</span>:
+    amount: float
+    currency: str = <span class="code-str">"USD"</span>
+
+    <span class="code-keyword">def</span> <span class="code-func">__post_init__</span>(self):
+        <span class="code-comment"># INVARIANT: Money >= 0</span>
+        <span class="code-keyword">if</span> self.amount < 0:
+            <span class="code-keyword">raise</span> NegativeMoneyError(<span class="code-str">f"Amount cannot be {self.amount}"</span>)
+
+<span class="code-comment"># Usage:</span>
+<span class="code-comment"># m = Money(100)  # OK</span>
+<span class="code-comment"># m = Money(-50)  # Exception raised instantly!</span>
+</code></pre>
+            <div class="alert-green mt-4">
+                <strong>Pattern: Parse, don't validate.</strong><br>
+                Do not write functions like `is_email_valid(str) -> bool`. Instead, create an object `Email(str)`. If creation is successful, the data is valid. If not, an error was raised.
+            </div>
+        </section>
+
+        <!-- 4. ENTITY CHECKS -->
+        <section id="entity-check" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">4. Checks in Entities (State Consistency)</h2>
+            <p>Entities live in time. Their invariants often depend on the <strong>current state</strong>.</p>
+            <p>We use "Guard Clauses" at the beginning of methods.</p>
+
+<pre><code class="language-python"><span class="code-keyword">class</span> <span class="code-class">Order</span>:
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, ...):
+        self._is_paid = <span class="code-keyword">False</span>
+        self._items = []
+
+    <span class="code-keyword">def</span> <span class="code-func">pay</span>(self):
+        <span class="code-comment"># INVARIANT 1: Cannot pay twice</span>
+        <span class="code-keyword">if</span> self._is_paid:
+            <span class="code-keyword">raise</span> OrderAlreadyPaidError(<span class="code-str">"Order is already paid"</span>)
+
+        <span class="code-comment"># INVARIANT 2: Cannot pay for empty order</span>
+        <span class="code-keyword">if</span> len(self._items) == 0:
+            <span class="code-keyword">raise</span> OrderEmptyError(<span class="code-str">"Cannot pay for an empty order"</span>)
+
+        <span class="code-comment"># If checks passed - change state</span>
+        self._is_paid = <span class="code-keyword">True</span>
+
+    <span class="code-keyword">def</span> <span class="code-func">add_item</span>(self, item):
+        <span class="code-comment"># INVARIANT 3: Freeze composition after payment</span>
+        <span class="code-keyword">if</span> self._is_paid:
+            <span class="code-keyword">raise</span> OrderAlreadyPaidError(<span class="code-str">"Cannot modify a paid order"</span>)
+        
+        self._items.append(item)
+</code></pre>
+        </section>
+
+        <!-- ANTIPATTERNS -->
+        <section id="antipatterns">
+            <h2 class="text-2xl font-bold text-red-700 mb-6">⚠️ Validation Anti-patterns</h2>
+
+            <div class="grid gap-6">
+                <!-- Validation Service -->
+                <div class="card border-l-4 border-red-500 p-6">
+                    <h3 class="font-bold text-lg text-gray-800">1. External Validation Service</h3>
+                    <p class="text-sm mb-2">Creating an `OrderValidator` class that checks the order from the outside.</p>
+                    <pre class="bg-gray-100 p-2 text-xs rounded mb-2"><span class="code-err">validator.validate(order) # BAD!</span></pre>
+                    <p class="text-sm"><strong>Why it's bad:</strong> Encapsulation is violated. Order rules must live inside the order. If you add a new field to the order, you will forget to update the validator.</p>
+                </div>
+
+                <!-- HTTP Exceptions in Domain -->
+                <div class="card border-l-4 border-red-500 p-6">
+                    <h3 class="font-bold text-lg text-gray-800">2. HTTP Exceptions in Domain</h3>
+                    <p class="text-sm mb-2">Importing `HTTPException` from FastAPI inside an entity.</p>
+                    <pre class="bg-gray-100 p-2 text-xs rounded mb-2"><span class="code-err">raise HTTPException(status_code=400) # BAD!</span></pre>
+                    <p class="text-sm"><strong>Why it's bad:</strong> Your domain now depends on the Web framework. You won't be able to use this code in a CLI or Telegram bot. Throw a `DomainError`, and the controller (Presentation Layer) will convert it to a 400.</p>
+                </div>
+                
+                <!-- Silent Failures -->
+                <div class="card border-l-4 border-red-500 p-6">
+                    <h3 class="font-bold text-lg text-gray-800">3. Returning False instead of Error</h3>
+                    <pre class="bg-gray-100 p-2 text-xs rounded mb-2"><span class="code-keyword">if</span> error: <span class="code-keyword">return</span> <span class="code-keyword">False</span> <span class="code-comment"># BAD!</span></pre>
+                    <p class="text-sm"><strong>Why it's bad:</strong> You lose context (why did the error occur?) and force the calling code to guess. Exceptions are not evil, they are a mode of communication.</p>
+                </div>
+            </div>
+        </section>
+
+    
+        <!-- NAVIGATION FOOTER -->
+        
+        <!-- NAVIGATION FOOTER -->
+        
+        <!-- NAVIGATION FOOTER -->
+        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="solid.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Back</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; SOLID</span></a><a href="dependency.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Next</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Dependency &rarr;</span></a></div></div>
+    </main>
+</body>
+</html>

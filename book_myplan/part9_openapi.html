@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9.3 OpenAPI & Ops — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 9: API</div>
+                    <a href="part9_restdesign.html" class="nav-link">9.1 REST Design</a>
+                    <a href="part9_idempotency.html" class="nav-link">9.2 Idempotency</a>
+                    <a href="part9_openapi.html" class="nav-link active">9.3 OpenAPI</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 9</span>
+                    <span>/</span>
+                    <span>9.3 Documentation</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 9.3: OpenAPI, ADR и Документация</h1>
+                <p class="lead">Код забывается через две недели. Документация остается. OpenAPI делает документацию живой.</p>
+
+                <h2>OpenAPI (Swagger) First vs Code First</h2>
+                <div class="comparison-table">
+                    <div class="comparison-col good">
+                        <h4>Code First (Litestar/FastAPI)</h4>
+                        <p>Пишете Python код, аннотации типов, Pydantic модели. Схема генерируется сама.</p>
+                        <ul>
+                            <li>✅ Быстрый старт</li>
+                            <li>✅ Всегда актуально (Sync)</li>
+                            <li>❌ Сложно дизайнить API заранее</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-col">
+                        <h4>Schema First</h4>
+                        <p>Пишете YAML файл вручную, потом генерируете серверный код.</p>
+                        <ul>
+                            <li>✅ Ясный контракт до начала кодинга</li>
+                            <li>✅ Frontend может делать моки сразу</li>
+                            <li>❌ Геморрой с поддержкой YAML</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>Улучшаем автогенерацию</h3>
+                <p>Просто сгенерированной схемы мало. Добавляйте примеры!</p>
+
+<pre><code class="language-python">class UserCreate(BaseModel):
+    username: str = Field(
+        min_length=3, 
+        examples=["cool_hacker_99"], 
+        description="Unique system identifier"
+    )
+    age: int = Field(
+        gt=0, 
+        examples=[25], 
+        description="Age in years"
+    )
+</code></pre>
+
+                <h2>Architecture Decision Records (ADR)</h2>
+                <p>Почему мы выбрали Redis, а не Memcached? Почему PostgreSQL, а не Mongo? Через год никто не вспомнит. Записывайте!</p>
+
+                <div class="info-box">
+                    <p>ADR — это легковесный текстовый файл, который хранится прямо в репозитории (обычно в <code>/docs/adr</code>).</p>
+                </div>
+
+                <h3>Структура ADR</h3>
+                <ol>
+                    <li><strong>Title:</strong> ADR-005: Use UUIDs for Primary Keys</li>
+                    <li><strong>Status:</strong> Accepted / Rejected / Deprecated</li>
+                    <li><strong>Context:</strong> Проблема. Int ID предсказуемы, сложно мержить базы.</li>
+                    <li><strong>Decision:</strong> Решение. Будем использовать UUIDv7.</li>
+                    <li><strong>Consequences:</strong>
+                        <ul>
+                            <li>(+) Секьюрно, можно генерить на клиенте.</li>
+                            <li>(-) Чуть медленнее INSERT, больше места на диске.</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h2>Diagrams as Code (Mermaid.js)</h2>
+                <p>Не рисуйте в Visio/Draw.io, бинарники сложно версионировать. Рисуйте кодом в Markdown!</p>
+
+<pre class="mermaid">
+sequenceDiagram
+    Client->>API: POST /orders
+    API->>DB: Save Order (Pending)
+    API->>RabbitMQ: Publish OrderCreated
+    RabbitMQ-->>Worker: Consume
+    Worker->>PaymentProvider: Charge Card
+    PaymentProvider-->>Worker: Success
+    Worker->>DB: Update Order (Paid)
+</pre>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Swagger UI на проде</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Это дыра в безопасности. Злоумышленник видит все эндпоинты и структуры данных. Отключайте <code>/docs</code> и <code>/openapi.json</code> в production окружении (или прячьте за VPN/Basic Auth).</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Schema First vs Real World</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если вы пишете YAML вручную, он <strong>всегда</strong> будет рассинхронизирован с кодом. Либо используйте жесткую кодогенерацию сервера из схемы, либо Code First (FastAPI/Litestar). Полумеры не работают.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. AnyOf / AllOf / OneOf</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Сложные конструкции OpenAPI (`oneOf`, полиморфизм) часто ломают кодогенераторы клиентов (особенно на Dart/Java). Старайтесь держать схемы простыми (KISS).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Orval / openapi-typescript:</strong> Не пишите типы на TypeScript руками. Генерируйте SDK для фронтенда одной командой из OpenAPI схемы. Это гарантирует Contract Testing на этапе компиляции.</li>
+                    <li><strong>MkDocs Material:</strong> Соберите всю доку в одном месте. MkDocs умеет рендерить Markdown, ADR, Mermaid диаграммы и даже встраивать Swagger UI через плагин. Идеальная база знаний (Knowledge Base).</li>
+                    <li><strong>Spectral:</strong> Линтер для OpenAPI. Проверяет, что у всех эндпоинтов есть описание, примеры и корректные статус-коды.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>🎯 Практика</h4>
+                    <ul class="task-list">
+                        <li>Настрой генерацию OpenAPI схемы в CI/CD</li>
+                        <li>Напиши ADR "Выбор брокера очередей"</li>
+                        <li>Сгенерируй TypeScript клиент через Orval</li>
+                        <li>Настрой MkDocs с плагином techdocs-core</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

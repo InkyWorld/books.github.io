@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.2 Транзакции и конкурентный доступ — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">
+                        <span class="nav-link-icon">🏠</span>
+                        Главная
+                    </a>
+                    <a href="setup.html" class="nav-link">
+                        <span class="nav-link-icon">⚙️</span>
+                        Настройка проекта
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
+                    <a href="part1_schema.html" class="nav-link">
+                        <span class="nav-link-icon">📊</span>
+                        1.1 Схема и хранение
+                    </a>
+                    <a href="part1_transactions.html" class="nav-link active">
+                        <span class="nav-link-icon">🔄</span>
+                        1.2 Транзакции
+                    </a>
+                    <a href="part1_indexes.html" class="nav-link">
+                        <span class="nav-link-icon">🔍</span>
+                        1.3 Индексы
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 2: Архитектура</div>
+                    <a href="part2_litestar.html" class="nav-link">
+                        <span class="nav-link-icon">🚀</span>
+                        2.1 Litestar + DDD
+                    </a>
+                    <a href="part2_dishka.html" class="nav-link">
+                        <span class="nav-link-icon">💉</span>
+                        2.2 DI с Dishka
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 3: Распределённые</div>
+                    <a href="part3_faststream.html" class="nav-link">
+                        <span class="nav-link-icon">📨</span>
+                        3.1 RabbitMQ + Faststream
+                    </a>
+                    <a href="part3_redis.html" class="nav-link">
+                        <span class="nav-link-icon">⚡</span>
+                        3.2 Redis Patterns
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 4: Надёжность</div>
+                    <a href="part4_testing.html" class="nav-link">
+                        <span class="nav-link-icon">🧪</span>
+                        4.1 Advanced Testing
+                    </a>
+                    <a href="part4_resiliency.html" class="nav-link">
+                        <span class="nav-link-icon">🛡️</span>
+                        4.2 Resiliency
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 5: Observability</div>
+                    <a href="part5_logging.html" class="nav-link">
+                        <span class="nav-link-icon">📝</span>
+                        5.1 Логирование
+                    </a>
+                    <a href="part5_clickhouse.html" class="nav-link">
+                        <span class="nav-link-icon">📈</span>
+                        5.2 ClickHouse
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 6: Production</div>
+                    <a href="part6_migrations.html" class="nav-link">
+                        <span class="nav-link-icon">🔀</span>
+                        6.1 Zero-Downtime
+                    </a>
+                    <a href="part6_quality.html" class="nav-link">
+                        <span class="nav-link-icon">✅</span>
+                        6.2 Code Quality
+                    </a>
+                    <a href="part6_django.html" class="nav-link">
+                        <span class="nav-link-icon">🔗</span>
+                        6.3 Django Admin
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 1</span>
+                    <span>/</span>
+                    <span>1.2 Транзакции</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 1.2: Транзакции и конкурентный доступ</h1>
+                <p class="lead">
+                    В финтехе Race Condition — это не баг, а потеря денег. 
+                    Разбираемся с уровнями изоляции, блокировками и паттернами конкурентного доступа.
+                </p>
+
+                <h2>ACID: не просто аббревиатура</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Свойство</th>
+                            <th>Что значит</th>
+                            <th>Для нас</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Atomicity</strong></td>
+                            <td>Всё или ничего</td>
+                            <td>Списали деньги + создали ордер — либо оба, либо никто</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Consistency</strong></td>
+                            <td>Данные всегда валидны</td>
+                            <td>Баланс не станет отрицательным</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Isolation</strong></td>
+                            <td>Транзакции не мешают друг другу</td>
+                            <td>Два списания не сломают баланс</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Durability</strong></td>
+                            <td>После коммита данные сохранены</td>
+                            <td>Сервер упал — данные на месте</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>Уровни изоляции: аномалии и защита</h2>
+                
+                <p>PostgreSQL поддерживает 4 уровня изоляции. Каждый защищает от определённых аномалий:</p>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Уровень</th>
+                            <th>Dirty Read</th>
+                            <th>Non-repeatable Read</th>
+                            <th>Phantom Read</th>
+                            <th>Serialization Anomaly</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Read Uncommitted*</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>Read Committed</td>
+                            <td>✅</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>Repeatable Read</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅**</td>
+                            <td>❌</td>
+                        </tr>
+                        <tr>
+                            <td>Serializable</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <p><small>* В PostgreSQL работает как Read Committed<br>** PostgreSQL защищает от Phantom Read на уровне RR</small></p>
+
+                <h3>Демонстрация: Non-repeatable Read</h3>
+                
+                <p><strong>Аномалия:</strong> Читаем одну строку дважды — получаем разные данные.</p>
+
+<pre><code><span class="comment">-- Терминал 1: Начинаем транзакцию (READ COMMITTED)</span>
+<span class="keyword">BEGIN</span>;
+<span class="keyword">SET TRANSACTION ISOLATION LEVEL</span> READ COMMITTED;
+
+<span class="keyword">SELECT</span> balance <span class="keyword">FROM</span> accounts <span class="keyword">WHERE</span> user_id = <span class="number">1</span>;
+<span class="comment">-- Результат: 1000.00</span>
+
+<span class="comment">-- Ждём пока Терминал 2 выполнит UPDATE и COMMIT...</span>
+
+<span class="keyword">SELECT</span> balance <span class="keyword">FROM</span> accounts <span class="keyword">WHERE</span> user_id = <span class="number">1</span>;
+<span class="comment">-- Результат: 800.00 (другое значение!)</span>
+<span class="keyword">COMMIT</span>;
+
+
+<span class="comment">-- Терминал 2: Меняем баланс</span>
+<span class="keyword">BEGIN</span>;
+<span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance = <span class="number">800</span> <span class="keyword">WHERE</span> user_id = <span class="number">1</span>;
+<span class="keyword">COMMIT</span>;</code></pre>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">🚨 Проблема</div>
+                    <p>
+                        Если логика приложения полагается на прочитанное значение, 
+                        а оно изменилось — получаем гонку. Типичный пример: 
+                        "проверили баланс → решили списать → баланс уже другой".
+                    </p>
+                </div>
+
+                <h3>Решение: REPEATABLE READ или блокировка</h3>
+
+<pre><code><span class="comment">-- Вариант 1: Уровень изоляции RR</span>
+<span class="keyword">BEGIN</span>;
+<span class="keyword">SET TRANSACTION ISOLATION LEVEL</span> REPEATABLE READ;
+<span class="keyword">SELECT</span> balance <span class="keyword">FROM</span> accounts <span class="keyword">WHERE</span> user_id = <span class="number">1</span>;
+<span class="comment">-- Всегда вернёт одно и то же значение в рамках транзакции</span>
+
+<span class="comment">-- Вариант 2: Явная блокировка (предпочтительнее)</span>
+<span class="keyword">BEGIN</span>;
+<span class="keyword">SELECT</span> balance <span class="keyword">FROM</span> accounts <span class="keyword">WHERE</span> user_id = <span class="number">1</span> <span class="keyword">FOR UPDATE</span>;
+<span class="comment">-- Блокируем строку до конца транзакции</span></code></pre>
+
+                <h2>SELECT FOR UPDATE: предотвращение Race Condition</h2>
+                
+                <p>
+                    Классическая задача: два запроса одновременно списывают деньги. 
+                    Баланс 1000, каждый хочет списать 600. Без блокировки оба прочитают 1000 
+                    и оба спишут — баланс станет -200.
+                </p>
+
+                <div class="comparison-table">
+                    <div class="comparison-col bad">
+                        <h4>❌ Race Condition</h4>
+<pre><code><span class="comment"># Два запроса одновременно</span>
+<span class="comment"># Оба читают balance = 1000</span>
+
+balance = session.query(Account.balance)\\
+    .filter_by(id=<span class="number">1</span>).scalar()
+
+<span class="keyword">if</span> balance >= amount:
+    <span class="comment"># Оба проходят проверку!</span>
+    session.execute(
+        update(Account)
+        .where(Account.id == <span class="number">1</span>)
+        .values(balance=balance - amount)
+    )
+<span class="comment"># Баланс: -200 💥</span></code></pre>
+                    </div>
+                    <div class="comparison-col good">
+                        <h4>✅ FOR UPDATE</h4>
+<pre><code><span class="comment"># Второй запрос ждёт</span>
+<span class="comment"># пока первый не завершит транзакцию</span>
+
+account = session.query(Account)\\
+    .filter_by(id=<span class="number">1</span>)\\
+    .with_for_update()\\  <span class="comment"># Блокировка!</span>
+    .one()
+
+<span class="keyword">if</span> account.balance >= amount:
+    account.balance -= amount
+    session.commit()
+<span class="comment"># Баланс: 400 ✅</span></code></pre>
+                    </div>
+                </div>
+
+                <h3>Реализация безопасного списания</h3>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/database/repositories/account.py</span>
+<span class="keyword">from</span> decimal <span class="keyword">import</span> Decimal
+<span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> select
+<span class="keyword">from</span> sqlalchemy.ext.asyncio <span class="keyword">import</span> AsyncSession
+
+<span class="keyword">from</span> scaletrade.domain.exceptions <span class="keyword">import</span> InsufficientFundsError
+<span class="keyword">from</span> scaletrade.infrastructure.database.models <span class="keyword">import</span> Account
+
+
+<span class="keyword">class</span> <span class="class-name">AccountRepository</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, session: AsyncSession) -> <span class="keyword">None</span>:
+        self._session = session
+    
+    <span class="keyword">async def</span> <span class="function">withdraw</span>(
+        self, 
+        account_id: <span class="type">int</span>, 
+        amount: Decimal
+    ) -> Account:
+        <span class="string">"""
+        Атомарное списание с блокировкой.
+        
+        FOR UPDATE блокирует строку до конца транзакции.
+        Другие транзакции будут ждать или получат ошибку.
+        """</span>
+        stmt = (
+            select(Account)
+            .where(Account.id == account_id)
+            .with_for_update()  <span class="comment"># Ключевой момент!</span>
+        )
+        
+        result = <span class="keyword">await</span> self._session.execute(stmt)
+        account = result.scalar_one_or_none()
+        
+        <span class="keyword">if</span> account <span class="keyword">is None</span>:
+            <span class="keyword">raise</span> ValueError(<span class="string">f"Account {account_id} not found"</span>)
+        
+        <span class="keyword">if</span> account.balance < amount:
+            <span class="keyword">raise</span> InsufficientFundsError(
+                <span class="string">f"Account {account_id} has {account.balance}, "</span>
+                <span class="string">f"but {amount} required"</span>
+            )
+        
+        account.balance -= amount
+        <span class="keyword">return</span> account
+    
+    <span class="keyword">async def</span> <span class="function">deposit</span>(
+        self, 
+        account_id: <span class="type">int</span>, 
+        amount: Decimal
+    ) -> Account:
+        <span class="string">"""Пополнение — тоже нужна блокировка для консистентности."""</span>
+        stmt = (
+            select(Account)
+            .where(Account.id == account_id)
+            .with_for_update()
+        )
+        
+        result = <span class="keyword">await</span> self._session.execute(stmt)
+        account = result.scalar_one()
+        
+        account.balance += amount
+        <span class="keyword">return</span> account</code></pre>
+
+                <h2>SKIP LOCKED: очередь задач на Postgres</h2>
+                
+                <p>
+                    <strong>Задача:</strong> Несколько воркеров разбирают задачи из таблицы. 
+                    Как избежать того, чтобы два воркера взяли одну задачу?
+                </p>
+                
+                <p>
+                    <code>SKIP LOCKED</code> пропускает заблокированные строки вместо ожидания:
+                </p>
+
+<pre><code><span class="comment">-- Таблица задач</span>
+<span class="keyword">CREATE TABLE</span> task_queue (
+    id BIGINT <span class="keyword">GENERATED ALWAYS AS IDENTITY PRIMARY KEY</span>,
+    payload JSONB <span class="keyword">NOT NULL</span>,
+    status VARCHAR(20) <span class="keyword">DEFAULT</span> 'pending',
+    locked_at TIMESTAMPTZ,
+    processed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ <span class="keyword">DEFAULT</span> now()
+);
+
+<span class="comment">-- Воркер берёт задачу</span>
+<span class="keyword">UPDATE</span> task_queue
+<span class="keyword">SET</span> 
+    status = 'processing',
+    locked_at = now()
+<span class="keyword">WHERE</span> id = (
+    <span class="keyword">SELECT</span> id <span class="keyword">FROM</span> task_queue
+    <span class="keyword">WHERE</span> status = 'pending'
+    <span class="keyword">ORDER BY</span> created_at
+    <span class="keyword">LIMIT</span> 1
+    <span class="keyword">FOR UPDATE SKIP LOCKED</span>  <span class="comment">-- Пропускаем заблокированные!</span>
+)
+<span class="keyword">RETURNING</span> *;</code></pre>
+
+                <h3>Реализация на SQLAlchemy</h3>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/database/repositories/task_queue.py</span>
+<span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> select, update
+<span class="keyword">from</span> sqlalchemy.ext.asyncio <span class="keyword">import</span> AsyncSession
+
+<span class="keyword">from</span> scaletrade.infrastructure.database.models <span class="keyword">import</span> Task, TaskStatus
+
+
+<span class="keyword">class</span> <span class="class-name">TaskQueueRepository</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, session: AsyncSession) -> <span class="keyword">None</span>:
+        self._session = session
+    
+    <span class="keyword">async def</span> <span class="function">claim_next_task</span>(self) -> Task | <span class="keyword">None</span>:
+        <span class="string">"""
+        Атомарно забираем следующую задачу из очереди.
+        SKIP LOCKED гарантирует, что два воркера не возьмут одну задачу.
+        """</span>
+        <span class="comment"># Подзапрос для выбора ID</span>
+        subq = (
+            select(Task.id)
+            .where(Task.status == TaskStatus.PENDING)
+            .order_by(Task.created_at)
+            .limit(<span class="number">1</span>)
+            .with_for_update(skip_locked=<span class="keyword">True</span>)
+            .scalar_subquery()
+        )
+        
+        <span class="comment"># UPDATE с RETURNING</span>
+        stmt = (
+            update(Task)
+            .where(Task.id == subq)
+            .values(
+                status=TaskStatus.PROCESSING,
+                locked_at=func.now()
+            )
+            .returning(Task)
+        )
+        
+        result = <span class="keyword">await</span> self._session.execute(stmt)
+        <span class="keyword">return</span> result.scalar_one_or_none()
+    
+    <span class="keyword">async def</span> <span class="function">complete_task</span>(self, task_id: <span class="type">int</span>) -> <span class="keyword">None</span>:
+        <span class="string">"""Помечаем задачу как выполненную."""</span>
+        stmt = (
+            update(Task)
+            .where(Task.id == task_id)
+            .values(
+                status=TaskStatus.COMPLETED,
+                processed_at=func.now()
+            )
+        )
+        <span class="keyword">await</span> self._session.execute(stmt)</code></pre>
+
+                <h2>Deadlocks: как создать и как избежать</h2>
+                
+                <p><strong>Deadlock</strong> — взаимная блокировка, когда две транзакции ждут друг друга.</p>
+
+<pre><code><span class="comment">-- Транзакция 1</span>
+<span class="keyword">BEGIN</span>;
+<span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance = balance - <span class="number">100</span> <span class="keyword">WHERE</span> id = <span class="number">1</span>;  <span class="comment">-- Блокирует id=1</span>
+<span class="comment">-- ... ждёт ...</span>
+<span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance = balance + <span class="number">100</span> <span class="keyword">WHERE</span> id = <span class="number">2</span>;  <span class="comment">-- Ждёт id=2</span>
+
+<span class="comment">-- Транзакция 2 (одновременно)</span>
+<span class="keyword">BEGIN</span>;
+<span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance = balance - <span class="number">50</span> <span class="keyword">WHERE</span> id = <span class="number">2</span>;   <span class="comment">-- Блокирует id=2</span>
+<span class="comment">-- ... ждёт ...</span>
+<span class="keyword">UPDATE</span> accounts <span class="keyword">SET</span> balance = balance + <span class="number">50</span> <span class="keyword">WHERE</span> id = <span class="number">1</span>;   <span class="comment">-- Ждёт id=1</span>
+
+<span class="comment">-- 💥 DEADLOCK! PostgreSQL откатит одну из транзакций</span></code></pre>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">✅ Как избежать Deadlock</div>
+                    <ul>
+                        <li><strong>Единый порядок блокировок:</strong> Всегда блокируй ресурсы в одном порядке (например, по возрастанию ID)</li>
+                        <li><strong>Короткие транзакции:</strong> Чем короче — тем меньше шанс пересечься</li>
+                        <li><strong>NOWAIT:</strong> Не ждать блокировку, а сразу получить ошибку</li>
+                        <li><strong>Lock timeout:</strong> Ограничить время ожидания</li>
+                    </ul>
+                </div>
+
+                <h3>Безопасный перевод между счетами</h3>
+
+<pre><code><span class="comment"># src/scaletrade/application/services/transfer_service.py</span>
+<span class="keyword">from</span> decimal <span class="keyword">import</span> Decimal
+<span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> select
+<span class="keyword">from</span> sqlalchemy.ext.asyncio <span class="keyword">import</span> AsyncSession
+
+<span class="keyword">from</span> scaletrade.infrastructure.database.models <span class="keyword">import</span> Account
+
+
+<span class="keyword">class</span> <span class="class-name">TransferService</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, session: AsyncSession) -> <span class="keyword">None</span>:
+        self._session = session
+    
+    <span class="keyword">async def</span> <span class="function">transfer</span>(
+        self,
+        from_account_id: <span class="type">int</span>,
+        to_account_id: <span class="type">int</span>,
+        amount: Decimal
+    ) -> <span class="keyword">None</span>:
+        <span class="string">"""
+        Атомарный перевод между счетами.
+        
+        Ключевой момент: блокируем счета в порядке возрастания ID,
+        чтобы избежать deadlock.
+        """</span>
+        <span class="comment"># Сортируем ID для единого порядка блокировок</span>
+        account_ids = sorted([from_account_id, to_account_id])
+        
+        <span class="comment"># Блокируем оба счёта в одном запросе</span>
+        stmt = (
+            select(Account)
+            .where(Account.id.in_(account_ids))
+            .order_by(Account.id)  <span class="comment"># Важно: порядок!</span>
+            .with_for_update()
+        )
+        
+        result = <span class="keyword">await</span> self._session.execute(stmt)
+        accounts = {acc.id: acc <span class="keyword">for</span> acc <span class="keyword">in</span> result.scalars().all()}
+        
+        <span class="keyword">if</span> len(accounts) != <span class="number">2</span>:
+            <span class="keyword">raise</span> ValueError(<span class="string">"One or both accounts not found"</span>)
+        
+        from_acc = accounts[from_account_id]
+        to_acc = accounts[to_account_id]
+        
+        <span class="keyword">if</span> from_acc.balance < amount:
+            <span class="keyword">raise</span> InsufficientFundsError(
+                <span class="string">f"Insufficient funds: {from_acc.balance} < {amount}"</span>
+            )
+        
+        <span class="comment"># Атомарное изменение</span>
+        from_acc.balance -= amount
+        to_acc.balance += amount
+        
+        <span class="comment"># Commit происходит на уровне выше (Unit of Work)</span></code></pre>
+
+                <h2>Advisory Locks: блокировки на уровне приложения</h2>
+                
+                <p>
+                    Иногда нужно заблокировать не строку, а абстрактный ресурс 
+                    (например, "обработка ордера #123"). Для этого есть <strong>Advisory Locks</strong>:
+                </p>
+
+<pre><code><span class="comment"># Блокировка по числовому ключу</span>
+<span class="keyword">async def</span> <span class="function">process_order_exclusively</span>(
+    session: AsyncSession, 
+    order_id: <span class="type">int</span>
+) -> <span class="keyword">None</span>:
+    <span class="string">"""
+    pg_advisory_xact_lock — блокировка до конца транзакции.
+    Число — уникальный идентификатор ресурса.
+    """</span>
+    <span class="comment"># Получаем эксклюзивную блокировку</span>
+    <span class="keyword">await</span> session.execute(
+        text(<span class="string">"SELECT pg_advisory_xact_lock(:key)"</span>),
+        {<span class="string">"key"</span>: order_id}
+    )
+    
+    <span class="comment"># Теперь мы единственные, кто обрабатывает этот ордер</span>
+    <span class="comment"># Другие вызовы с тем же order_id будут ждать</span>
+    
+    order = <span class="keyword">await</span> get_order(session, order_id)
+    <span class="keyword">await</span> process_order(order)
+    <span class="comment"># Блокировка снимется автоматически при commit/rollback</span>
+
+
+<span class="comment"># Неблокирующая попытка захвата</span>
+<span class="keyword">async def</span> <span class="function">try_process_order</span>(
+    session: AsyncSession, 
+    order_id: <span class="type">int</span>
+) -> <span class="type">bool</span>:
+    <span class="string">"""Попытаться захватить блокировку без ожидания."""</span>
+    result = <span class="keyword">await</span> session.execute(
+        text(<span class="string">"SELECT pg_try_advisory_xact_lock(:key)"</span>),
+        {<span class="string">"key"</span>: order_id}
+    )
+    acquired = result.scalar()
+    
+    <span class="keyword">if not</span> acquired:
+        <span class="comment"># Кто-то уже обрабатывает этот ордер</span>
+        <span class="keyword">return</span> <span class="keyword">False</span>
+    
+    <span class="keyword">await</span> process_order(order_id)
+    <span class="keyword">return</span> <span class="keyword">True</span></code></pre>
+
+                <h2>🪨 Подводные камни и частые ошибки</h2>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">❌ Ошибка #1: Забыли про изоляцию</div>
+                    <p><strong>Симптом:</strong> Баланс пользователя стал отрицательным, хотя проверяли перед списанием.</p>
+                    <pre><code class="language-python"># ПЛОХО ❌
+async def withdraw(user_id: int, amount: Decimal):
+    balance = await get_balance(user_id)  # SELECT без блокировки
+    if balance >= amount:
+        await update_balance(user_id, balance - amount)  # Race condition!
+    else:
+        raise InsufficientFunds()</code></pre>
+                    <p><strong>Решение:</strong> Использовать SELECT FOR UPDATE или Repeatable Read + оптимистичные блокировки.</p>
+                </div>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">❌ Ошибка #2: Deadlock в production</div>
+                    <p><strong>Симптом:</strong> <code>deadlock detected</code> в логах, транзакция откатывается.</p>
+                    <p><strong>Причина:</strong> Блокировки захватываются в разном порядке:</p>
+                    <pre><code class="language-python"># Transaction 1: блокирует A, потом B
+# Transaction 2: блокирует B, потом A
+# → Deadlock!</code></pre>
+                    <p><strong>Решение:</strong> Всегда блокировать ресурсы в одном порядке (например, сортировать ID).</p>
+                    <pre><code class="language-python"># ХОРОШО ✅
+async def transfer(from_id: int, to_id: int, amount: Decimal):
+    # Сортируем ID для предотвращения deadlock
+    ids = sorted([from_id, to_id])
+    
+    stmt = (
+        select(Account)
+        .where(Account.id.in_(ids))
+        .with_for_update()
+        .order_by(Account.id)  # Важно!
+    )
+    accounts = await session.execute(stmt)</code></pre>
+                </div>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">❌ Ошибка #3: Долгие транзакции</div>
+                    <p><strong>Симптом:</strong> Приложение тормозит, VACUUM не работает, база раздувается.</p>
+                    <p><strong>Причина:</strong> Открытая транзакция держит snapshots, PostgreSQL не может удалить старые версии строк.</p>
+                    <pre><code class="language-sql">-- Найти долгие транзакции
+SELECT pid, usename, state, now() - xact_start AS duration, query
+FROM pg_stat_activity
+WHERE state != 'idle'
+  AND xact_start IS NOT NULL
+ORDER BY xact_start
+LIMIT 10;</code></pre>
+                    <p><strong>Решение:</strong></p>
+                    <ul>
+                        <li>Используйте <code>statement_timeout</code> и <code>idle_in_transaction_session_timeout</code></li>
+                        <li>Не держите транзакцию открытой дольше 5-10 секунд</li>
+                        <li>Выносите тяжёлые операции (HTTP вызовы, файлы) ЗА транзакцию</li>
+                    </ul>
+                </div>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">❌ Ошибка #4: Serialization failures игнорируются</div>
+                    <p><strong>Симптом:</strong> <code>could not serialize access due to concurrent update</code> — транзакция откатилась, а приложение упало.</p>
+                    <p><strong>Решение:</strong> Повторять транзакции при serialization errors (но с ограничением!):</p>
+                    <pre><code class="language-python"># ХОРОШО ✅
+from tenacity import retry, retry_if_exception_type, stop_after_attempt
+from sqlalchemy.exc import OperationalError
+
+@retry(
+    retry=retry_if_exception_type(OperationalError),
+    stop=stop_after_attempt(3),
+    reraise=True
+)
+async def safe_transaction(func):
+    async with session.begin():
+        try:
+            return await func()
+        except OperationalError as e:
+            if "could not serialize" in str(e):
+                raise  # Позволяем tenacity повторить
+            raise  # Другие ошибки не повторяем</code></pre>
+                </div>
+
+                <h2>💡 Лайфхаки и Best Practices</h2>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">✅ Лайфхак #1: Используйте CTE для атомарных операций</div>
+                    <p>Вместо SELECT + UPDATE делайте всё в одном запросе:</p>
+                    <pre><code class="language-sql">-- Атомарное списание с проверкой баланса
+WITH updated AS (
+    UPDATE accounts
+    SET balance = balance - :amount
+    WHERE user_id = :user_id
+      AND balance >= :amount  -- Проверка в самом UPDATE!
+    RETURNING *
+)
+INSERT INTO transactions (user_id, amount, type)
+SELECT user_id, :amount, 'withdrawal'
+FROM updated;</code></pre>
+                    <p>Если баланса недостаточно — UPDATE не выполнится, INSERT тоже. Атомарно!</p>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">✅ Лайфхак #2: SKIP LOCKED для job queues</div>
+                    <p>Несколько воркеров обрабатывают задачи без блокировок:</p>
+                    <pre><code class="language-python">async def get_next_job(worker_id: int):
+    stmt = (
+        update(Job)
+        .where(Job.status == "pending")
+        .values(status="processing", worker_id=worker_id)
+        .returning(Job)
+        .with_for_update(skip_locked=True)  # Пропускаем занятые!
+        .limit(1)
+    )
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none()</code></pre>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">✅ Лайфхак #3: Оптимистичные блокировки для редких конфликтов</div>
+                    <p>Если конфликты редки — не блокируйте, а проверяйте version:</p>
+                    <pre><code class="language-python">@dataclass
+class Order:
+    id: int
+    quantity: Decimal
+    version: int  # Incrementing version column
+
+async def update_order(order_id: int, new_quantity: Decimal):
+    # Читаем без блокировки
+    order = await session.get(Order, order_id)
+    
+    # Обновляем с проверкой версии
+    stmt = (
+        update(Order)
+        .where(Order.id == order_id, Order.version == order.version)
+        .values(quantity=new_quantity, version=order.version + 1)
+    )
+    result = await session.execute(stmt)
+    
+    if result.rowcount == 0:
+        raise ConcurrentModificationError("Order was modified")</code></pre>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">✅ Лайфхак #4: Row-level locks вместо table locks</div>
+                    <p>PostgreSQL блокирует на уровне строк, но иногда захватывает table lock. Используйте:</p>
+                    <pre><code class="language-sql">-- Блокировка только нужных строк
+SELECT * FROM orders
+WHERE user_id = :user_id
+FOR UPDATE OF orders;  -- Только таблица orders, не джойны!
+
+-- Или с NOWAIT для fail-fast
+SELECT * FROM orders
+WHERE id = :order_id
+FOR UPDATE NOWAIT;</code></pre>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">✅ Лайфхак #5: Мониторьте блокировки</div>
+                    <p>Добавьте query для мониторинга заблокированных транзакций:</p>
+                    <pre><code class="language-sql">-- Кто кого блокирует
+SELECT
+    blocked_locks.pid AS blocked_pid,
+    blocked_activity.usename AS blocked_user,
+    blocking_locks.pid AS blocking_pid,
+    blocking_activity.usename AS blocking_user,
+    blocked_activity.query AS blocked_statement,
+    blocking_activity.query AS blocking_statement
+FROM pg_catalog.pg_locks blocked_locks
+JOIN pg_catalog.pg_stat_activity blocked_activity ON blocked_activity.pid = blocked_locks.pid
+JOIN pg_catalog.pg_locks blocking_locks 
+    ON blocking_locks.locktype = blocked_locks.locktype
+    AND blocking_locks.database IS NOT DISTINCT FROM blocked_locks.database
+    AND blocking_locks.relation IS NOT DISTINCT FROM blocked_locks.relation
+    AND blocking_locks.page IS NOT DISTINCT FROM blocked_locks.page
+    AND blocking_locks.tuple IS NOT DISTINCT FROM blocked_locks.tuple
+    AND blocking_locks.virtualxid IS NOT DISTINCT FROM blocked_locks.virtualxid
+    AND blocking_locks.transactionid IS NOT DISTINCT FROM blocked_locks.transactionid
+    AND blocking_locks.classid IS NOT DISTINCT FROM blocked_locks.classid
+    AND blocking_locks.objid IS NOT DISTINCT FROM blocked_locks.objid
+    AND blocking_locks.objsubid IS NOT DISTINCT FROM blocked_locks.objsubid
+    AND blocking_locks.pid != blocked_locks.pid
+JOIN pg_catalog.pg_stat_activity blocking_activity ON blocking_activity.pid = blocking_locks.pid
+WHERE NOT blocked_locks.granted;</code></pre>
+                    <p>Экспортируйте в Prometheus и алертите при длительных блокировках!</p>
+                </div>
+
+                <h2>📊 Что мониторить</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Метрика</th>
+                            <th>Что показывает</th>
+                            <th>Тревога при</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>pg_stat_activity.xact_start</code></td>
+                            <td>Длительность транзакции</td>
+                            <td>> 10 секунд</td>
+                        </tr>
+                        <tr>
+                            <td><code>pg_stat_database.deadlocks</code></td>
+                            <td>Количество deadlocks</td>
+                            <td>> 0 (расследовать)</td>
+                        </tr>
+                        <tr>
+                            <td><code>pg_locks.granted = false</code></td>
+                            <td>Заблокированные запросы</td>
+                            <td>> 5 ожидающих</td>
+                        </tr>
+                        <tr>
+                            <td><code>pg_stat_database.tup_updated</code></td>
+                            <td>Обновлённые строки</td>
+                            <td>Аномальный рост (hot updates?)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Deadlocks на внешних ключах</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Вставляя строку в таблицу с FK, вы берете `ShareLock` на родительскую запись. Если две транзакции вставляют "дочек" и обновляют "родителей" в разном порядке — это Deadlock. Индекс на FK снижает вероятность, но не устраняет проблему.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. FOR UPDATE без ORDER BY</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Запрос <code>SELECT ... FOR UPDATE LIMIT 1</code> непредсказуем. Он может заблокировать любую строку. Если запускать такой запрос параллельно, можно получить много Deadlock'ов просто потому, что Postgres решил сканировать таблицу с разных концов.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. Idle in Transaction</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Никогда не делайте HTTP-запросы или тяжелые вычисления внутри открытой транзакции. Транзакция висит — autovacuum не может почистить старые версии строк (bloat), блокировки держатся. Результат: деградация всей базы.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Advisory Locks:</strong> Если нужно заблокировать "абстрактный ресурс" (например, "генерацию отчета"), используйте <code>pg_advisory_xact_lock(hash('report_name'))</code>. Это дешевле и быстрее, чем обновлять поле в базе.</li>
+                    <li><strong>SKIP LOCKED:</strong> Идеально для очередей задач на базе. <code>SELECT * FROM tasks WHERE status='new' FOR UPDATE SKIP LOCKED LIMIT 1</code>. Позволяет воркерам не мешать друг другу.</li>
+                    <li><strong>Statement Timeout:</strong> Установите глобальный таймаут для всех запросов (например, 30 секунд). Это спасет базу, если кто-то запустит "тяжелый SELECT" в проде.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>📋 Задание</h4>
+                    <ul class="task-list">
+                        <li>Напиши тест, демонстрирующий Race Condition без FOR UPDATE</li>
+                        <li>Реализуй <code>AccountRepository.withdraw</code> с блокировкой</li>
+                        <li>Создай очередь задач с SKIP LOCKED и двумя "воркерами" (корутинами)</li>
+                        <li>Напиши тест, который создаёт Deadlock (и покажи, как PostgreSQL его разрешает)</li>
+                        <li>Реализуй безопасный перевод между счетами с сортировкой ID</li>
+                        <li>Добавь мониторинг долгих транзакций в Prometheus</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="part1_schema.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 1.1 Схема и хранение</div>
+                        </div>
+                    </a>
+                    <a href="part1_indexes.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">1.3 Индексы →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

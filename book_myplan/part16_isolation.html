@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16.2 Isolation Levels — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <!-- Navigation structure simplified for this view -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 16: DB Advanced</div>
+                    <a href="part16_indexes.html" class="nav-link">16.1 Indexes</a>
+                    <a href="part16_isolation.html" class="nav-link active">16.2 Transactions</a>
+                    <a href="part16_sharding.html" class="nav-link">16.3 Sharding</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 16</span>
+                    <span>/</span>
+                    <span>16.2 Isolation Levels</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 16.2: Уровни изоляции транзакций</h1>
+                <p class="lead">ACID — это ложь. Isolation там с большой звездочкой.</p>
+
+                <h2>Уровни изоляции (ANSI SQL)</h2>
+                
+                <h3>1. Read Uncommitted</h3>
+                <p>Можно читать данные, которые еще не закоммичены другой транзакцией. В Postgres <strong>не работает</strong> (он мапит его на Read Committed), потому что MVCC архитектура не позволяет читать грязные данные физически.</p>
+
+                <h3>2. Read Committed (Default в PG)</h3>
+                <p>Транзакция видит только закоммиченные данные. Но если вы сделаете <code>SELECT</code> дважды внутри одной транзакции, данные могут измениться (Non-Repeatable Read).</p>
+
+                <h3>3. Repeatable Read</h3>
+                <p>Гарантирует, что если вы прочитали строку, она не изменится до конца вашей транзакции. Защищает от Non-Repeatable Read. В Postgres также защищает от Phantom Read (почти всегда).</p>
+                <p><em>Цена:</em> Ошибки сериализации (Serialization Failure). Если кто-то изменил данные, которые вы трогали, Postgres кинет ошибку при коммите. Нужно делать Retry.</p>
+
+                <h3>4. Serializable</h3>
+                <p>Полная эмуляция, как будто транзакции шли строго по очереди. Самый строгий, самый медленный. Использует Predicate Locks.</p>
+
+                <h2>🪨 Подводные камни (Pitfalls)</h2>
+                
+                <h3>1. Phantom Read в MySQL vs Postgres</h3>
+                <p>В InnoDB (MySQL) <code>Repeatable Read</code> защищает от фантомов только при использовании "Next-Key Locking". В Postgres MVCC архитектура решает это иначе (Snapshot Isolation), но всё равно есть нюансы.</p>
+
+                <h3>2. Read Skew и Write Skew</h3>
+                <p>Хитрые аномалии. Например, "Вычесть деньги у Алисы, если сумма > 0" и "Вычесть у Боба, если сумма > 0". В параллели можно увести общий счет в минус, хотя каждая транзакция по отдельности корректна. <code>Read Committed</code> от этого не защищает.</p>
+
+                <h3>3. Deadlocks (Взаимные блокировки)</h3>
+                <p>Транзакция А блокирует строку 1 и ждет строку 2. Транзакция Б блокирует строку 2 и ждет строку 1. Postgres найдет это и убьет одну из них.</p>
+                <div class="info-box danger">
+                    <p>Всегда обновляйте строки в таблицах в одном и том же порядке (например, сортируйте по ID перед update), чтобы избежать дедлоков.</p>
+                </div>
+
+                <h2>💡 Лайфхаки (Senior Tricks)</h2>
+                
+                <h3>SELECT FOR UPDATE</h3>
+                <p>Если вы читаете данные, чтобы потом их изменить, используйте:</p>
+                <div class="code-block">
+                    <pre><code>SELECT * FROM accounts WHERE id = 1 FOR UPDATE;</code></pre>
+                </div>
+                <p>Это заблокирует строку до конца транзакции, превращая конкурентный доступ в последовательный для этой конкретной строки.</p>
+
+                <h3>SKIP LOCKED</h3>
+                <p>Идеально для очередей задач на базе Postgres.</p>
+                <div class="code-block">
+                    <pre><code>SELECT * FROM tasks 
+WHERE status = 'new' 
+LIMIT 1 
+FOR UPDATE SKIP LOCKED;</code></pre>
+                </div>
+                <p>Это позволяет 50 воркерам разбирать задачи из таблицы без конфликтов и ожиданий.</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

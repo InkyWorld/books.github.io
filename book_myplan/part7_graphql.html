@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7.1 GraphQL API — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link"><span class="nav-link-icon">🏠</span>Главная</a>
+                    <a href="setup.html" class="nav-link"><span class="nav-link-icon">⚙️</span>Настройка проекта</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1-6: Основы</div>
+                    <a href="part1_schema.html" class="nav-link"><span class="nav-link-icon">📊</span>PostgreSQL</a>
+                    <a href="part2_litestar.html" class="nav-link"><span class="nav-link-icon">🚀</span>Архитектура</a>
+                    <a href="part3_faststream.html" class="nav-link"><span class="nav-link-icon">📨</span>Распределённые</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 7: GraphQL & gRPC</div>
+                    <a href="part7_graphql.html" class="nav-link active"><span class="nav-link-icon">🔷</span>7.1 GraphQL API</a>
+                    <a href="part7_grpc.html" class="nav-link"><span class="nav-link-icon">⚡</span>7.2 gRPC Services</a>
+                    <a href="part7_federation.html" class="nav-link"><span class="nav-link-icon">🌐</span>7.3 Federation</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 8: Async</div>
+                    <a href="part8_asyncio.html" class="nav-link"><span class="nav-link-icon">🔄</span>8.1 Asyncio Advanced</a>
+                    <a href="part8_celery.html" class="nav-link"><span class="nav-link-icon">📋</span>8.2 Celery</a>
+                    <a href="part8_dramatiq.html" class="nav-link"><span class="nav-link-icon">🎭</span>8.3 Dramatiq</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 7</span>
+                    <span>/</span>
+                    <span>7.1 GraphQL API</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 7.1: GraphQL API с Strawberry</h1>
+                <p class="lead">
+                    Строим типобезопасный GraphQL API: схемы, резолверы, DataLoader для N+1, подписки.
+                </p>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">💡 Зачем GraphQL?</div>
+                    <ul>
+                        <li>Клиент запрашивает только нужные поля — экономим трафик</li>
+                        <li>Один endpoint вместо множества REST routes</li>
+                        <li>Типобезопасность из коробки с introspection</li>
+                        <li>Real-time подписки для live updates</li>
+                    </ul>
+                </div>
+
+                <h2>Strawberry GraphQL</h2>
+                <p>
+                    Strawberry — современная Python библиотека для GraphQL с поддержкой type hints.
+                </p>
+
+                <pre><code class="language-bash">poetry add strawberry-graphql[litestar] strawberry-sqlalchemy-mapper</code></pre>
+
+                <h2>GraphQL схема для торговой системы</h2>
+
+                <pre><code class="language-python"># domain/entities/order.py
+from dataclasses import dataclass
+from decimal import Decimal
+from datetime import datetime
+from enum import Enum
+import strawberry
+
+@strawberry.enum
+class OrderSide(str, Enum):
+    BUY = "BUY"
+    SELL = "SELL"
+
+@strawberry.enum
+class OrderStatus(str, Enum):
+    PENDING = "PENDING"
+    FILLED = "FILLED"
+    PARTIALLY_FILLED = "PARTIALLY_FILLED"
+    CANCELLED = "CANCELLED"
+
+@strawberry.type
+class Order:
+    id: strawberry.ID
+    user_id: int
+    symbol: str
+    side: OrderSide
+    quantity: Decimal
+    price: Decimal
+    filled_quantity: Decimal
+    status: OrderStatus
+    created_at: datetime
+    updated_at: datetime
+    
+    @strawberry.field
+    def total_value(self) -> Decimal:
+        """Вычисляемое поле"""
+        return self.quantity * self.price
+    
+    @strawberry.field
+    async def user(self, info) -> "User":
+        """Связь с пользователем через DataLoader"""
+        return await info.context["user_loader"].load(self.user_id)
+    
+    @strawberry.field
+    async def executions(self, info) -> list["Execution"]:
+        """Список исполнений ордера"""
+        return await info.context["execution_loader"].load(self.id)</code></pre>
+
+                <h2>Resolver с DataLoader (решение N+1 проблемы)</h2>
+
+                <pre><code class="language-python"># interface/graphql/loaders.py
+from strawberry.dataloader import DataLoader
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+
+class UserLoader(DataLoader):
+    def __init__(self, session: AsyncSession):
+        super().__init__()
+        self.session = session
+    
+    async def load(self, keys: list[int]) -> list[User]:
+        """Батчинг запросов пользователей"""
+        stmt = select(UserModel).where(UserModel.id.in_(keys))
+        result = await self.session.execute(stmt)
+        users = result.scalars().all()
+        
+        # Создаем маппинг id -> user для правильного порядка
+        user_map = {user.id: user for user in users}
+        return [user_map.get(key) for key in keys]
+
+# interface/graphql/resolvers/order.py
+import strawberry
+from typing import Optional
+from decimal import Decimal
+
+@strawberry.type
+class Query:
+    @strawberry.field
+    async def order(self, info, id: strawberry.ID) -> Optional[Order]:
+        """Получить ордер по ID"""
+        order_service = info.context["order_service"]
+        order_entity = await order_service.get_by_id(int(id))
+        return Order.from_entity(order_entity) if order_entity else None
+    
+    @strawberry.field
+    async def orders(
+        self,
+        info,
+        user_id: Optional[int] = None,
+        symbol: Optional[str] = None,
+        status: Optional[OrderStatus] = None,
+        limit: int = 100
+    ) -> list[Order]:
+        """Список ордеров с фильтрами"""
+        order_service = info.context["order_service"]
+        filters = {}
+        if user_id:
+            filters["user_id"] = user_id
+        if symbol:
+            filters["symbol"] = symbol
+        if status:
+            filters["status"] = status
+        
+        entities = await order_service.list_orders(filters, limit=limit)
+        return [Order.from_entity(e) for e in entities]</code></pre>
+
+                <h2>Mutations для создания ордеров</h2>
+
+                <pre><code class="language-python"># interface/graphql/resolvers/mutations.py
+import strawberry
+from decimal import Decimal
+
+@strawberry.input
+class CreateOrderInput:
+    symbol: str
+    side: OrderSide
+    quantity: Decimal
+    price: Decimal
+
+@strawberry.type
+class CreateOrderPayload:
+    order: Order
+    errors: Optional[list[str]] = None
+
+@strawberry.type
+class Mutation:
+    @strawberry.mutation
+    async def create_order(
+        self,
+        info,
+        input: CreateOrderInput
+    ) -> CreateOrderPayload:
+        """Создать новый ордер"""
+        try:
+            order_service = info.context["order_service"]
+            user_id = info.context["current_user"].id
+            
+            order_entity = await order_service.create_order(
+                user_id=user_id,
+                symbol=input.symbol,
+                side=input.side,
+                quantity=input.quantity,
+                price=input.price
+            )
+            
+            return CreateOrderPayload(
+                order=Order.from_entity(order_entity)
+            )
+        except ValueError as e:
+            return CreateOrderPayload(
+                order=None,
+                errors=[str(e)]
+            )
+    
+    @strawberry.mutation
+    async def cancel_order(
+        self,
+        info,
+        order_id: strawberry.ID
+    ) -> CreateOrderPayload:
+        """Отменить ордер"""
+        order_service = info.context["order_service"]
+        user_id = info.context["current_user"].id
+        
+        order_entity = await order_service.cancel_order(
+            order_id=int(order_id),
+            user_id=user_id
+        )
+        
+        return CreateOrderPayload(
+            order=Order.from_entity(order_entity)
+        )</code></pre>
+
+                <h2>Real-time подписки (WebSocket)</h2>
+
+                <pre><code class="language-python"># interface/graphql/subscriptions.py
+import strawberry
+import asyncio
+from typing import AsyncGenerator
+
+@strawberry.type
+class Subscription:
+    @strawberry.subscription
+    async def order_updates(
+        self,
+        info,
+        user_id: int
+    ) -> AsyncGenerator[Order, None]:
+        """Подписка на обновления ордеров пользователя"""
+        redis = info.context["redis"]
+        pubsub = redis.pubsub()
+        
+        await pubsub.subscribe(f"orders:user:{user_id}")
+        
+        try:
+            async for message in pubsub.listen():
+                if message["type"] == "message":
+                    order_data = json.loads(message["data"])
+                    yield Order.from_dict(order_data)
+        finally:
+            await pubsub.unsubscribe(f"orders:user:{user_id}")
+    
+    @strawberry.subscription
+    async def price_feed(
+        self,
+        info,
+        symbols: list[str]
+    ) -> AsyncGenerator["PriceTick", None]:
+        """Подписка на изменения цен"""
+        redis = info.context["redis"]
+        pubsub = redis.pubsub()
+        
+        channels = [f"price:{symbol}" for symbol in symbols]
+        await pubsub.subscribe(*channels)
+        
+        try:
+            async for message in pubsub.listen():
+                if message["type"] == "message":
+                    price_data = json.loads(message["data"])
+                    yield PriceTick(
+                        symbol=price_data["symbol"],
+                        price=Decimal(price_data["price"]),
+                        timestamp=datetime.fromisoformat(price_data["timestamp"])
+                    )
+        finally:
+            await pubsub.unsubscribe(*channels)</code></pre>
+
+                <h2>Интеграция с Litestar</h2>
+
+                <pre><code class="language-python"># interface/http/app.py
+from litestar import Litestar
+from strawberry.litestar import make_graphql_controller
+import strawberry
+
+schema = strawberry.Schema(
+    query=Query,
+    mutation=Mutation,
+    subscription=Subscription
+)
+
+graphql_controller = make_graphql_controller(
+    schema,
+    path="/graphql",
+    graphiql=True  # GraphiQL playground
+)
+
+async def create_graphql_context(request):
+    """Создание контекста для резолверов"""
+    return {
+        "request": request,
+        "current_user": request.user,
+        "order_service": request.app.state.order_service,
+        "user_loader": UserLoader(request.app.state.db_session),
+        "execution_loader": ExecutionLoader(request.app.state.db_session),
+        "redis": request.app.state.redis
+    }
+
+app = Litestar(
+    route_handlers=[graphql_controller],
+    on_app_init=[setup_di]
+)</code></pre>
+
+                <h2>Фрагменты и вложенные запросы</h2>
+
+                <pre><code class="language-graphql"># Клиентский запрос с фрагментами
+fragment OrderFields on Order {
+  id
+  symbol
+  side
+  quantity
+  price
+  totalValue
+  status
+  createdAt
+}
+
+query GetUserOrders($userId: Int!) {
+  orders(userId: $userId, limit: 50) {
+    ...OrderFields
+    user {
+      id
+      email
+    }
+    executions {
+      id
+      executedQuantity
+      executedPrice
+      timestamp
+    }
+  }
+}
+
+mutation PlaceOrder($input: CreateOrderInput!) {
+  createOrder(input: $input) {
+    order {
+      ...OrderFields
+    }
+    errors
+  }
+}
+
+subscription WatchOrders($userId: Int!) {
+  orderUpdates(userId: $userId) {
+    ...OrderFields
+  }
+}</code></pre>
+
+                <h2>Pagination с Relay Cursor</h2>
+
+                <pre><code class="language-python"># interface/graphql/pagination.py
+import strawberry
+from typing import Generic, TypeVar, Optional
+import base64
+
+T = TypeVar("T")
+
+@strawberry.type
+class PageInfo:
+    has_next_page: bool
+    has_previous_page: bool
+    start_cursor: Optional[str]
+    end_cursor: Optional[str]
+
+@strawberry.type
+class Edge(Generic[T]):
+    node: T
+    cursor: str
+
+@strawberry.type
+class Connection(Generic[T]):
+    edges: list[Edge[T]]
+    page_info: PageInfo
+    total_count: int
+
+def encode_cursor(value: int) -> str:
+    return base64.b64encode(f"cursor:{value}".encode()).decode()
+
+def decode_cursor(cursor: str) -> int:
+    decoded = base64.b64decode(cursor).decode()
+    return int(decoded.split(":")[1])
+
+@strawberry.type
+class Query:
+    @strawberry.field
+    async def orders_connection(
+        self,
+        info,
+        first: Optional[int] = 10,
+        after: Optional[str] = None
+    ) -> Connection[Order]:
+        """Пагинация в стиле Relay"""
+        order_service = info.context["order_service"]
+        
+        offset = decode_cursor(after) if after else 0
+        limit = first + 1  # +1 для проверки has_next_page
+        
+        orders = await order_service.list_orders(
+            offset=offset,
+            limit=limit
+        )
+        
+        has_next = len(orders) > first
+        if has_next:
+            orders = orders[:first]
+        
+        edges = [
+            Edge(
+                node=Order.from_entity(order),
+                cursor=encode_cursor(offset + i)
+            )
+            for i, order in enumerate(orders)
+        ]
+        
+        return Connection(
+            edges=edges,
+            page_info=PageInfo(
+                has_next_page=has_next,
+                has_previous_page=offset > 0,
+                start_cursor=edges[0].cursor if edges else None,
+                end_cursor=edges[-1].cursor if edges else None
+            ),
+            total_count=await order_service.count_orders()
+        )</code></pre>
+
+                <h2>Тестирование GraphQL</h2>
+
+                <pre><code class="language-python"># tests/interface/graphql/test_order_queries.py
+import pytest
+from httpx import AsyncClient
+
+@pytest.mark.asyncio
+async def test_query_orders(client: AsyncClient, auth_headers):
+    query = """
+        query {
+            orders(limit: 5) {
+                id
+                symbol
+                price
+            }
+        }
+    """
+    
+    response = await client.post(
+        "/graphql",
+        json={"query": query},
+        headers=auth_headers
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert "data" in data
+    assert len(data["data"]["orders"]) <= 5
+
+@pytest.mark.asyncio
+async def test_create_order_mutation(client: AsyncClient, auth_headers):
+    mutation = """
+        mutation CreateOrder($input: CreateOrderInput!) {
+            createOrder(input: $input) {
+                order {
+                    id
+                    symbol
+                    status
+                }
+                errors
+            }
+        }
+    """
+    
+    variables = {
+        "input": {
+            "symbol": "BTCUSDT",
+            "side": "BUY",
+            "quantity": "0.1",
+            "price": "50000.00"
+        }
+    }
+    
+    response = await client.post(
+        "/graphql",
+        json={"query": mutation, "variables": variables},
+        headers=auth_headers
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    assert data["data"]["createOrder"]["errors"] is None
+    assert data["data"]["createOrder"]["order"]["symbol"] == "BTCUSDT"</code></pre>
+
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Проблема N+1</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>В GraphQL это проблема №1. Если вы пишете простой резолвер <code>user { orders }</code>, который делает запрос в БД, то при запросе списка пользователей вы получите шквал запросов. Используйте <strong>DataLoader</strong> (<code>strawberry.dataloader</code>), который откладывает выполнение и батчит запросы по ID.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. DoS атаки через вложенность</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Пользователь может отправить запрос <code>{ me { friends { friends { ... } } } }</code> глубиной 100 уровней, и ваш сервер ляжет. Обязательно используйте валидацию "Query Depth Limit" и "Complexity Cost".</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. HTTP 200 OK при ошибках</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>GraphQL почти всегда возвращает статус 200, даже если в поле <code>errors</code> лежит трейсбек. Это ломает мониторинг, который смотрит на 5xx коды. Настройте мидлвар, который пишет метрики на основе тела ответа, а не статус-кода.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Persisted Queries:</strong> Чтобы не гонять по сети огромные строки запросов, фронтенд отправляет хеш запроса. Бэкенд ищет запрос по хешу в Redis. Это экономит трафик и работает как белый список разрешенных запросов.</li>
+                    <li><strong>Codegen:</strong> Настройте генерацию TypeScript типов на фронтенде из вашей <code>schema.graphql</code>. Это спасет от опечаток в названиях полей ("user_id" vs "userId").</li>
+                    <li><strong>Altair Client:</strong> Гораздо удобнее стандартного GraphiQL. Поддерживает коллекции запросов, энвайронменты и загрузку файлов.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>🎯 Практика</h4>
+                    <ul class="task-list">
+                        <li>Реализуй GraphQL схему для Order и User</li>
+                        <li>Добавь DataLoader для решения N+1 проблемы</li>
+                        <li>Создай mutation для создания/отмены ордеров</li>
+                        <li>Настрой WebSocket подписку на изменения</li>
+                        <li>Добавь Relay-style пагинацию</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="part6_django.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 6.3 Django Admin</div>
+                        </div>
+                    </a>
+                    <a href="part7_grpc.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">7.2 gRPC Services →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>6.3 Django Admin Integration — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link"><span class="nav-link-icon">🏠</span>Главная</a>
+                    <a href="setup.html" class="nav-link"><span class="nav-link-icon">⚙️</span>Настройка проекта</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
+                    <a href="part1_schema.html" class="nav-link"><span class="nav-link-icon">📊</span>1.1 Схема и хранение</a>
+                    <a href="part1_transactions.html" class="nav-link"><span class="nav-link-icon">🔄</span>1.2 Транзакции</a>
+                    <a href="part1_indexes.html" class="nav-link"><span class="nav-link-icon">🔍</span>1.3 Индексы</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 2: Архитектура</div>
+                    <a href="part2_litestar.html" class="nav-link"><span class="nav-link-icon">🚀</span>2.1 Litestar + DDD</a>
+                    <a href="part2_dishka.html" class="nav-link"><span class="nav-link-icon">💉</span>2.2 DI с Dishka</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 3: Распределённые</div>
+                    <a href="part3_faststream.html" class="nav-link"><span class="nav-link-icon">📨</span>3.1 RabbitMQ + Faststream</a>
+                    <a href="part3_redis.html" class="nav-link"><span class="nav-link-icon">⚡</span>3.2 Redis Patterns</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 4: Надёжность</div>
+                    <a href="part4_testing.html" class="nav-link"><span class="nav-link-icon">🧪</span>4.1 Advanced Testing</a>
+                    <a href="part4_resiliency.html" class="nav-link"><span class="nav-link-icon">🛡️</span>4.2 Resiliency</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 5: Observability</div>
+                    <a href="part5_logging.html" class="nav-link"><span class="nav-link-icon">📝</span>5.1 Логирование</a>
+                    <a href="part5_clickhouse.html" class="nav-link"><span class="nav-link-icon">📈</span>5.2 ClickHouse</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 6: Production</div>
+                    <a href="part6_migrations.html" class="nav-link"><span class="nav-link-icon">🔀</span>6.1 Zero-Downtime</a>
+                    <a href="part6_quality.html" class="nav-link"><span class="nav-link-icon">✅</span>6.2 Code Quality</a>
+                    <a href="part6_django.html" class="nav-link active"><span class="nav-link-icon">🔗</span>6.3 Django Admin</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 6</span>
+                    <span>/</span>
+                    <span>6.3 Django Admin</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 6.3: Django Admin Integration</h1>
+                <p class="lead">
+                    Используем Django Admin как готовую админку для существующей базы данных.
+                </p>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">💡 Зачем Django Admin?</div>
+                    <p>
+                        Django Admin — мощный готовый интерфейс для CRUD операций.
+                        Вместо написания своей админки (недели работы), 
+                        подключаем Django к существующей БД (часы работы).
+                    </p>
+                </div>
+
+                <h2>Архитектура: два приложения, одна БД</h2>
+
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│                      PostgreSQL                              │
+│  ┌─────────────┬─────────────┬──────────────┬─────────────┐ │
+│  │   orders    │    users    │   wallets    │   django_*  │ │
+│  └─────────────┴─────────────┴──────────────┴─────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+         ▲                                          ▲
+         │ SQLAlchemy (async)                       │ Django ORM (sync)
+         │                                          │
+┌────────┴────────┐                      ┌──────────┴──────────┐
+│   Litestar API  │                      │    Django Admin     │
+│   (main app)    │                      │   (admin panel)     │
+│   port 8000     │                      │    port 8001        │
+└─────────────────┘                      └─────────────────────┘</code></pre>
+
+                <h2>Django проект: структура</h2>
+
+<pre><code><span class="comment"># admin_panel/</span>
+admin_panel/
+├── admin_panel/
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── scaletrade_admin/       <span class="comment"># Django app</span>
+│   ├── __init__.py
+│   ├── admin.py            <span class="comment"># Admin конфигурация</span>
+│   ├── apps.py
+│   └── models.py           <span class="comment"># managed=False модели</span>
+└── manage.py</code></pre>
+
+                <h2>Settings: подключение к существующей БД</h2>
+
+<pre><code><span class="comment"># admin_panel/admin_panel/settings.py</span>
+<span class="keyword">import</span> os
+<span class="keyword">from</span> pathlib <span class="keyword">import</span> Path
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+SECRET_KEY = os.environ[<span class="string">"DJANGO_SECRET_KEY"</span>]
+DEBUG = os.environ.get(<span class="string">"DEBUG"</span>, <span class="string">"false"</span>).lower() == <span class="string">"true"</span>
+ALLOWED_HOSTS = [<span class="string">"*"</span>]
+
+INSTALLED_APPS = [
+    <span class="string">"django.contrib.admin"</span>,
+    <span class="string">"django.contrib.auth"</span>,
+    <span class="string">"django.contrib.contenttypes"</span>,
+    <span class="string">"django.contrib.sessions"</span>,
+    <span class="string">"django.contrib.messages"</span>,
+    <span class="string">"django.contrib.staticfiles"</span>,
+    <span class="comment"># Наше приложение</span>
+    <span class="string">"scaletrade_admin"</span>,
+]
+
+MIDDLEWARE = [
+    <span class="string">"django.middleware.security.SecurityMiddleware"</span>,
+    <span class="string">"django.contrib.sessions.middleware.SessionMiddleware"</span>,
+    <span class="string">"django.middleware.common.CommonMiddleware"</span>,
+    <span class="string">"django.middleware.csrf.CsrfViewMiddleware"</span>,
+    <span class="string">"django.contrib.auth.middleware.AuthenticationMiddleware"</span>,
+    <span class="string">"django.contrib.messages.middleware.MessageMiddleware"</span>,
+]
+
+<span class="comment"># Подключаемся к существующей БД ScaleTrade</span>
+DATABASES = {
+    <span class="string">"default"</span>: {
+        <span class="string">"ENGINE"</span>: <span class="string">"django.db.backends.postgresql"</span>,
+        <span class="string">"NAME"</span>: os.environ[<span class="string">"POSTGRES_DB"</span>],
+        <span class="string">"USER"</span>: os.environ[<span class="string">"POSTGRES_USER"</span>],
+        <span class="string">"PASSWORD"</span>: os.environ[<span class="string">"POSTGRES_PASSWORD"</span>],
+        <span class="string">"HOST"</span>: os.environ[<span class="string">"POSTGRES_HOST"</span>],
+        <span class="string">"PORT"</span>: os.environ.get(<span class="string">"POSTGRES_PORT"</span>, <span class="string">"5432"</span>),
+    }
+}
+
+<span class="comment"># Static files</span>
+STATIC_URL = <span class="string">"/static/"</span>
+STATIC_ROOT = BASE_DIR / <span class="string">"staticfiles"</span></code></pre>
+
+                <h2>Models: managed=False</h2>
+
+                <p>
+                    <code>managed = False</code> означает, что Django НЕ будет создавать/менять таблицы.
+                    Модели только для чтения/записи данных.
+                </p>
+
+<pre><code><span class="comment"># admin_panel/scaletrade_admin/models.py</span>
+<span class="keyword">from</span> django.db <span class="keyword">import</span> models
+<span class="keyword">import</span> uuid
+
+
+<span class="keyword">class</span> <span class="class-name">User</span>(models.Model):
+    <span class="string">"""Пользователь ScaleTrade (read-only таблица)."""</span>
+    
+    id = models.BigAutoField(primary_key=<span class="keyword">True</span>)
+    email = models.EmailField(unique=<span class="keyword">True</span>)
+    hashed_password = models.CharField(max_length=<span class="number">255</span>)
+    is_active = models.BooleanField(default=<span class="keyword">True</span>)
+    is_verified = models.BooleanField(default=<span class="keyword">False</span>)
+    created_at = models.DateTimeField(auto_now_add=<span class="keyword">True</span>)
+    updated_at = models.DateTimeField(auto_now=<span class="keyword">True</span>)
+    
+    <span class="keyword">class</span> <span class="class-name">Meta</span>:
+        managed = <span class="keyword">False</span>  <span class="comment"># Django НЕ управляет этой таблицей</span>
+        db_table = <span class="string">"users"</span>
+        verbose_name = <span class="string">"Пользователь"</span>
+        verbose_name_plural = <span class="string">"Пользователи"</span>
+    
+    <span class="keyword">def</span> <span class="function">__str__</span>(self) -> <span class="type">str</span>:
+        <span class="keyword">return</span> self.email
+
+
+<span class="keyword">class</span> <span class="class-name">Order</span>(models.Model):
+    <span class="string">"""Ордер ScaleTrade."""</span>
+    
+    <span class="keyword">class</span> <span class="class-name">Side</span>(models.TextChoices):
+        BUY = <span class="string">"buy"</span>, <span class="string">"Покупка"</span>
+        SELL = <span class="string">"sell"</span>, <span class="string">"Продажа"</span>
+    
+    <span class="keyword">class</span> <span class="class-name">Status</span>(models.TextChoices):
+        PENDING = <span class="string">"pending"</span>, <span class="string">"Ожидает"</span>
+        FILLED = <span class="string">"filled"</span>, <span class="string">"Исполнен"</span>
+        CANCELLED = <span class="string">"cancelled"</span>, <span class="string">"Отменён"</span>
+        REJECTED = <span class="string">"rejected"</span>, <span class="string">"Отклонён"</span>
+    
+    id = models.UUIDField(primary_key=<span class="keyword">True</span>, default=uuid.uuid4)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name=<span class="string">"orders"</span>,
+        db_column=<span class="string">"user_id"</span>,
+    )
+    symbol = models.CharField(max_length=<span class="number">20</span>)
+    side = models.CharField(max_length=<span class="number">4</span>, choices=Side.choices)
+    quantity = models.DecimalField(max_digits=<span class="number">18</span>, decimal_places=<span class="number">8</span>)
+    price = models.DecimalField(max_digits=<span class="number">18</span>, decimal_places=<span class="number">2</span>)
+    status = models.CharField(
+        max_length=<span class="number">10</span>,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
+    created_at = models.DateTimeField()
+    filled_at = models.DateTimeField(null=<span class="keyword">True</span>, blank=<span class="keyword">True</span>)
+    
+    <span class="keyword">class</span> <span class="class-name">Meta</span>:
+        managed = <span class="keyword">False</span>
+        db_table = <span class="string">"orders"</span>
+        ordering = [<span class="string">"-created_at"</span>]
+        verbose_name = <span class="string">"Ордер"</span>
+        verbose_name_plural = <span class="string">"Ордеры"</span>
+    
+    <span class="keyword">def</span> <span class="function">__str__</span>(self) -> <span class="type">str</span>:
+        <span class="keyword">return</span> f<span class="string">"{self.side.upper()} {self.symbol} @ {self.price}"</span>
+    
+    <span class="decorator">@property</span>
+    <span class="keyword">def</span> <span class="function">total_value</span>(self):
+        <span class="keyword">return</span> self.quantity * self.price
+
+
+<span class="keyword">class</span> <span class="class-name">Wallet</span>(models.Model):
+    <span class="string">"""Кошелёк пользователя."""</span>
+    
+    id = models.BigAutoField(primary_key=<span class="keyword">True</span>)
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name=<span class="string">"wallets"</span>,
+        db_column=<span class="string">"user_id"</span>,
+    )
+    currency = models.CharField(max_length=<span class="number">10</span>)
+    balance = models.DecimalField(max_digits=<span class="number">18</span>, decimal_places=<span class="number">8</span>)
+    locked_balance = models.DecimalField(max_digits=<span class="number">18</span>, decimal_places=<span class="number">8</span>)
+    updated_at = models.DateTimeField(auto_now=<span class="keyword">True</span>)
+    
+    <span class="keyword">class</span> <span class="class-name">Meta</span>:
+        managed = <span class="keyword">False</span>
+        db_table = <span class="string">"wallets"</span>
+        unique_together = [(<span class="string">"user"</span>, <span class="string">"currency"</span>)]
+        verbose_name = <span class="string">"Кошелёк"</span>
+        verbose_name_plural = <span class="string">"Кошельки"</span>
+    
+    <span class="keyword">def</span> <span class="function">__str__</span>(self) -> <span class="type">str</span>:
+        <span class="keyword">return</span> f<span class="string">"{self.user.email} - {self.currency}"</span></code></pre>
+
+                <h2>Admin: кастомизация</h2>
+
+<pre><code><span class="comment"># admin_panel/scaletrade_admin/admin.py</span>
+<span class="keyword">from</span> django.contrib <span class="keyword">import</span> admin
+<span class="keyword">from</span> django.utils.html <span class="keyword">import</span> format_html
+
+<span class="keyword">from</span> .models <span class="keyword">import</span> User, Order, Wallet
+
+
+<span class="decorator">@admin.register</span>(User)
+<span class="keyword">class</span> <span class="class-name">UserAdmin</span>(admin.ModelAdmin):
+    <span class="string">"""Admin для пользователей."""</span>
+    
+    list_display = [
+        <span class="string">"id"</span>, <span class="string">"email"</span>, <span class="string">"is_active"</span>, <span class="string">"is_verified"</span>, 
+        <span class="string">"orders_count"</span>, <span class="string">"created_at"</span>
+    ]
+    list_filter = [<span class="string">"is_active"</span>, <span class="string">"is_verified"</span>, <span class="string">"created_at"</span>]
+    search_fields = [<span class="string">"email"</span>]
+    readonly_fields = [<span class="string">"created_at"</span>, <span class="string">"updated_at"</span>, <span class="string">"hashed_password"</span>]
+    ordering = [<span class="string">"-created_at"</span>]
+    
+    <span class="keyword">def</span> <span class="function">orders_count</span>(self, obj):
+        <span class="keyword">return</span> obj.orders.count()
+    orders_count.short_description = <span class="string">"Ордеров"</span>
+    
+    <span class="keyword">def</span> <span class="function">has_delete_permission</span>(self, request, obj=<span class="keyword">None</span>):
+        <span class="comment"># Запрещаем удаление пользователей из админки</span>
+        <span class="keyword">return False</span>
+
+
+<span class="keyword">class</span> <span class="class-name">OrderStatusFilter</span>(admin.SimpleListFilter):
+    <span class="string">"""Фильтр по статусу ордера."""</span>
+    
+    title = <span class="string">"Статус"</span>
+    parameter_name = <span class="string">"status"</span>
+    
+    <span class="keyword">def</span> <span class="function">lookups</span>(self, request, model_admin):
+        <span class="keyword">return</span> Order.Status.choices
+    
+    <span class="keyword">def</span> <span class="function">queryset</span>(self, request, queryset):
+        <span class="keyword">if</span> self.value():
+            <span class="keyword">return</span> queryset.filter(status=self.value())
+        <span class="keyword">return</span> queryset
+
+
+<span class="decorator">@admin.register</span>(Order)
+<span class="keyword">class</span> <span class="class-name">OrderAdmin</span>(admin.ModelAdmin):
+    <span class="string">"""Admin для ордеров."""</span>
+    
+    list_display = [
+        <span class="string">"id_short"</span>, <span class="string">"user_email"</span>, <span class="string">"symbol"</span>, 
+        <span class="string">"side_badge"</span>, <span class="string">"quantity"</span>, <span class="string">"price"</span>,
+        <span class="string">"status_badge"</span>, <span class="string">"created_at"</span>
+    ]
+    list_filter = [OrderStatusFilter, <span class="string">"side"</span>, <span class="string">"symbol"</span>, <span class="string">"created_at"</span>]
+    search_fields = [<span class="string">"id"</span>, <span class="string">"user__email"</span>, <span class="string">"symbol"</span>]
+    readonly_fields = [
+        <span class="string">"id"</span>, <span class="string">"user"</span>, <span class="string">"symbol"</span>, <span class="string">"side"</span>, 
+        <span class="string">"quantity"</span>, <span class="string">"price"</span>, <span class="string">"created_at"</span>, <span class="string">"filled_at"</span>
+    ]
+    ordering = [<span class="string">"-created_at"</span>]
+    list_per_page = <span class="number">50</span>
+    
+    <span class="keyword">def</span> <span class="function">id_short</span>(self, obj):
+        <span class="keyword">return</span> <span class="type">str</span>(obj.id)[:<span class="number">8</span>]
+    id_short.short_description = <span class="string">"ID"</span>
+    
+    <span class="keyword">def</span> <span class="function">user_email</span>(self, obj):
+        <span class="keyword">return</span> obj.user.email
+    user_email.short_description = <span class="string">"Пользователь"</span>
+    
+    <span class="keyword">def</span> <span class="function">side_badge</span>(self, obj):
+        colors = {<span class="string">"buy"</span>: <span class="string">"#22c55e"</span>, <span class="string">"sell"</span>: <span class="string">"#ef4444"</span>}
+        color = colors.get(obj.side, <span class="string">"#888"</span>)
+        <span class="keyword">return</span> format_html(
+            <span class="string">'&lt;span style="color: {}; font-weight: bold;"&gt;{}&lt;/span&gt;'</span>,
+            color,
+            obj.get_side_display(),
+        )
+    side_badge.short_description = <span class="string">"Сторона"</span>
+    
+    <span class="keyword">def</span> <span class="function">status_badge</span>(self, obj):
+        colors = {
+            <span class="string">"pending"</span>: <span class="string">"#f59e0b"</span>,
+            <span class="string">"filled"</span>: <span class="string">"#22c55e"</span>,
+            <span class="string">"cancelled"</span>: <span class="string">"#6b7280"</span>,
+            <span class="string">"rejected"</span>: <span class="string">"#ef4444"</span>,
+        }
+        color = colors.get(obj.status, <span class="string">"#888"</span>)
+        <span class="keyword">return</span> format_html(
+            <span class="string">'&lt;span style="background: {}; color: white; '
+            'padding: 2px 8px; border-radius: 4px;"&gt;{}&lt;/span&gt;'</span>,
+            color,
+            obj.get_status_display(),
+        )
+    status_badge.short_description = <span class="string">"Статус"</span>
+    
+    <span class="keyword">def</span> <span class="function">has_add_permission</span>(self, request):
+        <span class="comment"># Ордеры создаются только через API</span>
+        <span class="keyword">return False</span>
+    
+    <span class="keyword">def</span> <span class="function">has_delete_permission</span>(self, request, obj=<span class="keyword">None</span>):
+        <span class="keyword">return False</span>
+
+
+<span class="decorator">@admin.register</span>(Wallet)
+<span class="keyword">class</span> <span class="class-name">WalletAdmin</span>(admin.ModelAdmin):
+    <span class="string">"""Admin для кошельков."""</span>
+    
+    list_display = [
+        <span class="string">"id"</span>, <span class="string">"user_email"</span>, <span class="string">"currency"</span>, 
+        <span class="string">"balance"</span>, <span class="string">"locked_balance"</span>, <span class="string">"available"</span>
+    ]
+    list_filter = [<span class="string">"currency"</span>]
+    search_fields = [<span class="string">"user__email"</span>, <span class="string">"currency"</span>]
+    readonly_fields = [<span class="string">"user"</span>, <span class="string">"currency"</span>, <span class="string">"updated_at"</span>]
+    
+    <span class="keyword">def</span> <span class="function">user_email</span>(self, obj):
+        <span class="keyword">return</span> obj.user.email
+    user_email.short_description = <span class="string">"Пользователь"</span>
+    
+    <span class="keyword">def</span> <span class="function">available</span>(self, obj):
+        <span class="keyword">return</span> obj.balance - obj.locked_balance
+    available.short_description = <span class="string">"Доступно"</span></code></pre>
+
+                <h2>Запуск Django Admin</h2>
+
+<pre><code><span class="comment"># Dockerfile.admin</span>
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY admin_panel/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY admin_panel/ .
+
+<span class="comment"># Collect static</span>
+RUN python manage.py collectstatic --noinput
+
+<span class="comment"># Создаём миграции только для django_* таблиц</span>
+RUN python manage.py migrate --run-syncdb
+
+EXPOSE 8001
+
+CMD [<span class="string">"gunicorn"</span>, <span class="string">"admin_panel.wsgi:application"</span>, <span class="string">"-b"</span>, <span class="string">"0.0.0.0:8001"</span>]</code></pre>
+
+<pre><code><span class="comment"># docker-compose.yml (добавляем сервис)</span>
+services:
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+    ports:
+      - <span class="string">"8001:8001"</span>
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=scaletrade
+      - POSTGRES_USER=scaletrade
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    depends_on:
+      - postgres</code></pre>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">⚠️ Безопасность</div>
+                    <ul>
+                        <li>Django Admin должен быть за VPN или IP whitelist</li>
+                        <li>Используй отдельного DB user с ограниченными правами</li>
+                        <li>Включи audit log для всех действий в админке</li>
+                        <li>Двухфакторная аутентификация обязательна (django-otp)</li>
+                    </ul>
+                </div>
+
+                <div class="task-box">
+                    <h4>📋 Задание</h4>
+                    <ul class="task-list">
+                        <li>Создай Django проект с managed=False моделями</li>
+                        <li>Настрой ModelAdmin для User, Order, Wallet</li>
+                        <li>Добавь кастомные фильтры и badges</li>
+                        <li>Запусти Django Admin в Docker</li>
+                        <li>Настрой права доступа (readonly для критичных полей)</li>
+                    </ul>
+                </div>
+
+                <h2>🎉 Поздравляем!</h2>
+                
+                <p>
+                    Вы завершили курс ScaleTrade! Теперь у вас есть знания для построения
+                    production-ready backend систем на Python.
+                </p>
+
+                <h2>🪨 Подводные камни Django</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Сигналы (Signals)</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Сигналы работают синхронно! Если в <code>post_save</code> вы отправляете email, то сохранение в БД будет висеть, пока SMTP сервер не ответит. Плюс, сигналы размазывают логику по проекту, делая код неочевидным ("Я просто сохранил юзера, почему упал Celery?").</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. N+1 в Админке</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Добавление поля из связанной модели в <code>list_display</code> моментально создает проблему N+1. На каждый ряд админка делает новый SELECT. Обязательно используйте <code>list_select_related</code> и переопределяйте <code>get_queryset</code>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Django Ninja:</strong> Если вам нужен API на Django, забудьте про DRF. Используйте Django Ninja (Pydantic + Async support). Он быстрее, понятнее и современнее.</li>
+                    <li><strong>django-debug-toolbar:</strong> Стандарт де-факто для отладки в браузере. Показывает все SQL запросы, время рендеринга шаблонов и сигналы.</li>
+                    <li><strong>Constraint Validation:</strong> Всегда дублируйте валидацию модели на уровне БД (Constraint). Django валидация (<code>clean()</code>) вызывается только при сохранении через формы/DRF, но не при <code>User.objects.create()</code>.</li>
+                </ul>
+
+                <div class="nav-footer">
+                    <a href="part6_quality.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 6.2 Code Quality</div>
+                        </div>
+                    </a>
+                    <a href="index.html">
+                        <div>
+                            <div class="nav-label">К началу</div>
+                            <div class="nav-title">🏠 Главная →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

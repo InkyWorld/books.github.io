@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.2 Dependency Injection с Dishka — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link"><span class="nav-link-icon">🏠</span>Главная</a>
+                    <a href="setup.html" class="nav-link"><span class="nav-link-icon">⚙️</span>Настройка проекта</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
+                    <a href="part1_schema.html" class="nav-link"><span class="nav-link-icon">📊</span>1.1 Схема и хранение</a>
+                    <a href="part1_transactions.html" class="nav-link"><span class="nav-link-icon">🔄</span>1.2 Транзакции</a>
+                    <a href="part1_indexes.html" class="nav-link"><span class="nav-link-icon">🔍</span>1.3 Индексы</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 2: Архитектура</div>
+                    <a href="part2_litestar.html" class="nav-link"><span class="nav-link-icon">🚀</span>2.1 Litestar + DDD</a>
+                    <a href="part2_dishka.html" class="nav-link active"><span class="nav-link-icon">💉</span>2.2 DI с Dishka</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 3: Распределённые</div>
+                    <a href="part3_faststream.html" class="nav-link"><span class="nav-link-icon">📨</span>3.1 RabbitMQ + Faststream</a>
+                    <a href="part3_redis.html" class="nav-link"><span class="nav-link-icon">⚡</span>3.2 Redis Patterns</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 4: Надёжность</div>
+                    <a href="part4_testing.html" class="nav-link"><span class="nav-link-icon">🧪</span>4.1 Advanced Testing</a>
+                    <a href="part4_resiliency.html" class="nav-link"><span class="nav-link-icon">🛡️</span>4.2 Resiliency</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 5: Observability</div>
+                    <a href="part5_logging.html" class="nav-link"><span class="nav-link-icon">📝</span>5.1 Логирование</a>
+                    <a href="part5_clickhouse.html" class="nav-link"><span class="nav-link-icon">📈</span>5.2 ClickHouse</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 6: Production</div>
+                    <a href="part6_migrations.html" class="nav-link"><span class="nav-link-icon">🔀</span>6.1 Zero-Downtime</a>
+                    <a href="part6_quality.html" class="nav-link"><span class="nav-link-icon">✅</span>6.2 Code Quality</a>
+                    <a href="part6_django.html" class="nav-link"><span class="nav-link-icon">🔗</span>6.3 Django Admin</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 2</span>
+                    <span>/</span>
+                    <span>2.2 DI с Dishka</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 2.2: Dependency Injection с Dishka</h1>
+                <p class="lead">
+                    Полноценный IoC контейнер для Python. Scopes, провайдеры, Unit of Work — 
+                    всё для тестируемой и модульной архитектуры.
+                </p>
+
+                <h2>Зачем DI контейнер?</h2>
+                
+                <p>FastAPI <code>Depends()</code> — это не DI, это Service Locator. Проблемы:</p>
+                
+                <div class="comparison-table">
+                    <div class="comparison-col bad">
+                        <h4>❌ FastAPI Depends</h4>
+<pre><code><span class="comment"># Жёсткая связь с реализацией</span>
+<span class="keyword">def</span> <span class="function">get_db</span>():
+    <span class="keyword">return</span> SessionLocal()
+
+<span class="decorator">@app.get</span>(<span class="string">"/orders"</span>)
+<span class="keyword">def</span> <span class="function">get_orders</span>(
+    db = Depends(get_db)  <span class="comment"># Нельзя подменить</span>
+):
+    ...
+
+<span class="comment"># Как тестировать?</span>
+<span class="comment"># app.dependency_overrides — глобально</span></code></pre>
+                    </div>
+                    <div class="comparison-col good">
+                        <h4>✅ Dishka</h4>
+<pre><code><span class="comment"># Декларативная конфигурация</span>
+<span class="keyword">class</span> <span class="class-name">DbProvider</span>(Provider):
+    <span class="decorator">@provide</span>(scope=Scope.REQUEST)
+    <span class="keyword">def</span> <span class="function">session</span>(self) -> AsyncSession:
+        ...
+
+<span class="comment"># Легко подменить для тестов</span>
+container = make_container(
+    TestDbProvider(),  <span class="comment"># Другая реализация</span>
+)</code></pre>
+                    </div>
+                </div>
+
+                <h2>Основные концепции Dishka</h2>
+
+                <h3>Scopes: время жизни зависимостей</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Scope</th>
+                            <th>Время жизни</th>
+                            <th>Примеры</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>APP</code></td>
+                            <td>Всё время работы приложения</td>
+                            <td>Engine, Settings, Redis Pool</td>
+                        </tr>
+                        <tr>
+                            <td><code>REQUEST</code></td>
+                            <td>Один HTTP запрос</td>
+                            <td>Session, UoW, текущий пользователь</td>
+                        </tr>
+                        <tr>
+                            <td><code>ACTION</code></td>
+                            <td>Одна бизнес-операция</td>
+                            <td>Вложенные транзакции</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Provider: фабрика зависимостей</h3>
+
+<pre><code><span class="comment"># src/scaletrade/di/providers.py</span>
+<span class="keyword">from</span> dishka <span class="keyword">import</span> Provider, Scope, provide, make_async_container
+<span class="keyword">from</span> sqlalchemy.ext.asyncio <span class="keyword">import</span> (
+    AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+)
+
+<span class="keyword">from</span> scaletrade.config <span class="keyword">import</span> Settings
+
+
+<span class="keyword">class</span> <span class="class-name">DatabaseProvider</span>(Provider):
+    <span class="string">"""Провайдер зависимостей для работы с БД."""</span>
+    
+    <span class="decorator">@provide</span>(scope=Scope.APP)
+    <span class="keyword">def</span> <span class="function">engine</span>(self, settings: Settings) -> AsyncEngine:
+        <span class="string">"""
+        Engine создаётся один раз при старте приложения.
+        Содержит пул соединений.
+        """</span>
+        <span class="keyword">return</span> create_async_engine(
+            settings.async_database_url,
+            pool_size=settings.database_pool_size,
+            max_overflow=settings.database_pool_overflow,
+            echo=settings.debug,
+        )
+    
+    <span class="decorator">@provide</span>(scope=Scope.APP)
+    <span class="keyword">def</span> <span class="function">session_factory</span>(self, engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
+        <span class="string">"""Фабрика сессий — тоже singleton."""</span>
+        <span class="keyword">return</span> async_sessionmaker(
+            engine,
+            class_=AsyncSession,
+            expire_on_commit=<span class="keyword">False</span>,
+        )
+    
+    <span class="decorator">@provide</span>(scope=Scope.REQUEST)
+    <span class="keyword">async def</span> <span class="function">session</span>(
+        self, 
+        factory: async_sessionmaker[AsyncSession]
+    ) -> AsyncSession:
+        <span class="string">"""
+        Сессия создаётся для каждого запроса.
+        Автоматически закрывается в конце.
+        """</span>
+        <span class="keyword">async with</span> factory() <span class="keyword">as</span> session:
+            <span class="keyword">yield</span> session</code></pre>
+
+                <h2>Unit of Work Pattern</h2>
+                
+                <p>
+                    UoW инкапсулирует транзакцию и все репозитории. 
+                    Гарантирует атомарность операций.
+                </p>
+
+<pre><code><span class="comment"># src/scaletrade/application/uow.py</span>
+<span class="keyword">from</span> typing <span class="keyword">import</span> Self
+<span class="keyword">from</span> sqlalchemy.ext.asyncio <span class="keyword">import</span> AsyncSession
+
+<span class="keyword">from</span> scaletrade.infrastructure.database.repositories <span class="keyword">import</span> (
+    SQLAlchemyOrderRepository,
+    SQLAlchemyAccountRepository,
+)
+
+
+<span class="keyword">class</span> <span class="class-name">UnitOfWork</span>:
+    <span class="string">"""
+    Unit of Work — управляет транзакцией и репозиториями.
+    
+    Использование:
+        async with uow:
+            order = await uow.orders.get_by_id(order_id)
+            order.cancel()
+            await uow.commit()
+    """</span>
+    
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, session: AsyncSession) -> <span class="keyword">None</span>:
+        self._session = session
+        self.orders = SQLAlchemyOrderRepository(session)
+        self.accounts = SQLAlchemyAccountRepository(session)
+    
+    <span class="keyword">async def</span> <span class="function">__aenter__</span>(self) -> Self:
+        <span class="keyword">return</span> self
+    
+    <span class="keyword">async def</span> <span class="function">__aexit__</span>(self, exc_type, exc_val, exc_tb) -> <span class="keyword">None</span>:
+        <span class="keyword">if</span> exc_type <span class="keyword">is not None</span>:
+            <span class="keyword">await</span> self.rollback()
+    
+    <span class="keyword">async def</span> <span class="function">commit</span>(self) -> <span class="keyword">None</span>:
+        <span class="keyword">await</span> self._session.commit()
+    
+    <span class="keyword">async def</span> <span class="function">rollback</span>(self) -> <span class="keyword">None</span>:
+        <span class="keyword">await</span> self._session.rollback()</code></pre>
+
+                <h3>UoW Provider</h3>
+
+<pre><code><span class="keyword">class</span> <span class="class-name">ApplicationProvider</span>(Provider):
+    <span class="string">"""Провайдер application-слоя."""</span>
+    
+    <span class="decorator">@provide</span>(scope=Scope.REQUEST)
+    <span class="keyword">def</span> <span class="function">uow</span>(self, session: AsyncSession) -> UnitOfWork:
+        <span class="keyword">return</span> UnitOfWork(session)
+    
+    <span class="decorator">@provide</span>(scope=Scope.REQUEST)
+    <span class="keyword">def</span> <span class="function">order_service</span>(self, uow: UnitOfWork) -> OrderService:
+        <span class="keyword">return</span> OrderService(uow=uow)
+    
+    <span class="decorator">@provide</span>(scope=Scope.REQUEST)
+    <span class="keyword">def</span> <span class="function">account_service</span>(self, uow: UnitOfWork) -> AccountService:
+        <span class="keyword">return</span> AccountService(uow=uow)</code></pre>
+
+                <h2>Сборка контейнера</h2>
+
+<pre><code><span class="comment"># src/scaletrade/di/container.py</span>
+<span class="keyword">from</span> dishka <span class="keyword">import</span> make_async_container, Provider, Scope, provide
+
+<span class="keyword">from</span> scaletrade.config <span class="keyword">import</span> Settings, get_settings
+
+
+<span class="keyword">class</span> <span class="class-name">SettingsProvider</span>(Provider):
+    <span class="decorator">@provide</span>(scope=Scope.APP)
+    <span class="keyword">def</span> <span class="function">settings</span>(self) -> Settings:
+        <span class="keyword">return</span> get_settings()
+
+
+<span class="keyword">def</span> <span class="function">create_container</span>():
+    <span class="string">"""Создание контейнера с всеми провайдерами."""</span>
+    <span class="keyword">return</span> make_async_container(
+        SettingsProvider(),
+        DatabaseProvider(),
+        CacheProvider(),
+        ApplicationProvider(),
+    )</code></pre>
+
+                <h2>Интеграция с Litestar</h2>
+
+<pre><code><span class="comment"># src/scaletrade/main.py</span>
+<span class="keyword">from</span> litestar <span class="keyword">import</span> Litestar
+<span class="keyword">from</span> dishka.integrations.litestar <span class="keyword">import</span> (
+    setup_dishka,
+    FromDishka,
+    inject,
+)
+
+<span class="keyword">from</span> scaletrade.di.container <span class="keyword">import</span> create_container
+<span class="keyword">from</span> scaletrade.interface.http.orders <span class="keyword">import</span> OrderController
+
+
+<span class="keyword">def</span> <span class="function">create_app</span>() -> Litestar:
+    container = create_container()
+    
+    app = Litestar(
+        route_handlers=[OrderController],
+        lifespan=[container],  <span class="comment"># Закрытие при остановке</span>
+    )
+    
+    setup_dishka(container, app)
+    <span class="keyword">return</span> app
+
+
+<span class="comment"># В контроллере:</span>
+<span class="keyword">from</span> dishka.integrations.litestar <span class="keyword">import</span> FromDishka
+
+<span class="keyword">class</span> <span class="class-name">OrderController</span>(Controller):
+    <span class="decorator">@get</span>(<span class="string">"/"</span>)
+    <span class="keyword">async def</span> <span class="function">list_orders</span>(
+        self,
+        order_service: FromDishka[OrderService],  <span class="comment"># Инъекция!</span>
+    ) -> <span class="type">list</span>[OrderResponse]:
+        <span class="keyword">return await</span> order_service.list_orders()</code></pre>
+
+                <h2>Тестирование с подменой зависимостей</h2>
+
+<pre><code><span class="comment"># tests/conftest.py</span>
+<span class="keyword">import</span> pytest
+<span class="keyword">from</span> dishka <span class="keyword">import</span> make_async_container, Provider, provide, Scope
+<span class="keyword">from</span> unittest.mock <span class="keyword">import</span> AsyncMock
+
+
+<span class="keyword">class</span> <span class="class-name">MockOrderRepository</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self):
+        self.orders = {}
+    
+    <span class="keyword">async def</span> <span class="function">get_by_id</span>(self, order_id):
+        <span class="keyword">return</span> self.orders.get(<span class="type">str</span>(order_id))
+    
+    <span class="keyword">async def</span> <span class="function">save</span>(self, order):
+        self.orders[<span class="type">str</span>(order.id)] = order
+
+
+<span class="keyword">class</span> <span class="class-name">TestProvider</span>(Provider):
+    <span class="string">"""Тестовый провайдер с моками."""</span>
+    
+    <span class="decorator">@provide</span>(scope=Scope.APP)
+    <span class="keyword">def</span> <span class="function">order_repo</span>(self) -> MockOrderRepository:
+        <span class="keyword">return</span> MockOrderRepository()
+
+
+<span class="decorator">@pytest.fixture</span>
+<span class="keyword">async def</span> <span class="function">test_container</span>():
+    container = make_async_container(
+        TestProvider(),
+        <span class="comment"># Остальные провайдеры...</span>
+    )
+    <span class="keyword">yield</span> container
+    <span class="keyword">await</span> container.close()
+
+
+<span class="decorator">@pytest.fixture</span>
+<span class="keyword">async def</span> <span class="function">order_service</span>(test_container):
+    <span class="keyword">async with</span> test_container() <span class="keyword">as</span> request_container:
+        <span class="keyword">yield await</span> request_container.get(OrderService)</code></pre>
+
+                <h3>Пример теста</h3>
+
+<pre><code><span class="comment"># tests/unit/test_order_service.py</span>
+<span class="keyword">import</span> pytest
+<span class="keyword">from</span> scaletrade.application.dto.order <span class="keyword">import</span> CreateOrderDTO
+
+
+<span class="decorator">@pytest.mark.asyncio</span>
+<span class="keyword">async def</span> <span class="function">test_create_order</span>(order_service):
+    <span class="comment"># Arrange</span>
+    dto = CreateOrderDTO(
+        user_id=<span class="number">1</span>,
+        symbol=<span class="string">"BTC/USD"</span>,
+        side=<span class="string">"BUY"</span>,
+        quantity=<span class="string">"0.5"</span>,
+        price=<span class="string">"50000.00"</span>,
+    )
+    
+    <span class="comment"># Act</span>
+    result = <span class="keyword">await</span> order_service.create_order(dto)
+    
+    <span class="comment"># Assert</span>
+    <span class="keyword">assert</span> result.symbol == <span class="string">"BTC/USD"</span>
+    <span class="keyword">assert</span> result.status == <span class="string">"pending"</span></code></pre>
+
+                <h2>Продвинутые паттерны</h2>
+
+                <h3>Контекстные данные (Request Context)</h3>
+
+<pre><code><span class="keyword">class</span> <span class="class-name">RequestContextProvider</span>(Provider):
+    <span class="string">"""Провайдер данных текущего запроса."""</span>
+    
+    <span class="decorator">@provide</span>(scope=Scope.REQUEST)
+    <span class="keyword">def</span> <span class="function">current_user</span>(self, request: Request) -> User:
+        <span class="comment"># Извлекаем из JWT токена</span>
+        token = request.headers.get(<span class="string">"Authorization"</span>)
+        <span class="keyword">return</span> decode_jwt_user(token)
+    
+    <span class="decorator">@provide</span>(scope=Scope.REQUEST)
+    <span class="keyword">def</span> <span class="function">request_id</span>(self, request: Request) -> <span class="type">str</span>:
+        <span class="keyword">return</span> request.headers.get(<span class="string">"X-Request-ID"</span>, uuid4().hex)</code></pre>
+
+                <h3>Декораторы с инъекцией</h3>
+
+<pre><code><span class="keyword">from</span> dishka.integrations.litestar <span class="keyword">import</span> inject
+
+
+<span class="decorator">@inject</span>
+<span class="keyword">async def</span> <span class="function">some_background_task</span>(
+    order_service: FromDishka[OrderService],
+) -> <span class="keyword">None</span>:
+    <span class="string">"""Фоновая задача с DI."""</span>
+    <span class="keyword">await</span> order_service.process_pending_orders()</code></pre>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Scope Mismatch</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Самая частая ошибка — попытка внедрить зависимость с <code>Scope.REQUEST</code> (например, соединение с БД) в сервис с <code>Scope.APP</code> (синглтон). Dishka выбросит исключение при старте контейнера. Синглтоны не могут зависеть от временных объектов.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Логика в __init__ провайдера</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Провайдеры должны быть "тупыми" фабриками. Не делайте вызовы API или подключения к БД в <code>__init__</code> провайдера. Делайте это внутри методов, помеченных <code>@provide</code>, и используйте <code>scope=Scope.APP</code>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Визуализация графа:</strong> В Dishka есть встроенная утилита для рисования графа зависимостей. Это спасает, когда граф становится огромным и непонятным.</li>
+                    <li><strong>Контекст для Task Queue:</strong> Используйте контейнер в Celery/Dramatiq воркерах. Создавайте scope для каждой задачи, аналогично HTTP-запросу. Это позволит использовать тот же код сервисов и в API, и в фоновых задачах.</li>
+                    <li><strong>Yield вместо Return:</strong> Всегда используйте <code>yield</code> в провайдерах ресурсов (DB, HTTP Client). Это гарантирует, что код после <code>yield</code> (закрытие соединения) выполнится при закрытии контейнера, даже если случилась ошибка.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>📋 Задание</h4>
+                    <ul class="task-list">
+                        <li>Создай <code>CacheProvider</code> для Redis с правильным scope</li>
+                        <li>Реализуй <code>UnitOfWork</code> с доступом к orders и accounts</li>
+                        <li>Интегрируй Dishka с Litestar приложением</li>
+                        <li>Напиши тест с подменой репозитория на мок</li>
+                        <li>Добавь <code>RequestContextProvider</code> для текущего пользователя</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="part2_litestar.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 2.1 Litestar + DDD</div>
+                        </div>
+                    </a>
+                    <a href="part3_faststream.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">3.1 RabbitMQ + Faststream →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

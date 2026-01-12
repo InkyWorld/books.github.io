@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мини-проекты - Clean Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
+        p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
+        .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
+        .sidebar-title { color: #f8fafc; }
+        .sidebar-subtitle { color: #60a5fa; }
+        .nav-section { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem 1rem 0.5rem; }
+        .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
+        pre { font-family: 'JetBrains Mono', monospace; background-color: #1e293b; color: #e2e8f0; padding: 1.5rem; border-radius: 0.75rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.6; border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin: 1.5rem 0; }
+        .card { background: white; border-radius: 1rem; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem; border: 1px solid #e2e8f0; }
+        .pattern-tag { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; margin-right: 0.5rem; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body class="flex bg-slate-50">
+    <aside class="sidebar hidden md:block">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
+            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+        </div>
+        <nav class="py-4">
+            <div class="px-4 mb-4">
+                <div class="flex gap-2 text-xs font-bold text-slate-400">
+                    <a href="projects.html" class="text-blue-400 font-bold">RU</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../en/projects.html" class="hover:text-white transition">EN</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../ua/projects.html" class="hover:text-white transition">UA</a>
+                </div>
+            </div>
+            <div class="nav-section">Основы</div>
+            <a href="index.html" class="nav-link">📘 Введение</a>
+            <div class="nav-section">Слои архитектуры</div>
+            <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link">🌐 Presentation Layer</a>
+            <div class="nav-section">Принципы и паттерны</div>
+            <a href="solid.html" class="nav-link">📐 SOLID принципы</a>
+            <a href="invariants.html" class="nav-link">🛡️ Инварианты</a>
+            <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
+            <a href="cqrs_es.html" class="nav-link">⚡ CQRS и ES</a>
+            <div class="nav-section">Security & Production</div>
+            <a href="security.html" class="nav-link">🔐 Auth & Permissions</a>
+            <a href="concurrency.html" class="nav-link">🛑 Concurrency & Migrations</a>
+            <a href="background_tasks.html" class="nav-link">⏳ Background Tasks</a>
+            <a href="error_handling.html" class="nav-link">🚫 Error Handling</a>
+            <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
+            <div class="nav-section">DDD Patterns</div>
+            <a href="bounded_context.html" class="nav-link">🌍 Bounded Contexts</a>
+            <a href="modular_monolith.html" class="nav-link">🏗️ Modular Monolith</a>
+            <a href="aggregates.html" class="nav-link">📦 Aggregates</a>
+            <a href="value_objects.html" class="nav-link">💎 Value Objects</a>
+            <a href="repository_uow.html" class="nav-link">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link">📋 Specification</a>
+            <div class="nav-section">EDA & Dist. Systems</div>
+            <a href="domain_events.html" class="nav-link">📣 Domain Events</a>
+            <a href="saga.html" class="nav-link">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link">📮 Outbox Pattern</a>
+            <div class="nav-section">Frameworks & Практика</div>
+            <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
+            <a href="advanced_techniques.html" class="nav-link">🚀 Advanced Tech</a>
+            <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
+            <a href="testing.html" class="nav-link">🧪 Тестирование</a>
+            <a href="projects.html" class="nav-link active">🚀 Мини-проекты</a>
+            <a href="antipatterns.html" class="nav-link">⚠️ Антипаттерны</a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
+        <header class="mb-12 pb-6 border-b border-gray-200">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Практика</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Мини-проекты с паттернами</h1>
+            <p class="text-xl text-gray-500 mt-4">Практические примеры применения Clean Architecture и GoF паттернов</p>
+        </header>
+
+        <!-- PROJECT 1: Payment System -->
+        <section class="card mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-3xl">💳</span>
+                <h2 class="text-2xl font-bold">Проект 1: Система платежей</h2>
+            </div>
+            <div class="mb-4">
+                <span class="pattern-tag bg-blue-100 text-blue-800">Strategy</span>
+                <span class="pattern-tag bg-green-100 text-green-800">Factory</span>
+                <span class="pattern-tag bg-purple-100 text-purple-800">Repository</span>
+            </div>
+            <p>Реализуем систему оплаты с несколькими платёжными провайдерами (Stripe, PayPal, криптовалюта).</p>
+            
+            <h3 class="text-lg font-bold mt-6 mb-3">📁 Структура проекта</h3>
+<pre><code>payment_service/
+├── domain/
+│   ├── entities.py          # Order, Payment
+│   ├── value_objects.py     # Money, PaymentMethod
+│   └── exceptions.py        # PaymentFailed, InvalidAmount
+├── application/
+│   ├── ports.py             # PaymentGateway (interface)
+│   ├── use_cases.py         # ProcessPaymentUseCase
+│   └── dto.py               # PaymentRequest, PaymentResult
+├── infrastructure/
+│   ├── stripe_gateway.py    # Stripe реализация
+│   ├── paypal_gateway.py    # PayPal реализация
+│   └── crypto_gateway.py    # Crypto реализация
+└── presentation/
+    └── api.py               # FastAPI endpoints</code></pre>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">🎯 Strategy Pattern — Выбор платёжного шлюза</h3>
+<pre><code class="language-python"># domain/value_objects.py
+from enum import Enum
+from dataclasses import dataclass
+from decimal import Decimal
+
+class PaymentMethod(Enum):
+    STRIPE = "stripe"
+    PAYPAL = "paypal"
+    CRYPTO = "crypto"
+
+@dataclass(frozen=True)
+class Money:
+    amount: Decimal
+    currency: str
+    
+    def __post_init__(self):
+        if self.amount < 0:
+            raise ValueError("Amount cannot be negative")
+
+# application/ports.py — Интерфейс стратегии
+from abc import ABC, abstractmethod
+from domain.value_objects import Money
+
+class PaymentGateway(ABC):
+    """Strategy interface"""
+    @abstractmethod
+    def charge(self, amount: Money, token: str) -> str:
+        """Возвращает transaction_id"""
+        pass
+    
+    @abstractmethod
+    def refund(self, transaction_id: str) -> bool:
+        pass
+
+# infrastructure/stripe_gateway.py — Конкретная стратегия
+import stripe
+from application.ports import PaymentGateway
+from domain.value_objects import Money
+
+class StripeGateway(PaymentGateway):
+    def __init__(self, api_key: str):
+        stripe.api_key = api_key
+    
+    def charge(self, amount: Money, token: str) -> str:
+        charge = stripe.Charge.create(
+            amount=int(amount.amount * 100),  # Stripe в центах
+            currency=amount.currency.lower(),
+            source=token
+        )
+        return charge.id
+    
+    def refund(self, transaction_id: str) -> bool:
+        stripe.Refund.create(charge=transaction_id)
+        return True
+
+# infrastructure/paypal_gateway.py — Другая стратегия
+class PayPalGateway(PaymentGateway):
+    def __init__(self, client_id: str, secret: str):
+        self.client_id = client_id
+        self.secret = secret
+    
+    def charge(self, amount: Money, token: str) -> str:
+        # PayPal API integration
+        return f"PAYPAL-{token[:8]}"
+    
+    def refund(self, transaction_id: str) -> bool:
+        return True</code></pre>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">🏭 Factory Pattern — Создание нужного шлюза</h3>
+<pre><code class="language-python"># infrastructure/gateway_factory.py
+from domain.value_objects import PaymentMethod
+from application.ports import PaymentGateway
+from .stripe_gateway import StripeGateway
+from .paypal_gateway import PayPalGateway
+from .crypto_gateway import CryptoGateway
+
+class PaymentGatewayFactory:
+    """Factory для создания платёжных шлюзов"""
+    
+    def __init__(self, config: dict):
+        self._config = config
+        self._gateways = {}
+    
+    def get_gateway(self, method: PaymentMethod) -> PaymentGateway:
+        if method not in self._gateways:
+            self._gateways[method] = self._create_gateway(method)
+        return self._gateways[method]
+    
+    def _create_gateway(self, method: PaymentMethod) -> PaymentGateway:
+        if method == PaymentMethod.STRIPE:
+            return StripeGateway(self._config["stripe_key"])
+        elif method == PaymentMethod.PAYPAL:
+            return PayPalGateway(
+                self._config["paypal_client_id"],
+                self._config["paypal_secret"]
+            )
+        elif method == PaymentMethod.CRYPTO:
+            return CryptoGateway(self._config["crypto_wallet"])
+        raise ValueError(f"Unknown payment method: {method}")</code></pre>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">⚙️ Use Case — Оркестрация</h3>
+<pre><code class="language-python"># application/use_cases.py
+from dataclasses import dataclass
+from domain.value_objects import Money, PaymentMethod
+from .ports import PaymentGateway
+
+@dataclass
+class ProcessPaymentCommand:
+    order_id: str
+    amount: Money
+    method: PaymentMethod
+    payment_token: str
+
+class ProcessPaymentUseCase:
+    def __init__(self, gateway_factory, order_repo, payment_repo):
+        self.gateway_factory = gateway_factory
+        self.order_repo = order_repo
+        self.payment_repo = payment_repo
+    
+    def execute(self, cmd: ProcessPaymentCommand) -> str:
+        # 1. Получаем нужный шлюз через Factory
+        gateway = self.gateway_factory.get_gateway(cmd.method)
+        
+        # 2. Выполняем оплату через Strategy
+        transaction_id = gateway.charge(cmd.amount, cmd.payment_token)
+        
+        # 3. Сохраняем результат
+        payment = Payment(
+            order_id=cmd.order_id,
+            amount=cmd.amount,
+            method=cmd.method,
+            transaction_id=transaction_id
+        )
+        self.payment_repo.save(payment)
+        
+        # 4. Обновляем заказ
+        order = self.order_repo.get(cmd.order_id)
+        order.mark_as_paid()
+        self.order_repo.save(order)
+        
+        return transaction_id</code></pre>
+        </section>
+
+        <!-- PROJECT 2: Notification Service -->
+        <section class="card mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-3xl">🔔</span>
+                <h2 class="text-2xl font-bold">Проект 2: Сервис уведомлений</h2>
+            </div>
+            <div class="mb-4">
+                <span class="pattern-tag bg-orange-100 text-orange-800">Observer</span>
+                <span class="pattern-tag bg-pink-100 text-pink-800">Decorator</span>
+                <span class="pattern-tag bg-cyan-100 text-cyan-800">Template Method</span>
+            </div>
+            <p>Система отправки уведомлений через разные каналы (Email, SMS, Push, Telegram).</p>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">📁 Структура проекта</h3>
+<pre><code>notification_service/
+├── domain/
+│   ├── events.py            # UserRegistered, OrderShipped
+│   └── entities.py          # Notification, NotificationChannel
+├── application/
+│   ├── ports.py             # NotificationSender (interface)
+│   ├── handlers.py          # Event handlers
+│   └── services.py          # NotificationService
+├── infrastructure/
+│   ├── email_sender.py      # SMTP/SendGrid
+│   ├── sms_sender.py        # Twilio
+│   ├── push_sender.py       # Firebase
+│   └── telegram_sender.py   # Telegram Bot API
+└── presentation/
+    └── event_consumers.py   # RabbitMQ/Kafka consumers</code></pre>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">👁️ Observer Pattern — Подписка на события</h3>
+<pre><code class="language-python"># domain/events.py
+from dataclasses import dataclass
+from datetime import datetime
+from typing import List, Callable
+from abc import ABC
+
+@dataclass
+class DomainEvent(ABC):
+    occurred_at: datetime = None
+    
+    def __post_init__(self):
+        if self.occurred_at is None:
+            self.occurred_at = datetime.utcnow()
+
+@dataclass
+class UserRegistered(DomainEvent):
+    user_id: str
+    email: str
+    name: str
+
+@dataclass  
+class OrderShipped(DomainEvent):
+    order_id: str
+    user_id: str
+    tracking_number: str
+
+# application/event_bus.py — Реализация Observer
+class EventBus:
+    """Observer pattern implementation"""
+    
+    def __init__(self):
+        self._handlers: dict[type, List[Callable]] = {}
+    
+    def subscribe(self, event_type: type, handler: Callable):
+        """Подписка на событие"""
+        if event_type not in self._handlers:
+            self._handlers[event_type] = []
+        self._handlers[event_type].append(handler)
+    
+    def publish(self, event: DomainEvent):
+        """Публикация события всем подписчикам"""
+        event_type = type(event)
+        if event_type in self._handlers:
+            for handler in self._handlers[event_type]:
+                handler(event)
+
+# application/handlers.py — Обработчики событий
+class NotificationEventHandlers:
+    def __init__(self, notification_service):
+        self.notification_service = notification_service
+    
+    def on_user_registered(self, event: UserRegistered):
+        self.notification_service.send(
+            user_id=event.user_id,
+            template="welcome",
+            channels=["email", "push"],
+            context={"name": event.name}
+        )
+    
+    def on_order_shipped(self, event: OrderShipped):
+        self.notification_service.send(
+            user_id=event.user_id,
+            template="order_shipped",
+            channels=["email", "sms", "push"],
+            context={"tracking": event.tracking_number}
+        )</code></pre>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">🎀 Decorator Pattern — Логирование и retry</h3>
+<pre><code class="language-python"># application/ports.py
+from abc import ABC, abstractmethod
+
+class NotificationSender(ABC):
+    @abstractmethod
+    def send(self, recipient: str, message: str) -> bool:
+        pass
+
+# infrastructure/email_sender.py
+class EmailSender(NotificationSender):
+    def send(self, recipient: str, message: str) -> bool:
+        # Отправка через SMTP
+        return True
+
+# infrastructure/decorators.py — Декораторы
+import logging
+import time
+from functools import wraps
+
+class LoggingDecorator(NotificationSender):
+    """Decorator для логирования"""
+    
+    def __init__(self, sender: NotificationSender):
+        self._sender = sender
+        self._logger = logging.getLogger(__name__)
+    
+    def send(self, recipient: str, message: str) -> bool:
+        self._logger.info(f"Sending to {recipient}")
+        result = self._sender.send(recipient, message)
+        self._logger.info(f"Result: {result}")
+        return result
+
+class RetryDecorator(NotificationSender):
+    """Decorator для повторных попыток"""
+    
+    def __init__(self, sender: NotificationSender, max_retries: int = 3):
+        self._sender = sender
+        self._max_retries = max_retries
+    
+    def send(self, recipient: str, message: str) -> bool:
+        for attempt in range(self._max_retries):
+            try:
+                return self._sender.send(recipient, message)
+            except Exception as e:
+                if attempt == self._max_retries - 1:
+                    raise
+                time.sleep(2 ** attempt)  # Exponential backoff
+        return False
+
+# Использование — композиция декораторов
+email_sender = RetryDecorator(
+    LoggingDecorator(
+        EmailSender(smtp_config)
+    ),
+    max_retries=3
+)</code></pre>
+        </section>
+
+        <!-- PROJECT 3: File Upload Service -->
+        <section class="card mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-3xl">📁</span>
+                <h2 class="text-2xl font-bold">Проект 3: Сервис загрузки файлов</h2>
+            </div>
+            <div class="mb-4">
+                <span class="pattern-tag bg-yellow-100 text-yellow-800">Chain of Responsibility</span>
+                <span class="pattern-tag bg-red-100 text-red-800">Adapter</span>
+                <span class="pattern-tag bg-indigo-100 text-indigo-800">Facade</span>
+            </div>
+            <p>Загрузка и обработка файлов с валидацией, вирус-сканированием и сохранением в облако.</p>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">📁 Структура проекта</h3>
+<pre><code>file_service/
+├── domain/
+│   ├── entities.py          # UploadedFile, FileMetadata
+│   └── value_objects.py     # FileType, FileSize
+├── application/
+│   ├── ports.py             # FileStorage, VirusScanner
+│   ├── validators.py        # Chain of Responsibility
+│   └── use_cases.py         # UploadFileUseCase
+├── infrastructure/
+│   ├── s3_storage.py        # AWS S3 Adapter
+│   ├── local_storage.py     # Local filesystem
+│   ├── clamav_scanner.py    # ClamAV integration
+│   └── image_processor.py   # Pillow/ImageMagick
+└── presentation/
+    └── api.py               # File upload endpoints</code></pre>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">⛓️ Chain of Responsibility — Валидация файлов</h3>
+<pre><code class="language-python"># application/validators.py
+from abc import ABC, abstractmethod
+from domain.entities import UploadedFile
+from domain.exceptions import ValidationError
+
+class FileValidator(ABC):
+    """Base handler in Chain of Responsibility"""
+    
+    def __init__(self):
+        self._next: FileValidator = None
+    
+    def set_next(self, validator: 'FileValidator') -> 'FileValidator':
+        self._next = validator
+        return validator
+    
+    def validate(self, file: UploadedFile) -> bool:
+        if self._check(file):
+            if self._next:
+                return self._next.validate(file)
+            return True
+        return False
+    
+    @abstractmethod
+    def _check(self, file: UploadedFile) -> bool:
+        pass
+
+class FileSizeValidator(FileValidator):
+    def __init__(self, max_size_mb: int = 10):
+        super().__init__()
+        self.max_size = max_size_mb * 1024 * 1024
+    
+    def _check(self, file: UploadedFile) -> bool:
+        if file.size > self.max_size:
+            raise ValidationError(f"File too large: {file.size} bytes")
+        return True
+
+class FileTypeValidator(FileValidator):
+    def __init__(self, allowed_types: list):
+        super().__init__()
+        self.allowed_types = allowed_types
+    
+    def _check(self, file: UploadedFile) -> bool:
+        if file.content_type not in self.allowed_types:
+            raise ValidationError(f"Type not allowed: {file.content_type}")
+        return True
+
+class VirusScanValidator(FileValidator):
+    def __init__(self, scanner):
+        super().__init__()
+        self.scanner = scanner
+    
+    def _check(self, file: UploadedFile) -> bool:
+        if not self.scanner.is_clean(file.content):
+            raise ValidationError("File contains malware")
+        return True
+
+# Построение цепочки
+validator_chain = FileSizeValidator(max_size_mb=50)
+validator_chain.set_next(
+    FileTypeValidator(['image/jpeg', 'image/png', 'application/pdf'])
+).set_next(
+    VirusScanValidator(clamav_scanner)
+)</code></pre>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">🔌 Adapter Pattern — Унификация хранилищ</h3>
+<pre><code class="language-python"># application/ports.py
+from abc import ABC, abstractmethod
+
+class FileStorage(ABC):
+    @abstractmethod
+    def save(self, key: str, content: bytes) -> str:
+        """Возвращает URL файла"""
+        pass
+    
+    @abstractmethod
+    def get(self, key: str) -> bytes:
+        pass
+    
+    @abstractmethod
+    def delete(self, key: str) -> bool:
+        pass
+
+# infrastructure/s3_storage.py — Adapter для AWS S3
+import boto3
+
+class S3StorageAdapter(FileStorage):
+    """Adapter: преобразует интерфейс boto3 в наш FileStorage"""
+    
+    def __init__(self, bucket: str, region: str):
+        self.bucket = bucket
+        self.s3 = boto3.client('s3', region_name=region)
+    
+    def save(self, key: str, content: bytes) -> str:
+        self.s3.put_object(Bucket=self.bucket, Key=key, Body=content)
+        return f"https://{self.bucket}.s3.amazonaws.com/{key}"
+    
+    def get(self, key: str) -> bytes:
+        response = self.s3.get_object(Bucket=self.bucket, Key=key)
+        return response['Body'].read()
+    
+    def delete(self, key: str) -> bool:
+        self.s3.delete_object(Bucket=self.bucket, Key=key)
+        return True
+
+# infrastructure/local_storage.py — Adapter для локальной FS
+from pathlib import Path
+
+class LocalStorageAdapter(FileStorage):
+    def __init__(self, base_path: str):
+        self.base_path = Path(base_path)
+        self.base_path.mkdir(parents=True, exist_ok=True)
+    
+    def save(self, key: str, content: bytes) -> str:
+        path = self.base_path / key
+        path.write_bytes(content)
+        return str(path)
+    
+    def get(self, key: str) -> bytes:
+        return (self.base_path / key).read_bytes()
+    
+    def delete(self, key: str) -> bool:
+        (self.base_path / key).unlink()
+        return True</code></pre>
+        </section>
+
+        <!-- PROJECT 4: Order Management -->
+        <section class="card mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-3xl">📦</span>
+                <h2 class="text-2xl font-bold">Проект 4: Управление заказами</h2>
+            </div>
+            <div class="mb-4">
+                <span class="pattern-tag bg-teal-100 text-teal-800">State</span>
+                <span class="pattern-tag bg-lime-100 text-lime-800">Command</span>
+                <span class="pattern-tag bg-amber-100 text-amber-800">Memento</span>
+            </div>
+            <p>Система управления жизненным циклом заказа с состояниями и историей изменений.</p>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">🔄 State Pattern — Состояния заказа</h3>
+<pre><code class="language-python"># domain/order_states.py
+from abc import ABC, abstractmethod
+
+class OrderState(ABC):
+    """State interface"""
+    
+    @abstractmethod
+    def confirm(self, order: 'Order'): pass
+    
+    @abstractmethod
+    def ship(self, order: 'Order'): pass
+    
+    @abstractmethod
+    def deliver(self, order: 'Order'): pass
+    
+    @abstractmethod
+    def cancel(self, order: 'Order'): pass
+
+class PendingState(OrderState):
+    def confirm(self, order):
+        order.set_state(ConfirmedState())
+        order.add_event(OrderConfirmed(order.id))
+    
+    def ship(self, order):
+        raise InvalidOperation("Cannot ship pending order")
+    
+    def deliver(self, order):
+        raise InvalidOperation("Cannot deliver pending order")
+    
+    def cancel(self, order):
+        order.set_state(CancelledState())
+        order.add_event(OrderCancelled(order.id))
+
+class ConfirmedState(OrderState):
+    def confirm(self, order):
+        raise InvalidOperation("Already confirmed")
+    
+    def ship(self, order):
+        order.set_state(ShippedState())
+        order.add_event(OrderShipped(order.id))
+    
+    def deliver(self, order):
+        raise InvalidOperation("Must ship first")
+    
+    def cancel(self, order):
+        order.set_state(CancelledState())
+        order.add_event(OrderCancelled(order.id, reason="cancelled_after_confirm"))
+
+class ShippedState(OrderState):
+    def confirm(self, order):
+        raise InvalidOperation("Already shipped")
+    
+    def ship(self, order):
+        raise InvalidOperation("Already shipped")
+    
+    def deliver(self, order):
+        order.set_state(DeliveredState())
+        order.add_event(OrderDelivered(order.id))
+    
+    def cancel(self, order):
+        raise InvalidOperation("Cannot cancel shipped order")
+
+# domain/entities.py
+class Order:
+    def __init__(self, id: str, items: list):
+        self.id = id
+        self.items = items
+        self._state: OrderState = PendingState()
+        self._events = []
+    
+    def set_state(self, state: OrderState):
+        self._state = state
+    
+    def confirm(self):
+        self._state.confirm(self)
+    
+    def ship(self):
+        self._state.ship(self)
+    
+    def deliver(self):
+        self._state.deliver(self)
+    
+    def cancel(self):
+        self._state.cancel(self)</code></pre>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">📝 Command Pattern — Операции над заказом</h3>
+<pre><code class="language-python"># application/commands.py
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+
+class Command(ABC):
+    @abstractmethod
+    def execute(self): pass
+    
+    @abstractmethod
+    def undo(self): pass
+
+@dataclass
+class AddItemCommand(Command):
+    order: 'Order'
+    item: 'OrderItem'
+    
+    def execute(self):
+        self.order.add_item(self.item)
+    
+    def undo(self):
+        self.order.remove_item(self.item)
+
+@dataclass
+class ChangeQuantityCommand(Command):
+    order: 'Order'
+    item_id: str
+    new_quantity: int
+    _old_quantity: int = None
+    
+    def execute(self):
+        item = self.order.get_item(self.item_id)
+        self._old_quantity = item.quantity
+        item.quantity = self.new_quantity
+    
+    def undo(self):
+        item = self.order.get_item(self.item_id)
+        item.quantity = self._old_quantity
+
+# application/command_handler.py
+class OrderCommandHandler:
+    def __init__(self):
+        self._history: list[Command] = []
+    
+    def execute(self, command: Command):
+        command.execute()
+        self._history.append(command)
+    
+    def undo(self):
+        if self._history:
+            command = self._history.pop()
+            command.undo()
+    
+    def undo_all(self):
+        while self._history:
+            self.undo()</code></pre>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">💾 Memento Pattern — Снимки состояния</h3>
+<pre><code class="language-python"># domain/memento.py
+from dataclasses import dataclass
+from datetime import datetime
+from typing import List
+import copy
+
+@dataclass
+class OrderMemento:
+    """Снимок состояния заказа"""
+    state: dict
+    created_at: datetime
+    version: int
+
+class Order:
+    def __init__(self, id: str):
+        self.id = id
+        self.items = []
+        self.status = "pending"
+        self._version = 0
+    
+    def save_state(self) -> OrderMemento:
+        """Создать снимок"""
+        self._version += 1
+        return OrderMemento(
+            state={
+                'id': self.id,
+                'items': copy.deepcopy(self.items),
+                'status': self.status
+            },
+            created_at=datetime.utcnow(),
+            version=self._version
+        )
+    
+    def restore_state(self, memento: OrderMemento):
+        """Восстановить из снимка"""
+        self.id = memento.state['id']
+        self.items = copy.deepcopy(memento.state['items'])
+        self.status = memento.state['status']
+        self._version = memento.version
+
+class OrderHistory:
+    """Caretaker — хранит историю снимков"""
+    
+    def __init__(self):
+        self._mementos: List[OrderMemento] = []
+    
+    def push(self, memento: OrderMemento):
+        self._mementos.append(memento)
+    
+    def pop(self) -> OrderMemento:
+        return self._mementos.pop()
+    
+    def get_version(self, version: int) -> OrderMemento:
+        for m in self._mementos:
+            if m.version == version:
+                return m
+        raise ValueError(f"Version {version} not found")</code></pre>
+        </section>
+
+        <!-- PROJECT 5: Discount Calculator -->
+        <section class="card mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-3xl">🏷️</span>
+                <h2 class="text-2xl font-bold">Проект 5: Калькулятор скидок</h2>
+            </div>
+            <div class="mb-4">
+                <span class="pattern-tag bg-rose-100 text-rose-800">Composite</span>
+                <span class="pattern-tag bg-violet-100 text-violet-800">Specification</span>
+                <span class="pattern-tag bg-sky-100 text-sky-800">Builder</span>
+            </div>
+            <p>Гибкая система скидок с комбинированием правил и условий.</p>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">🌳 Composite Pattern — Комбинирование скидок</h3>
+<pre><code class="language-python"># domain/discounts.py
+from abc import ABC, abstractmethod
+from decimal import Decimal
+from typing import List
+
+class Discount(ABC):
+    """Component interface"""
+    
+    @abstractmethod
+    def calculate(self, order: 'Order') -> Decimal:
+        pass
+
+class PercentageDiscount(Discount):
+    """Leaf: процентная скидка"""
+    
+    def __init__(self, percent: Decimal):
+        self.percent = percent
+    
+    def calculate(self, order: 'Order') -> Decimal:
+        return order.subtotal * (self.percent / 100)
+
+class FixedDiscount(Discount):
+    """Leaf: фиксированная скидка"""
+    
+    def __init__(self, amount: Decimal):
+        self.amount = amount
+    
+    def calculate(self, order: 'Order') -> Decimal:
+        return min(self.amount, order.subtotal)
+
+class CompositeDiscount(Discount):
+    """Composite: комбинация скидок"""
+    
+    def __init__(self, mode: str = 'sum'):
+        self.discounts: List[Discount] = []
+        self.mode = mode  # 'sum', 'max', 'first'
+    
+    def add(self, discount: Discount):
+        self.discounts.append(discount)
+    
+    def calculate(self, order: 'Order') -> Decimal:
+        if not self.discounts:
+            return Decimal(0)
+        
+        amounts = [d.calculate(order) for d in self.discounts]
+        
+        if self.mode == 'sum':
+            return sum(amounts)
+        elif self.mode == 'max':
+            return max(amounts)
+        elif self.mode == 'first':
+            return amounts[0] if amounts else Decimal(0)
+
+# Использование
+black_friday = CompositeDiscount(mode='max')
+black_friday.add(PercentageDiscount(Decimal('20')))  # -20%
+black_friday.add(FixedDiscount(Decimal('500')))      # или -500₽
+# Применится максимальная из двух</code></pre>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">📋 Specification Pattern — Условия применения</h3>
+<pre><code class="language-python"># domain/specifications.py
+from abc import ABC, abstractmethod
+
+class Specification(ABC):
+    @abstractmethod
+    def is_satisfied_by(self, candidate) -> bool:
+        pass
+    
+    def __and__(self, other: 'Specification') -> 'Specification':
+        return AndSpecification(self, other)
+    
+    def __or__(self, other: 'Specification') -> 'Specification':
+        return OrSpecification(self, other)
+    
+    def __invert__(self) -> 'Specification':
+        return NotSpecification(self)
+
+class AndSpecification(Specification):
+    def __init__(self, *specs):
+        self.specs = specs
+    
+    def is_satisfied_by(self, candidate) -> bool:
+        return all(s.is_satisfied_by(candidate) for s in self.specs)
+
+class OrSpecification(Specification):
+    def __init__(self, *specs):
+        self.specs = specs
+    
+    def is_satisfied_by(self, candidate) -> bool:
+        return any(s.is_satisfied_by(candidate) for s in self.specs)
+
+# Конкретные спецификации для скидок
+class MinOrderAmountSpec(Specification):
+    def __init__(self, min_amount: Decimal):
+        self.min_amount = min_amount
+    
+    def is_satisfied_by(self, order) -> bool:
+        return order.subtotal >= self.min_amount
+
+class CustomerLevelSpec(Specification):
+    def __init__(self, required_level: str):
+        self.required_level = required_level
+    
+    def is_satisfied_by(self, order) -> bool:
+        return order.customer.level == self.required_level
+
+class FirstOrderSpec(Specification):
+    def is_satisfied_by(self, order) -> bool:
+        return order.customer.orders_count == 0
+
+# Комбинирование условий
+vip_discount_spec = (
+    MinOrderAmountSpec(Decimal('5000')) &
+    CustomerLevelSpec('VIP')
+)
+
+new_customer_spec = FirstOrderSpec() | CustomerLevelSpec('NEW')</code></pre>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">🔨 Builder Pattern — Конструирование правил</h3>
+<pre><code class="language-python"># application/discount_builder.py
+class DiscountRuleBuilder:
+    def __init__(self):
+        self._discount = None
+        self._specification = None
+        self._priority = 0
+        self._stackable = True
+    
+    def with_percentage(self, percent: Decimal) -> 'DiscountRuleBuilder':
+        self._discount = PercentageDiscount(percent)
+        return self
+    
+    def with_fixed_amount(self, amount: Decimal) -> 'DiscountRuleBuilder':
+        self._discount = FixedDiscount(amount)
+        return self
+    
+    def when(self, spec: Specification) -> 'DiscountRuleBuilder':
+        self._specification = spec
+        return self
+    
+    def with_priority(self, priority: int) -> 'DiscountRuleBuilder':
+        self._priority = priority
+        return self
+    
+    def non_stackable(self) -> 'DiscountRuleBuilder':
+        self._stackable = False
+        return self
+    
+    def build(self) -> 'DiscountRule':
+        return DiscountRule(
+            discount=self._discount,
+            specification=self._specification,
+            priority=self._priority,
+            stackable=self._stackable
+        )
+
+# Использование Builder
+vip_rule = (
+    DiscountRuleBuilder()
+    .with_percentage(Decimal('15'))
+    .when(CustomerLevelSpec('VIP') & MinOrderAmountSpec(Decimal('3000')))
+    .with_priority(10)
+    .build()
+)
+
+welcome_rule = (
+    DiscountRuleBuilder()
+    .with_fixed_amount(Decimal('500'))
+    .when(FirstOrderSpec())
+    .non_stackable()
+    .with_priority(100)
+    .build()
+)</code></pre>
+        </section>
+
+        <!-- Summary Table -->
+        <section class="card bg-gray-50">
+            <h2 class="text-2xl font-bold mb-6">📊 Сводка паттернов</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="border-b-2 border-gray-300">
+                            <th class="text-left p-3 font-bold">Паттерн</th>
+                            <th class="text-left p-3 font-bold">Категория</th>
+                            <th class="text-left p-3 font-bold">Когда использовать</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b"><td class="p-3 font-semibold">Strategy</td><td class="p-3">Поведенческий</td><td class="p-3">Взаимозаменяемые алгоритмы (платежи, сортировка)</td></tr>
+                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Factory</td><td class="p-3">Порождающий</td><td class="p-3">Создание объектов без указания конкретного класса</td></tr>
+                        <tr class="border-b"><td class="p-3 font-semibold">Observer</td><td class="p-3">Поведенческий</td><td class="p-3">Уведомления, события, pub/sub</td></tr>
+                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Decorator</td><td class="p-3">Структурный</td><td class="p-3">Добавление поведения (логирование, retry, кэш)</td></tr>
+                        <tr class="border-b"><td class="p-3 font-semibold">Chain of Responsibility</td><td class="p-3">Поведенческий</td><td class="p-3">Последовательная обработка (валидация, фильтры)</td></tr>
+                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Adapter</td><td class="p-3">Структурный</td><td class="p-3">Интеграция с внешними API и библиотеками</td></tr>
+                        <tr class="border-b"><td class="p-3 font-semibold">State</td><td class="p-3">Поведенческий</td><td class="p-3">Объекты с состоянием (заказы, документы)</td></tr>
+                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Command</td><td class="p-3">Поведенческий</td><td class="p-3">Операции с undo, очереди задач</td></tr>
+                        <tr class="border-b"><td class="p-3 font-semibold">Memento</td><td class="p-3">Поведенческий</td><td class="p-3">История изменений, версионирование</td></tr>
+                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Composite</td><td class="p-3">Структурный</td><td class="p-3">Древовидные структуры (меню, скидки)</td></tr>
+                        <tr class="border-b"><td class="p-3 font-semibold">Specification</td><td class="p-3">DDD</td><td class="p-3">Бизнес-правила, фильтрация, валидация</td></tr>
+                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Builder</td><td class="p-3">Порождающий</td><td class="p-3">Сложные объекты с множеством параметров</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Navigation -->
+        <div class="mt-12 pt-8 border-t border-gray-200">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <a href="testing.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right">
+                    <span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Назад</span>
+                    <span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Тестирование</span>
+                </a>
+                <a href="antipatterns.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left">
+                    <span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далее</span>
+                    <span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Антипаттерны &rarr;</span>
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

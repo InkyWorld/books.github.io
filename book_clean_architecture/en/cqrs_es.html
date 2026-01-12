@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 8: CQRS and Event Sourcing - Clean Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
+        p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
+        
+        .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
+        .sidebar-title { color: #f8fafc; }
+        .sidebar-subtitle { color: #60a5fa; }
+        .nav-section { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem 1rem 0.5rem; }
+        .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
+
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+        .code-keyword { color: #c084fc; font-weight: bold; } 
+        .code-class { color: #fbbf24; font-weight: bold; }   
+        .code-func { color: #60a5fa; font-weight: bold; }    
+        .code-str { color: #a3e635; }                        
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+    <!-- SIDEBAR (Placeholder, will be updated globally) -->
+    <aside class="sidebar hidden md:block">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
+            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+        </div>
+        <nav class="py-4">
+            <div class="px-4 mb-4">
+                <div class="flex gap-2 text-xs font-bold text-slate-400">
+                    <a href="../ru/cqrs_es.html" class="hover:text-white transition">RU</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="cqrs_es.html" class="text-blue-400 font-bold">EN</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../ua/cqrs_es.html" class="hover:text-white transition">UA</a>
+                </div>
+            </div>
+
+            <div class="nav-section">Basics</div>
+            <a href="index.html" class="nav-link ">📘 Introduction</a>
+            
+            <div class="nav-section">Architecture Layers</div>
+            <a href="domain.html" class="nav-link ">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link ">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link ">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link ">🌐 Presentation Layer</a>
+            
+            <div class="nav-section">Principles & Patterns</div>
+            <a href="solid.html" class="nav-link ">📐 SOLID Principles</a>
+            <a href="invariants.html" class="nav-link ">🛡️ Invariants</a>
+            <a href="dependency.html" class="nav-link ">💉 Dependency Injection</a>
+            <a href="cqrs_es.html" class="nav-link active">⚡ CQRS and ES</a>
+            
+            <div class="nav-section">Security & Production</div>
+            <a href="security.html" class="nav-link ">🔐 Auth & Permissions</a>
+            <a href="concurrency.html" class="nav-link ">🛑 Concurrency & Migrations</a>
+            <a href="background_tasks.html" class="nav-link ">⏳ Background Tasks</a>
+            <a href="error_handling.html" class="nav-link ">🚫 Error Handling</a>
+            <a href="config_logging.html" class="nav-link ">⚙️ Config & Observability</a>
+
+            <div class="nav-section">DDD Patterns</div>
+            <a href="bounded_context.html" class="nav-link ">🌍 Bounded Contexts</a>
+            <a href="modular_monolith.html" class="nav-link ">🏗️ Modular Monolith</a>
+            <a href="aggregates.html" class="nav-link ">📦 Aggregates</a>
+            <a href="value_objects.html" class="nav-link ">💎 Value Objects</a>
+            <a href="repository_uow.html" class="nav-link ">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link ">📋 Specification</a>
+
+            <div class="nav-section">EDA & Dist. Systems</div>
+            <a href="domain_events.html" class="nav-link ">📣 Domain Events</a>
+            <a href="saga.html" class="nav-link ">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link ">📮 Outbox Pattern</a>
+
+            <div class="nav-section">Frameworks & Practice</div>
+            <a href="frameworks_django.html" class="nav-link ">🐍 Django & Others</a>
+            <a href="advanced_techniques.html" class="nav-link ">🚀 Advanced Tech</a>
+            <a href="deployment.html" class="nav-link ">🚀 Deployment & Protection</a>
+            <a href="testing.html" class="nav-link ">🧪 Testing</a>
+            <a href="projects.html" class="nav-link ">🚀 Mini-projects</a>
+            <a href="antipatterns.html" class="nav-link ">⚠️ Anti-patterns</a>
+        </nav>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
+        <header class="mb-12 pb-8 border-b border-gray-200">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">CQRS and Event Sourcing</h1>
+            <p class="text-xl text-gray-600">Divide and conquer. Advanced patterns for scalable systems.</p>
+        </header>
+
+        <!-- Section 1: CQRS -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">1. CQRS (Command Query Responsibility Segregation)</h2>
+            <div class="prose prose-slate max-w-none text-gray-700">
+                <p class="mb-4">
+                    In simple CRUD systems, we use the same model (ORM) for reading and writing. But read and write requirements often contradict each other:
+                </p>
+                <ul class="list-disc list-inside mb-4">
+                    <li><strong>Write (Command):</strong> Needs normalization, integrity, transactionality. "Hard to write".</li>
+                    <li><strong>Read (Query):</strong> Needs denormalization, speed, aggregation. "Fast to read".</li>
+                </ul>
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                    <p><strong>CQRS</strong> proposes splitting the system into two parts: <strong>Command Model</strong> (write path) and <strong>Query Model</strong> (read path).</p>
+                </div>
+                
+                <h3 class="font-bold text-lg mb-2">Implementation Example:</h3>
+                <pre><code class="language-python"># 1. COMMAND SIDE (Clean Architecture, Rich Model)
+# Using Domain Entities, Repositories, Validations
+class CreateOrderUseCase:
+    def execute(self, cmd: CreateOrderCommand):
+        order = Order(cmd.details) # Check invariants
+        self.repo.save(order)
+
+# 2. QUERY SIDE (Optimized for Reading)
+# Ignoring Entities. Reading DTOs directly via Raw SQL.
+class GetOrderQueryHandler:
+    def execute(self, query: GetOrderQuery) -> OrderDTO:
+        # SQL query immediately returns the needed structure (JOINs included)
+        sql = "SELECT o.id, u.name FROM orders o JOIN users u ON ..."
+        return self.db.execute(sql).fetchone()</code></pre>
+            </div>
+        </section>
+
+        <!-- Section 2: Domain Events -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">2. Domain Events</h2>
+            <p class="mb-4 text-gray-700">
+                An event is a fact that something has <strong>already</strong> happened. "Order paid", "User registered".
+                Events allow reducing Coupling between modules.
+            </p>
+            <pre><code class="language-python">from dataclasses import dataclass
+from datetime import datetime
+
+# An event is a DTO, it is immutable. Name in past tense.
+@dataclass(frozen=True)
+class OrderPaid:
+    order_id: str
+    amount: float
+    paid_at: datetime
+
+# In Entity
+class Order:
+    def pay(self):
+        self.status = "PAID"
+        # We just record the fact, not calling email_service directly
+        self.events.append(OrderPaid(self.id, self.amount, datetime.now()))
+
+# In Infrastructure (Unit of Work)
+# After transaction commit, we publish events
+for event in order.events:
+    event_bus.publish(event)
+</code></pre>
+        </section>
+        
+        
+        <!-- Section 3: Event Sourcing -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">3. Event Sourcing (ES)</h2>
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                <p><strong>Essence:</strong> We do not store the current state of the object (a row in the DB). We store the <strong>history of all events</strong> that brought the object to this state.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-6">
+                <div>
+                    <h3 class="font-bold text-lg mb-2">Traditional Approach (State-Oriented)</h3>
+                    <div class="bg-gray-100 p-3 rounded text-sm font-mono">
+                        User(id=1, balance=500)<br>
+                        ⬇ UPDATE balance=600<br>
+                        User(id=1, balance=600)<br>
+                        <span class="text-red-500">History lost. Where did 100 come from?</span>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg mb-2">Event Sourcing</h3>
+                    <div class="bg-gray-100 p-3 rounded text-sm font-mono">
+                        Ev1: UserCreated(balance=0)<br>
+                        Ev2: MoneyDeposited(1000)<br>
+                        Ev3: ItemPurchased(500)<br>
+                        -------------------------<br>
+                        <span class="text-green-600">Current State = sum(events) = 500</span>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="font-bold text-lg mt-6 mb-2">How it works?</h3>
+            <ol class="list-decimal list-inside space-y-3 mb-6">
+                <li><strong>Event Store:</strong> This is an Append-Only database. We never delete or change events.</li>
+                <li><strong>Replay:</strong> To get an `Order` object, we take an empty order and "apply" all events from the database to it in order.</li>
+                <li><strong>Projections:</strong> Restoring an object from 1000 events every time is slow. Therefore, we listen to events in the background and update regular SQL tables ("Read Models") for fast search.</li>
+            </ol>
+
+            <pre><code class="language-python">class Order(AggregateRoot):
+    # State Reconstruction (Apply)
+    def apply(self, event: DomainEvent):
+        if isinstance(event, OrderCreated):
+            self.status = "NEW"
+            self.total = 0
+        elif isinstance(event, ItemAdded):
+            self.total += event.price
+
+    # Load from history
+    @classmethod
+    def load_from_history(cls, events: List[DomainEvent]):
+        order = cls()
+        for event in events:
+            order.apply(event)
+        return order
+</code></pre>
+            
+            <h3 class="font-bold text-lg mt-6 mb-2">Pros and Cons</h3>
+            <ul class="list-disc list-inside space-y-2">
+                <li><strong class="text-green-600">Audit Log:</strong> Rock-solid audit out of the box. You cannot "quietly" fix the database.</li>
+                <li><strong class="text-green-600">Temporal Query:</strong> "What was the user's balance last Friday?" — Easy, just replay events up to that date.</li>
+                <li><strong class="text-red-600">Complexity:</strong> Event Versioning (Data Migration for events is hell). Eventually Consistency (Projection lag).</li>
+            </ul>
+        </section>
+
+        <!-- NAVIGATION FOOTER -->
+        
+        <!-- NAVIGATION FOOTER -->
+        
+        <!-- NAVIGATION FOOTER -->
+        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="dependency.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Back</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Dependency</span></a><a href="security.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Next</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Auth & Permissions &rarr;</span></a></div></div>
+    </main>
+</body>
+</html>

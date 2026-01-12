@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7.3 GraphQL Federation — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link"><span class="nav-link-icon">🏠</span>Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 7: GraphQL & gRPC</div>
+                    <a href="part7_graphql.html" class="nav-link"><span class="nav-link-icon">🔷</span>7.1 GraphQL</a>
+                    <a href="part7_grpc.html" class="nav-link"><span class="nav-link-icon">⚡</span>7.2 gRPC</a>
+                    <a href="part7_federation.html" class="nav-link active"><span class="nav-link-icon">🌐</span>7.3 Federation</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 7</span>
+                    <span>/</span>
+                    <span>7.3 GraphQL Federation</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 7.3: GraphQL Federation</h1>
+                <p class="lead">
+                    Объединяем независимые GraphQL схемы микросервисов в единый API Gateway.
+                </p>
+
+                <h2>Apollo Federation архитектура</h2>
+                
+                <p>Federation позволяет каждому микросервису управлять своей частью схемы:</p>
+
+                <pre><code class="language-python"># orders-service/schema.py
+import strawberry
+from strawberry.federation import FederatedType, Key
+
+@strawberry.federation.type(keys=["id"])
+class User:
+    """Внешняя сущность из users-service"""
+    id: strawberry.ID = strawberry.federation.field(external=True)
+    
+    @classmethod
+    def resolve_reference(cls, id: strawberry.ID):
+        # Не загружаем пользователя, это делает users-service
+        return cls(id=id)
+
+@strawberry.type
+class Order:
+    id: strawberry.ID
+    user_id: int
+    symbol: str
+    quantity: Decimal
+    
+    @strawberry.field
+    def user(self) -> User:
+        """Ссылка на пользователя из другого сервиса"""
+        return User(id=strawberry.ID(str(self.user_id)))
+
+@strawberry.type
+class Query:
+    @strawberry.field
+    async def orders(self) -> list[Order]:
+        return await fetch_orders()
+
+# Создание federated схемы
+schema = strawberry.federation.Schema(query=Query)</code></pre>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. N+1 Distributed Waterfall</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если вы запрашиваете список из 50 ордеров и для каждого тянете поле <code>user { email }</code>, Gateway сделает 1 запрос в Orders Service, получит 50 ID, и затем может сделать 50 запросов в Users Service (если не настроен Dataloader на уровне Gateway или Query Plan не оптимален). Это убивает latency.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Schema Registry Failure</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если один из подграфов (сервисов) упал или выкатил невалидную схему, Gateway не сможет собрать общий граф и может просто перестать стартовать (или перестать обновляться). Используйте Managed Federation (Apollo Studio), чтобы валидировать схему ДО деплоя.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Apollo Router:</strong> Забудьте про старый Apollo Gateway на Node.js. Используйте Apollo Router (написан на Rust). Он выдает < 1ms оверхеда и держит огромную нагрузку.</li>
+                    <li><strong>Entities Representation:</strong> В методе <code>resolve_reference</code> старайтесь не ходить в БД, если вам нужны только ID. Если нужны данные — используйте Dataloader, чтобы батчить запросы по ключам от Gateway.</li>
+                    <li><strong>Rover CLI:</strong> Используйте <code>rover subgraph check</code> в CI/CD пайплайне. Это утилита, которая проверит, не ломает ли ваш PR общий граф (например, удалением поля, которое использует другой сервис).</li>
+                </ul>
+
+                <h2>Полный пример с 3 микросервисами</h2>
+
+                <p>Практическая задача - объединить orders, users и analytics сервисы.</p>
+
+                <div class="task-box">
+                    <h4>🎯 Практика</h4>
+                    <ul class="task-list">
+                        <li>Настрой Apollo Gateway для 3 сервисов</li>
+                        <li>Реализуй @key директиву для связей</li>
+                        <li>Добавь distributed tracing</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="part7_grpc.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 7.2 gRPC</div>
+                        </div>
+                    </a>
+                    <a href="part8_asyncio.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">8.1 Asyncio Advanced →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

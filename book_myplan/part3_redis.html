@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.2 Redis Patterns — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link"><span class="nav-link-icon">🏠</span>Главная</a>
+                    <a href="setup.html" class="nav-link"><span class="nav-link-icon">⚙️</span>Настройка проекта</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
+                    <a href="part1_schema.html" class="nav-link"><span class="nav-link-icon">📊</span>1.1 Схема и хранение</a>
+                    <a href="part1_transactions.html" class="nav-link"><span class="nav-link-icon">🔄</span>1.2 Транзакции</a>
+                    <a href="part1_indexes.html" class="nav-link"><span class="nav-link-icon">🔍</span>1.3 Индексы</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 2: Архитектура</div>
+                    <a href="part2_litestar.html" class="nav-link"><span class="nav-link-icon">🚀</span>2.1 Litestar + DDD</a>
+                    <a href="part2_dishka.html" class="nav-link"><span class="nav-link-icon">💉</span>2.2 DI с Dishka</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 3: Распределённые</div>
+                    <a href="part3_faststream.html" class="nav-link"><span class="nav-link-icon">📨</span>3.1 RabbitMQ + Faststream</a>
+                    <a href="part3_redis.html" class="nav-link active"><span class="nav-link-icon">⚡</span>3.2 Redis Patterns</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 4: Надёжность</div>
+                    <a href="part4_testing.html" class="nav-link"><span class="nav-link-icon">🧪</span>4.1 Advanced Testing</a>
+                    <a href="part4_resiliency.html" class="nav-link"><span class="nav-link-icon">🛡️</span>4.2 Resiliency</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 5: Observability</div>
+                    <a href="part5_logging.html" class="nav-link"><span class="nav-link-icon">📝</span>5.1 Логирование</a>
+                    <a href="part5_clickhouse.html" class="nav-link"><span class="nav-link-icon">📈</span>5.2 ClickHouse</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 6: Production</div>
+                    <a href="part6_migrations.html" class="nav-link"><span class="nav-link-icon">🔀</span>6.1 Zero-Downtime</a>
+                    <a href="part6_quality.html" class="nav-link"><span class="nav-link-icon">✅</span>6.2 Code Quality</a>
+                    <a href="part6_django.html" class="nav-link"><span class="nav-link-icon">🔗</span>6.3 Django Admin</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 3</span>
+                    <span>/</span>
+                    <span>3.2 Redis Patterns</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 3.2: Redis Patterns</h1>
+                <p class="lead">
+                    Распределённые блокировки, Lua скрипты, Rate Limiting — 
+                    паттерны для координации в distributed системах.
+                </p>
+
+                <h2>Redis в архитектуре</h2>
+                
+                <p>Redis используется для:</p>
+                <ul>
+                    <li><strong>Кеширование:</strong> Горячие данные, сессии</li>
+                    <li><strong>Distributed Locks:</strong> Координация между инстансами</li>
+                    <li><strong>Rate Limiting:</strong> Защита от перегрузки</li>
+                    <li><strong>Pub/Sub:</strong> Real-time уведомления</li>
+                    <li><strong>Leaderboard:</strong> Sorted Sets для рейтингов</li>
+                </ul>
+
+                <h2>Distributed Locks (Redlock)</h2>
+                
+                <p>
+                    <strong>Задача:</strong> Несколько инстансов обрабатывают ордера. 
+                    Нужно гарантировать, что один ордер обрабатывается только одним инстансом.
+                </p>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/cache/distributed_lock.py</span>
+<span class="keyword">import</span> uuid
+<span class="keyword">from</span> contextlib <span class="keyword">import</span> asynccontextmanager
+<span class="keyword">from</span> typing <span class="keyword">import</span> AsyncIterator
+
+<span class="keyword">from</span> redis.asyncio <span class="keyword">import</span> Redis
+
+
+<span class="keyword">class</span> <span class="class-name">DistributedLock</span>:
+    <span class="string">"""
+    Распределённая блокировка на Redis.
+    
+    Использует SET NX EX для атомарного захвата.
+    Безопасное освобождение через Lua скрипт.
+    """</span>
+    
+    <span class="comment"># Lua скрипт для безопасного освобождения</span>
+    <span class="comment"># Удаляет ключ ТОЛЬКО если значение совпадает</span>
+    RELEASE_SCRIPT = <span class="string">"""
+    if redis.call("get", KEYS[1]) == ARGV[1] then
+        return redis.call("del", KEYS[1])
+    else
+        return 0
+    end
+    """</span>
+    
+    <span class="keyword">def</span> <span class="function">__init__</span>(
+        self, 
+        redis: Redis, 
+        name: <span class="type">str</span>, 
+        timeout: <span class="type">int</span> = <span class="number">30</span>
+    ) -> <span class="keyword">None</span>:
+        self._redis = redis
+        self._name = <span class="string">f"lock:</span>{name}<span class="string">"</span>
+        self._timeout = timeout
+        self._token = uuid.uuid4().hex
+    
+    <span class="keyword">async def</span> <span class="function">acquire</span>(self) -> <span class="type">bool</span>:
+        <span class="string">"""
+        Попытка захватить блокировку.
+        
+        SET NX — установить только если не существует
+        EX — TTL в секундах (защита от deadlock)
+        """</span>
+        result = <span class="keyword">await</span> self._redis.set(
+            self._name,
+            self._token,
+            nx=<span class="keyword">True</span>,    <span class="comment"># Not eXists</span>
+            ex=self._timeout,
+        )
+        <span class="keyword">return</span> result <span class="keyword">is True</span>
+    
+    <span class="keyword">async def</span> <span class="function">release</span>(self) -> <span class="type">bool</span>:
+        <span class="string">"""
+        Освобождение блокировки.
+        
+        Используем Lua скрипт для атомарности:
+        проверка токена и удаление в одной операции.
+        """</span>
+        result = <span class="keyword">await</span> self._redis.eval(
+            self.RELEASE_SCRIPT,
+            <span class="number">1</span>,  <span class="comment"># количество ключей</span>
+            self._name,
+            self._token,
+        )
+        <span class="keyword">return</span> result == <span class="number">1</span>
+    
+    <span class="decorator">@asynccontextmanager</span>
+    <span class="keyword">async def</span> <span class="function">hold</span>(self) -> AsyncIterator[<span class="type">bool</span>]:
+        <span class="string">"""Context manager для автоматического освобождения."""</span>
+        acquired = <span class="keyword">await</span> self.acquire()
+        <span class="keyword">try</span>:
+            <span class="keyword">yield</span> acquired
+        <span class="keyword">finally</span>:
+            <span class="keyword">if</span> acquired:
+                <span class="keyword">await</span> self.release()</code></pre>
+
+                <h3>Использование</h3>
+
+<pre><code><span class="comment"># Обработка ордера с блокировкой</span>
+<span class="keyword">async def</span> <span class="function">process_order</span>(order_id: <span class="type">str</span>, redis: Redis) -> <span class="keyword">None</span>:
+    lock = DistributedLock(redis, <span class="string">f"order:</span>{order_id}<span class="string">"</span>, timeout=<span class="number">60</span>)
+    
+    <span class="keyword">async with</span> lock.hold() <span class="keyword">as</span> acquired:
+        <span class="keyword">if not</span> acquired:
+            logger.warning(<span class="string">f"Order {order_id} is being processed by another instance"</span>)
+            <span class="keyword">return</span>
+        
+        <span class="comment"># Безопасно обрабатываем</span>
+        order = <span class="keyword">await</span> get_order(order_id)
+        <span class="keyword">await</span> execute_order(order)</code></pre>
+
+                <h2>Lua Scripting: атомарные операции</h2>
+                
+                <p>
+                    Lua скрипты выполняются атомарно. Redis гарантирует, 
+                    что никакие другие команды не выполнятся во время скрипта.
+                </p>
+
+                <h3>Rate Limiter (Token Bucket)</h3>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/cache/rate_limiter.py</span>
+<span class="keyword">from</span> redis.asyncio <span class="keyword">import</span> Redis
+
+
+<span class="keyword">class</span> <span class="class-name">TokenBucketRateLimiter</span>:
+    <span class="string">"""
+    Rate Limiter на основе Token Bucket.
+    
+    - Bucket наполняется токенами с заданной скоростью
+    - Каждый запрос забирает токен
+    - Если токенов нет — отказ
+    """</span>
+    
+    <span class="comment"># Lua скрипт для атомарного rate limiting</span>
+    SCRIPT = <span class="string">"""
+    local key = KEYS[1]
+    local capacity = tonumber(ARGV[1])     -- Максимум токенов
+    local refill_rate = tonumber(ARGV[2])  -- Токенов в секунду
+    local now = tonumber(ARGV[3])          -- Текущее время (ms)
+    local requested = tonumber(ARGV[4])    -- Сколько токенов нужно
+    
+    -- Получаем текущее состояние
+    local data = redis.call("HMGET", key, "tokens", "last_refill")
+    local tokens = tonumber(data[1]) or capacity
+    local last_refill = tonumber(data[2]) or now
+    
+    -- Вычисляем сколько токенов добавилось
+    local elapsed = (now - last_refill) / 1000
+    local refilled = elapsed * refill_rate
+    tokens = math.min(capacity, tokens + refilled)
+    
+    -- Пробуем забрать токены
+    local allowed = 0
+    if tokens >= requested then
+        tokens = tokens - requested
+        allowed = 1
+    end
+    
+    -- Сохраняем состояние
+    redis.call("HMSET", key, "tokens", tokens, "last_refill", now)
+    redis.call("EXPIRE", key, 3600)  -- TTL 1 час
+    
+    return {allowed, math.floor(tokens)}
+    """</span>
+    
+    <span class="keyword">def</span> <span class="function">__init__</span>(
+        self,
+        redis: Redis,
+        capacity: <span class="type">int</span> = <span class="number">100</span>,
+        refill_rate: <span class="type">float</span> = <span class="number">10.0</span>,  <span class="comment"># токенов/сек</span>
+    ) -> <span class="keyword">None</span>:
+        self._redis = redis
+        self._capacity = capacity
+        self._refill_rate = refill_rate
+        self._script = self._redis.register_script(self.SCRIPT)
+    
+    <span class="keyword">async def</span> <span class="function">is_allowed</span>(
+        self, 
+        key: <span class="type">str</span>, 
+        tokens: <span class="type">int</span> = <span class="number">1</span>
+    ) -> <span class="keyword">tuple</span>[<span class="type">bool</span>, <span class="type">int</span>]:
+        <span class="string">"""
+        Проверяем, разрешён ли запрос.
+        
+        Returns:
+            (allowed, remaining_tokens)
+        """</span>
+        <span class="keyword">import</span> time
+        now_ms = <span class="type">int</span>(time.time() * <span class="number">1000</span>)
+        
+        result = <span class="keyword">await</span> self._script(
+            keys=[<span class="string">f"ratelimit:</span>{key}<span class="string">"</span>],
+            args=[self._capacity, self._refill_rate, now_ms, tokens],
+        )
+        
+        <span class="keyword">return</span> <span class="type">bool</span>(result[<span class="number">0</span>]), <span class="type">int</span>(result[<span class="number">1</span>])</code></pre>
+
+                <h3>Rate Limiter Middleware</h3>
+
+<pre><code><span class="comment"># src/scaletrade/interface/middleware/rate_limit.py</span>
+<span class="keyword">from</span> litestar <span class="keyword">import</span> Request
+<span class="keyword">from</span> litestar.middleware <span class="keyword">import</span> AbstractMiddleware
+<span class="keyword">from</span> litestar.exceptions <span class="keyword">import</span> TooManyRequestsException
+
+
+<span class="keyword">class</span> <span class="class-name">RateLimitMiddleware</span>(AbstractMiddleware):
+    <span class="keyword">async def</span> <span class="function">__call__</span>(self, request: Request, call_next):
+        <span class="comment"># Получаем rate limiter из DI</span>
+        limiter = request.app.state.rate_limiter
+        
+        <span class="comment"># Ключ — IP или user_id</span>
+        user_id = request.user.id <span class="keyword">if</span> request.user <span class="keyword">else</span> request.client.host
+        key = <span class="string">f"api:</span>{user_id}<span class="string">"</span>
+        
+        allowed, remaining = <span class="keyword">await</span> limiter.is_allowed(key)
+        
+        <span class="keyword">if not</span> allowed:
+            <span class="keyword">raise</span> TooManyRequestsException(
+                detail=<span class="string">"Rate limit exceeded. Try again later."</span>,
+                headers={<span class="string">"X-RateLimit-Remaining"</span>: <span class="type">str</span>(remaining)},
+            )
+        
+        response = <span class="keyword">await</span> call_next(request)
+        response.headers[<span class="string">"X-RateLimit-Remaining"</span>] = <span class="type">str</span>(remaining)
+        <span class="keyword">return</span> response</code></pre>
+
+                <h2>Pipelining: массовые операции</h2>
+                
+                <p>
+                    Без pipelining: N операций = N round-trip до Redis.<br>
+                    С pipelining: N операций = 1 round-trip.
+                </p>
+
+<pre><code><span class="comment"># Без pipelining (медленно)</span>
+<span class="keyword">for</span> user_id <span class="keyword">in</span> user_ids:
+    <span class="keyword">await</span> redis.get(<span class="string">f"user:</span>{user_id}<span class="string">"</span>)  <span class="comment"># 100 запросов = 100 RTT</span>
+
+<span class="comment"># С pipelining (быстро)</span>
+<span class="keyword">async with</span> redis.pipeline() <span class="keyword">as</span> pipe:
+    <span class="keyword">for</span> user_id <span class="keyword">in</span> user_ids:
+        pipe.get(<span class="string">f"user:</span>{user_id}<span class="string">"</span>)
+    results = <span class="keyword">await</span> pipe.execute()  <span class="comment"># 1 RTT!</span></code></pre>
+
+                <h3>Batch операции для кеша</h3>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/cache/user_cache.py</span>
+<span class="keyword">class</span> <span class="class-name">UserCache</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, redis: Redis) -> <span class="keyword">None</span>:
+        self._redis = redis
+        self._ttl = <span class="number">3600</span>
+    
+    <span class="keyword">async def</span> <span class="function">get_many</span>(self, user_ids: <span class="type">list</span>[<span class="type">int</span>]) -> <span class="type">dict</span>[<span class="type">int</span>, User | <span class="keyword">None</span>]:
+        <span class="string">"""Получить несколько пользователей одним запросом."""</span>
+        <span class="keyword">if not</span> user_ids:
+            <span class="keyword">return</span> {}
+        
+        keys = [<span class="string">f"user:</span>{uid}<span class="string">"</span> <span class="keyword">for</span> uid <span class="keyword">in</span> user_ids]
+        values = <span class="keyword">await</span> self._redis.mget(keys)
+        
+        result = {}
+        <span class="keyword">for</span> uid, value <span class="keyword">in</span> <span class="function">zip</span>(user_ids, values):
+            <span class="keyword">if</span> value:
+                result[uid] = User.model_validate_json(value)
+            <span class="keyword">else</span>:
+                result[uid] = <span class="keyword">None</span>
+        
+        <span class="keyword">return</span> result
+    
+    <span class="keyword">async def</span> <span class="function">set_many</span>(self, users: <span class="type">dict</span>[<span class="type">int</span>, User]) -> <span class="keyword">None</span>:
+        <span class="string">"""Сохранить несколько пользователей одним запросом."""</span>
+        <span class="keyword">async with</span> self._redis.pipeline() <span class="keyword">as</span> pipe:
+            <span class="keyword">for</span> uid, user <span class="keyword">in</span> users.items():
+                pipe.setex(
+                    <span class="string">f"user:</span>{uid}<span class="string">"</span>,
+                    self._ttl,
+                    user.model_dump_json(),
+                )
+            <span class="keyword">await</span> pipe.execute()</code></pre>
+
+                <h2>Cache-Aside Pattern</h2>
+
+<pre><code><span class="comment"># src/scaletrade/application/services/user_service.py</span>
+<span class="keyword">class</span> <span class="class-name">UserService</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, uow: UnitOfWork, cache: UserCache) -> <span class="keyword">None</span>:
+        self._uow = uow
+        self._cache = cache
+    
+    <span class="keyword">async def</span> <span class="function">get_user</span>(self, user_id: <span class="type">int</span>) -> User:
+        <span class="string">"""
+        Cache-Aside:
+        1. Проверяем кеш
+        2. Если нет — идём в БД
+        3. Сохраняем в кеш
+        """</span>
+        <span class="comment"># 1. Пробуем кеш</span>
+        cached = <span class="keyword">await</span> self._cache.get(user_id)
+        <span class="keyword">if</span> cached:
+            <span class="keyword">return</span> cached
+        
+        <span class="comment"># 2. Идём в БД</span>
+        <span class="keyword">async with</span> self._uow:
+            user = <span class="keyword">await</span> self._uow.users.get_by_id(user_id)
+            <span class="keyword">if</span> user <span class="keyword">is None</span>:
+                <span class="keyword">raise</span> UserNotFoundError(user_id)
+        
+        <span class="comment"># 3. Сохраняем в кеш</span>
+        <span class="keyword">await</span> self._cache.set(user_id, user)
+        
+        <span class="keyword">return</span> user
+    
+    <span class="keyword">async def</span> <span class="function">update_user</span>(self, user_id: <span class="type">int</span>, data: UpdateUserDTO) -> User:
+        <span class="string">"""При изменении — инвалидируем кеш."""</span>
+        <span class="keyword">async with</span> self._uow:
+            user = <span class="keyword">await</span> self._uow.users.get_by_id(user_id)
+            user.update(data)
+            <span class="keyword">await</span> self._uow.commit()
+        
+        <span class="comment"># Инвалидируем кеш</span>
+        <span class="keyword">await</span> self._cache.delete(user_id)
+        
+        <span class="keyword">return</span> user</code></pre>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Команда KEYS *</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Никогда не используйте <code>KEYS *</code> в проде. Redis — однопоточный. Пока он сканирует 10 млн ключей, все остальные запросы ждут. Приложение встанет колом. Используйте курсоры: <code>SCAN</code>.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Big Keys</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если в хеше или списке миллион элементов, удаление этого ключа (DEL) заблокирует Redis на секунды. Используйте <code>UNLINK</code> (асинхронное удаление) и избегайте создания таких монстров.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. Redis как БД</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Не храните в Redis данные, потеря которых критична, если вы не настроили AOF с <code>fsync everysec</code> (и даже так есть риск). Redis оптимизирован на скорость, а не на сохранность. Используйте его как кэш или очередь, но не как Source of Truth.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Naming Convention:</strong> Используйте двоеточия для группировки: <code>object_type:id:field</code> (например, <code>user:100:settings</code>). Это стандарт, который понимают многие GUI клиенты.</li>
+                    <li><strong>Кэш с Jitter:</strong> При установке TTL добавляйте случайное отклонение (например, 3600 ± 300 сек). Это спасет от "Cache Stampede", когда тысячи ключей протухают одновременно и база падает под нагрузкой.</li>
+                    <li><strong>Анализ памяти:</strong> Запустите <code>redis-cli --bigkeys</code> или <code>--memkeys</code>, чтобы понять, кто съел всю память.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>📋 Задание</h4>
+                    <ul class="task-list">
+                        <li>Реализуй <code>DistributedLock</code> с Lua скриптом для безопасного release</li>
+                        <li>Создай Rate Limiter с Token Bucket алгоритмом</li>
+                        <li>Интегрируй Rate Limit middleware в Litestar</li>
+                        <li>Реализуй кеширование пользователей с Cache-Aside</li>
+                        <li>Напиши тест, демонстрирующий работу распределённой блокировки</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="part3_faststream.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 3.1 RabbitMQ + Faststream</div>
+                        </div>
+                    </a>
+                    <a href="part4_testing.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">4.1 Advanced Testing →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

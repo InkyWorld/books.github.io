@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15.2 Postmortem — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 15: Debugging</div>
+                    <a href="part15_debugging.html" class="nav-link">15.1 Debugging</a>
+                    <a href="part15_postmortem.html" class="nav-link active">15.2 Postmortem</a>
+                    <a href="part15_chaos.html" class="nav-link">15.3 Chaos Eng</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 15</span>
+                    <span>/</span>
+                    <span>15.2 Postmortem</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 15.2: Postmortem (Разбор полетов)</h1>
+                <p class="lead">Инциденты случаются. Важно не "наказать виновных", а сделать так, чтобы это не повторилось.</p>
+
+                <h2>Blameless Culture</h2>
+                <p>Культура без обвинений — фундамент SRE (Site Reliability Engineering). Если вы уволите инженера, который уронил прод, вы:</p>
+                <ol>
+                    <li>Потеряете деньги, потраченные на его обучение.</li>
+                    <li>Потеряете урок, который он извлек ("за одного битого двух небитых дают").</li>
+                    <li>Научите остальных скрывать ошибки.</li>
+                </ol>
+                <p><strong>Виноват не человек, а система, которая позволила ему совершить ошибку.</strong></p>
+
+                <h2>Структура Postmortem документа</h2>
+                <div class="info-box">
+                    <ul>
+                        <li><strong>Дата и время:</strong> Начало инцидента, время обнаружения, время починки.</li>
+                        <li><strong>Влияние (Impact):</strong> "API лежал 20 минут, потеряно 500 заказов, убытки $10k".</li>
+                        <li><strong>Root Cause (Корневая причина):</strong> "Опечатка в конфиге Nginx".</li>
+                        <li><strong>Trigger (Триггер):</strong> "Деплой новой версии в 15:30".</li>
+                        <li><strong>Хронология (Timeline):</strong> Поминутно.</li>
+                        <li><strong>Action Items (Что сделать):</strong>
+                            <ul>
+                                <li>Добавить валидатор конфигов в CI/CD (чтобы опечатка не прошла).</li>
+                                <li>Добавить алерт на 5xx ошибки (чтобы узнали не через 20 минут, а через 1).</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <h2>Техника "5 почему" (5 Whys)</h2>
+                <p>Позволяет докопаться до корневой причины.</p>
+                <ol>
+                    <li><strong>Почему упал сайт?</strong> Потому что закончилась память на сервере.</li>
+                    <li><strong>Почему закончилась память?</strong> Потому что процесс `worker` съел 16GB.</li>
+                    <li><strong>Почему он съел 16GB?</strong> Потому что была утечка памяти при обработке PDF.</li>
+                    <li><strong>Почему была утечка?</strong> Потому что библиотека `libpdf` старой версии.</li>
+                    <li><strong>Почему мы не обновили библиотеку?</strong> Потому что у нас нет автоматического сканирования зависимостей. -> <strong>ROOT CAUSE</strong>.</li>
+                </ol>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

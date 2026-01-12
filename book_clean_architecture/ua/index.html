@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вступ - Clean Architecture Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
+        p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
+        
+        .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
+        .sidebar-title { color: #f8fafc; }
+        .sidebar-subtitle { color: #60a5fa; }
+        .nav-section { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem 1rem 0.5rem; }
+        .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
+
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+        .code-comment { color: #94a3b8; font-style: italic; }
+        .code-keyword { color: #c084fc; font-weight: bold; } 
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar hidden md:block">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
+            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+        </div>
+        <nav class="py-4">
+            <div class="px-4 mb-4">
+                <div class="flex gap-2 text-xs font-bold text-slate-400">
+                    <a href="../ru/index.html" class="hover:text-white transition">RU</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../en/index.html" class="hover:text-white transition">EN</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="index.html" class="text-blue-400 font-bold">UA</a>
+                </div>
+            </div>
+
+            <div class="nav-section">Основи</div>
+            <a href="index.html" class="nav-link active">📘 Вступ</a>
+            
+            <div class="nav-section">Шари архітектури</div>
+            <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link">🌐 Presentation Layer</a>
+            
+            <div class="nav-section">Принципи та патерни</div>
+            <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
+            <a href="invariants.html" class="nav-link">🛡️ Інваріанти</a>
+            <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
+            <a href="cqrs_es.html" class="nav-link">⚡ CQRS та ES</a>
+            
+            <div class="nav-section">Security & Production</div>
+            <a href="security.html" class="nav-link">🔐 Auth & Permissions</a>
+            <a href="concurrency.html" class="nav-link">🛑 Concurrency & Migrations</a>
+            <a href="background_tasks.html" class="nav-link">⏳ Background Tasks</a>
+            <a href="error_handling.html" class="nav-link">🚫 Error Handling</a>
+            <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
+
+            <div class="nav-section">DDD Patterns</div>
+            <a href="bounded_context.html" class="nav-link">🌍 Bounded Contexts</a>
+            <a href="modular_monolith.html" class="nav-link">🏗️ Modular Monolith</a>
+            <a href="aggregates.html" class="nav-link">📦 Aggregates</a>
+            <a href="value_objects.html" class="nav-link">💎 Value Objects</a>
+            <a href="repository_uow.html" class="nav-link">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link">📋 Specification</a>
+
+            <div class="nav-section">EDA & Dist. Systems</div>
+            <a href="domain_events.html" class="nav-link">📣 Domain Events</a>
+            <a href="saga.html" class="nav-link">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link">📮 Outbox Pattern</a>
+
+            <div class="nav-section">Frameworks & Практика</div>
+            <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
+            <a href="advanced_techniques.html" class="nav-link">🚀 Advanced Tech</a>
+            <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
+            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="projects.html" class="nav-link">🚀 Міні-проєкти</a>
+            <a href="antipatterns.html" class="nav-link">⚠️ Антипатерни</a>
+        </nav>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
+        <header class="mb-12 pb-8 border-b border-gray-200">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Clean Architecture в Python</h1>
+            <p class="text-xl text-gray-600">Як писати код, який не страшно відкривати через півроку.</p>
+        </header>
+
+        <!-- Section 1: The Problem -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Навіщо нам це потрібно?</h2>
+            <div class="prose prose-slate max-w-none text-gray-700">
+                <p class="mb-4">
+                     Більшість Python-проєктів починаються однаково просто: `app.py`, пара моделей SQLAlchemy, і функції-обробники (views/handlers). 
+                     Це працює, поки в проєкті 1000 рядків коду. Але коли їх 50 000 — починається пекло.
+                </p>
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                    <h3 class="font-bold text-red-700 mb-2">Проблема "Big Ball of Mud":</h3>
+                    <ul class="list-disc list-inside space-y-1 text-gray-800">
+                        <li>Бізнес-логіка розмазана по API хендлерам і моделям бази даних.</li>
+                        <li>Зміна схеми БД ламає API контракти.</li>
+                        <li>Неможливо протестувати "бізнес" без піднімання docker-контейнера з Postgres.</li>
+                        <li>Міграція з Flask на FastAPI або додавання GraphQL вимагає повного переписування.</li>
+                    </ul>
+                </div>
+                <p>
+                    Clean Architecture вирішує це через <strong>Інверсію Залежностей (Dependency Inversion)</strong>. 
+                    Бізнес-логіка стає центром всесвіту, а Фреймворк і База Даних — просто плагінами.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 2: The Dependency Rule -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Золоте правило: The Dependency Rule</h2>
+            <div class="bg-blue-600 text-white p-6 rounded-lg shadow-lg mb-8">
+                <p class="text-lg font-medium text-center">
+                    "Залежності у вихідному коді можуть вказувати тільки ВСЕРЕДИНУ, у бік високорівневих політик."
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white p-6 rounded border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-red-600 mb-3">❌ Неправильно</h3>
+                    <pre><code class="language-python"># Business Logic (Domain)
+# Імпортуємо БД напряму
+from sqlalchemy.orm import Session
+from myapp.models import UserModel
+
+def create_user(db: Session, ...):
+    return db.query(UserModel).add(...)</code></pre>
+                    <p class="text-sm text-gray-600 mt-2">Домен залежить від деталей (ORM).</p>
+                </div>
+                <div class="bg-white p-6 rounded border border-gray-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-green-700 mb-3">✅ Правильно</h3>
+                    <pre><code class="language-python"># Business Logic (Domain)
+# Чистий Python, ніяких імпортів!
+class UserRepository(Protocol):
+    def save(self, user: User): ...
+
+def create_user(repo: UserRepository, ...):
+    repo.save(...)</code></pre>
+                    <p class="text-sm text-gray-600 mt-2">Деталі (БД) будуть залежати від Домену.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: The Four Layers -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Шари Архітектури</h2>
+            <div class="space-y-6">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-purple-600 flex items-center justify-center text-white font-bold">1</div>
+                    <div class="ml-4">
+                        <h3 class="text-xl font-bold text-gray-900">Domain (Entities)</h3>
+                        <p class="text-gray-600">
+                            Центральне коло. Містить бізнес-правила підприємства. Найчистіші об'єкти.
+                            <strong>Залежності: Немає.</strong>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">2</div>
+                    <div class="ml-4">
+                        <h3 class="text-xl font-bold text-gray-900">Application (Use Cases)</h3>
+                        <p class="text-gray-600">
+                            Сценарії використання. Оркеструє потоки даних. Каже домену "зроби роботу".
+                            Визначає інтерфейси (порти) для репозиторіїв.
+                            <strong>Залежності: Domain.</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">3</div>
+                    <div class="ml-4">
+                        <h3 class="text-xl font-bold text-gray-900">Adapters (Infrastructure)</h3>
+                        <p class="text-gray-600">
+                            Конвертери та реалізації. SQLAlchemy репозиторії, API клієнти.
+                            Реалізують інтерфейси, визначені в Application.
+                            <strong>Залежності: Application, Domain.</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-500 flex items-center justify-center text-white font-bold">4</div>
+                    <div class="ml-4">
+                        <h3 class="text-xl font-bold text-gray-900">External Interfaces (Presentation)</h3>
+                        <p class="text-gray-600">
+                            Фреймворки. FastAPI, Django views, CLI, Celery tasks.
+                            Найзовнішній, "брудний" шар.
+                            <strong>Залежності: All inner layers.</strong>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- NAVIGATION FOOTER -->
+        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><div class="hidden md:block w-1/2"></div><a href="domain.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далі</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Domain &rarr;</span></a></div></div>
+    </main>
+</body>
+</html>

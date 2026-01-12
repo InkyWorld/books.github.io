@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>5.2 ClickHouse Analytics — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link"><span class="nav-link-icon">🏠</span>Главная</a>
+                    <a href="setup.html" class="nav-link"><span class="nav-link-icon">⚙️</span>Настройка проекта</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
+                    <a href="part1_schema.html" class="nav-link"><span class="nav-link-icon">📊</span>1.1 Схема и хранение</a>
+                    <a href="part1_transactions.html" class="nav-link"><span class="nav-link-icon">🔄</span>1.2 Транзакции</a>
+                    <a href="part1_indexes.html" class="nav-link"><span class="nav-link-icon">🔍</span>1.3 Индексы</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 2: Архитектура</div>
+                    <a href="part2_litestar.html" class="nav-link"><span class="nav-link-icon">🚀</span>2.1 Litestar + DDD</a>
+                    <a href="part2_dishka.html" class="nav-link"><span class="nav-link-icon">💉</span>2.2 DI с Dishka</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 3: Распределённые</div>
+                    <a href="part3_faststream.html" class="nav-link"><span class="nav-link-icon">📨</span>3.1 RabbitMQ + Faststream</a>
+                    <a href="part3_redis.html" class="nav-link"><span class="nav-link-icon">⚡</span>3.2 Redis Patterns</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 4: Надёжность</div>
+                    <a href="part4_testing.html" class="nav-link"><span class="nav-link-icon">🧪</span>4.1 Advanced Testing</a>
+                    <a href="part4_resiliency.html" class="nav-link"><span class="nav-link-icon">🛡️</span>4.2 Resiliency</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 5: Observability</div>
+                    <a href="part5_logging.html" class="nav-link"><span class="nav-link-icon">📝</span>5.1 Логирование</a>
+                    <a href="part5_clickhouse.html" class="nav-link active"><span class="nav-link-icon">📈</span>5.2 ClickHouse</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 6: Production</div>
+                    <a href="part6_migrations.html" class="nav-link"><span class="nav-link-icon">🔀</span>6.1 Zero-Downtime</a>
+                    <a href="part6_quality.html" class="nav-link"><span class="nav-link-icon">✅</span>6.2 Code Quality</a>
+                    <a href="part6_django.html" class="nav-link"><span class="nav-link-icon">🔗</span>6.3 Django Admin</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 5</span>
+                    <span>/</span>
+                    <span>5.2 ClickHouse</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 5.2: ClickHouse Analytics</h1>
+                <p class="lead">
+                    OLAP база для аналитики: MergeTree, Materialized Views, async batch insert.
+                </p>
+
+                <h2>Зачем ClickHouse?</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>PostgreSQL (OLTP)</th>
+                            <th>ClickHouse (OLAP)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Строковое хранение</td>
+                            <td>Колоночное хранение</td>
+                        </tr>
+                        <tr>
+                            <td>ACID транзакции</td>
+                            <td>Eventual consistency</td>
+                        </tr>
+                        <tr>
+                            <td>Быстрый CRUD</td>
+                            <td>Быстрые агрегации</td>
+                        </tr>
+                        <tr>
+                            <td>Orders, Users, Wallets</td>
+                            <td>Логи, метрики, аналитика</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>MergeTree Engine</h2>
+
+<pre><code><span class="comment">-- Таблица событий торговли</span>
+<span class="keyword">CREATE TABLE</span> trade_events
+(
+    event_id        UUID,
+    event_time      DateTime64(<span class="number">3</span>),  <span class="comment">-- миллисекунды</span>
+    event_type      LowCardinality(String),  <span class="comment">-- order_created, order_filled, etc.</span>
+    order_id        UUID,
+    user_id         UInt64,
+    symbol          LowCardinality(String),
+    side            Enum8(<span class="string">'buy'</span> = <span class="number">1</span>, <span class="string">'sell'</span> = <span class="number">2</span>),
+    quantity        Decimal(<span class="number">18</span>, <span class="number">8</span>),
+    price           Decimal(<span class="number">18</span>, <span class="number">2</span>),
+    total_value     Decimal(<span class="number">18</span>, <span class="number">2</span>),
+    
+    <span class="comment">-- Partition key (по месяцам)</span>
+    event_date      Date <span class="keyword">MATERIALIZED</span> toDate(event_time)
+)
+<span class="keyword">ENGINE</span> = MergeTree()
+<span class="keyword">PARTITION BY</span> toYYYYMM(event_date)
+<span class="keyword">ORDER BY</span> (symbol, event_time, user_id)  <span class="comment">-- Ключ сортировки</span>
+<span class="keyword">TTL</span> event_date + INTERVAL <span class="number">1</span> YEAR  <span class="comment">-- Автоудаление через год</span>
+<span class="keyword">SETTINGS</span> index_granularity = <span class="number">8192</span>;
+
+<span class="comment">-- Запрос: топ-10 трейдеров за день</span>
+<span class="keyword">SELECT</span>
+    user_id,
+    count() <span class="keyword">AS</span> trades_count,
+    sum(total_value) <span class="keyword">AS</span> volume
+<span class="keyword">FROM</span> trade_events
+<span class="keyword">WHERE</span> 
+    event_type = <span class="string">'order_filled'</span>
+    <span class="keyword">AND</span> event_date = today()
+<span class="keyword">GROUP BY</span> user_id
+<span class="keyword">ORDER BY</span> volume <span class="keyword">DESC</span>
+<span class="keyword">LIMIT</span> <span class="number">10</span>;</code></pre>
+
+                <h2>Materialized Views: предагрегация</h2>
+
+<pre><code><span class="comment">-- Таблица для агрегатов (target)</span>
+<span class="keyword">CREATE TABLE</span> daily_user_stats
+(
+    stat_date       Date,
+    user_id         UInt64,
+    symbol          LowCardinality(String),
+    trades_count    AggregateFunction(count, UInt64),
+    total_volume    AggregateFunction(sum, Decimal(<span class="number">18</span>, <span class="number">2</span>)),
+    avg_price       AggregateFunction(avg, Decimal(<span class="number">18</span>, <span class="number">2</span>))
+)
+<span class="keyword">ENGINE</span> = AggregatingMergeTree()
+<span class="keyword">PARTITION BY</span> toYYYYMM(stat_date)
+<span class="keyword">ORDER BY</span> (stat_date, user_id, symbol);
+
+<span class="comment">-- Materialized View: автоматически агрегирует новые данные</span>
+<span class="keyword">CREATE MATERIALIZED VIEW</span> daily_user_stats_mv
+<span class="keyword">TO</span> daily_user_stats
+<span class="keyword">AS SELECT</span>
+    toDate(event_time) <span class="keyword">AS</span> stat_date,
+    user_id,
+    symbol,
+    countState() <span class="keyword">AS</span> trades_count,
+    sumState(total_value) <span class="keyword">AS</span> total_volume,
+    avgState(price) <span class="keyword">AS</span> avg_price
+<span class="keyword">FROM</span> trade_events
+<span class="keyword">WHERE</span> event_type = <span class="string">'order_filled'</span>
+<span class="keyword">GROUP BY</span> stat_date, user_id, symbol;
+
+<span class="comment">-- Запрос агрегатов (мгновенный!)</span>
+<span class="keyword">SELECT</span>
+    stat_date,
+    user_id,
+    countMerge(trades_count) <span class="keyword">AS</span> trades,
+    sumMerge(total_volume) <span class="keyword">AS</span> volume,
+    avgMerge(avg_price) <span class="keyword">AS</span> avg_price
+<span class="keyword">FROM</span> daily_user_stats
+<span class="keyword">WHERE</span> stat_date >= today() - <span class="number">7</span>
+<span class="keyword">GROUP BY</span> stat_date, user_id
+<span class="keyword">ORDER BY</span> volume <span class="keyword">DESC</span>;</code></pre>
+
+                <h2>Async Batch Insert из Python</h2>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/clickhouse/client.py</span>
+<span class="keyword">import</span> asyncio
+<span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass, field
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+<span class="keyword">from</span> typing <span class="keyword">import</span> Generic, TypeVar
+<span class="keyword">from</span> collections.abc <span class="keyword">import</span> Sequence
+
+<span class="keyword">from</span> clickhouse_connect <span class="keyword">import</span> get_async_client
+<span class="keyword">from</span> clickhouse_connect.driver.asyncclient <span class="keyword">import</span> AsyncClient
+
+T = TypeVar(<span class="string">"T"</span>)
+
+
+<span class="decorator">@dataclass</span>
+<span class="keyword">class</span> <span class="class-name">BatchBuffer</span>(Generic[T]):
+    <span class="string">"""
+    Буфер для batch insert.
+    
+    Собирает события и отправляет пачками:
+    - По достижению max_size
+    - По истечению flush_interval
+    """</span>
+    max_size: <span class="type">int</span> = <span class="number">1000</span>
+    flush_interval: <span class="type">float</span> = <span class="number">5.0</span>  <span class="comment"># секунд</span>
+    
+    _buffer: <span class="type">list</span>[T] = field(default_factory=<span class="type">list</span>, init=<span class="keyword">False</span>)
+    _lock: asyncio.Lock = field(default_factory=asyncio.Lock, init=<span class="keyword">False</span>)
+    _last_flush: <span class="type">float</span> = field(default_factory=<span class="keyword">lambda</span>: asyncio.get_event_loop().time(), init=<span class="keyword">False</span>)
+    
+    <span class="keyword">async def</span> <span class="function">add</span>(self, item: T) -> <span class="type">bool</span>:
+        <span class="string">"""Добавить элемент. Возвращает True если нужен flush."""</span>
+        <span class="keyword">async with</span> self._lock:
+            self._buffer.append(item)
+            <span class="keyword">return</span> self._should_flush()
+    
+    <span class="keyword">def</span> <span class="function">_should_flush</span>(self) -> <span class="type">bool</span>:
+        now = asyncio.get_event_loop().time()
+        size_trigger = len(self._buffer) >= self.max_size
+        time_trigger = (now - self._last_flush) >= self.flush_interval
+        <span class="keyword">return</span> size_trigger <span class="keyword">or</span> time_trigger
+    
+    <span class="keyword">async def</span> <span class="function">flush</span>(self) -> Sequence[T]:
+        <span class="string">"""Забрать все элементы из буфера."""</span>
+        <span class="keyword">async with</span> self._lock:
+            items = self._buffer.copy()
+            self._buffer.clear()
+            self._last_flush = asyncio.get_event_loop().time()
+            <span class="keyword">return</span> items
+
+
+<span class="keyword">class</span> <span class="class-name">ClickHouseEventWriter</span>:
+    <span class="string">"""
+    Асинхронный writer событий в ClickHouse.
+    
+    Features:
+    - Batch insert для производительности
+    - Background flush по таймеру
+    - Graceful shutdown
+    """</span>
+    
+    <span class="keyword">def</span> <span class="function">__init__</span>(
+        self,
+        client: AsyncClient,
+        table: <span class="type">str</span>,
+        columns: <span class="type">list</span>[<span class="type">str</span>],
+        batch_size: <span class="type">int</span> = <span class="number">1000</span>,
+        flush_interval: <span class="type">float</span> = <span class="number">5.0</span>,
+    ):
+        self._client = client
+        self._table = table
+        self._columns = columns
+        self._buffer = BatchBuffer(
+            max_size=batch_size,
+            flush_interval=flush_interval,
+        )
+        self._flush_task: asyncio.Task | <span class="keyword">None</span> = <span class="keyword">None</span>
+        self._running = <span class="keyword">False</span>
+    
+    <span class="keyword">async def</span> <span class="function">start</span>(self) -> <span class="keyword">None</span>:
+        <span class="string">"""Запуск background flush."""</span>
+        self._running = <span class="keyword">True</span>
+        self._flush_task = asyncio.create_task(self._flush_loop())
+    
+    <span class="keyword">async def</span> <span class="function">stop</span>(self) -> <span class="keyword">None</span>:
+        <span class="string">"""Graceful shutdown: flush оставшихся данных."""</span>
+        self._running = <span class="keyword">False</span>
+        <span class="keyword">if</span> self._flush_task:
+            self._flush_task.cancel()
+            <span class="keyword">try</span>:
+                <span class="keyword">await</span> self._flush_task
+            <span class="keyword">except</span> asyncio.CancelledError:
+                <span class="keyword">pass</span>
+        <span class="comment"># Final flush</span>
+        <span class="keyword">await</span> self._do_flush()
+    
+    <span class="keyword">async def</span> <span class="function">write</span>(self, event: <span class="type">dict</span>) -> <span class="keyword">None</span>:
+        <span class="string">"""Добавить событие в буфер."""</span>
+        row = [event.get(col) <span class="keyword">for</span> col <span class="keyword">in</span> self._columns]
+        should_flush = <span class="keyword">await</span> self._buffer.add(row)
+        <span class="keyword">if</span> should_flush:
+            <span class="keyword">await</span> self._do_flush()
+    
+    <span class="keyword">async def</span> <span class="function">_flush_loop</span>(self) -> <span class="keyword">None</span>:
+        <span class="string">"""Background task для периодического flush."""</span>
+        <span class="keyword">while</span> self._running:
+            <span class="keyword">await</span> asyncio.sleep(self._buffer.flush_interval)
+            <span class="keyword">await</span> self._do_flush()
+    
+    <span class="keyword">async def</span> <span class="function">_do_flush</span>(self) -> <span class="keyword">None</span>:
+        <span class="string">"""Отправка данных в ClickHouse."""</span>
+        rows = <span class="keyword">await</span> self._buffer.flush()
+        <span class="keyword">if not</span> rows:
+            <span class="keyword">return</span>
+        
+        <span class="keyword">await</span> self._client.insert(
+            self._table,
+            rows,
+            column_names=self._columns,
+        )</code></pre>
+
+                <h2>Интеграция с приложением</h2>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/clickhouse/event_publisher.py</span>
+<span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass, asdict
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+<span class="keyword">from</span> decimal <span class="keyword">import</span> Decimal
+<span class="keyword">from</span> uuid <span class="keyword">import</span> UUID
+
+
+<span class="decorator">@dataclass</span>
+<span class="keyword">class</span> <span class="class-name">TradeEvent</span>:
+    <span class="string">"""Событие торговли для аналитики."""</span>
+    event_id: UUID
+    event_time: datetime
+    event_type: <span class="type">str</span>
+    order_id: UUID
+    user_id: <span class="type">int</span>
+    symbol: <span class="type">str</span>
+    side: <span class="type">str</span>
+    quantity: Decimal
+    price: Decimal
+    total_value: Decimal
+
+
+<span class="keyword">class</span> <span class="class-name">AnalyticsEventPublisher</span>:
+    <span class="string">"""Публикация событий в ClickHouse."""</span>
+    
+    COLUMNS = [
+        <span class="string">"event_id"</span>, <span class="string">"event_time"</span>, <span class="string">"event_type"</span>,
+        <span class="string">"order_id"</span>, <span class="string">"user_id"</span>, <span class="string">"symbol"</span>,
+        <span class="string">"side"</span>, <span class="string">"quantity"</span>, <span class="string">"price"</span>, <span class="string">"total_value"</span>,
+    ]
+    
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, writer: ClickHouseEventWriter):
+        self._writer = writer
+    
+    <span class="keyword">async def</span> <span class="function">publish_order_created</span>(self, order: Order) -> <span class="keyword">None</span>:
+        event = TradeEvent(
+            event_id=uuid.uuid4(),
+            event_time=datetime.utcnow(),
+            event_type=<span class="string">"order_created"</span>,
+            order_id=order.id.value,
+            user_id=order.user_id.value,
+            symbol=order.symbol,
+            side=order.side.value,
+            quantity=order.quantity.amount,
+            price=order.price.amount,
+            total_value=order.total_value.amount,
+        )
+        <span class="keyword">await</span> self._writer.write(asdict(event))
+    
+    <span class="keyword">async def</span> <span class="function">publish_order_filled</span>(self, order: Order) -> <span class="keyword">None</span>:
+        event = TradeEvent(
+            event_id=uuid.uuid4(),
+            event_time=datetime.utcnow(),
+            event_type=<span class="string">"order_filled"</span>,
+            order_id=order.id.value,
+            user_id=order.user_id.value,
+            symbol=order.symbol,
+            side=order.side.value,
+            quantity=order.quantity.amount,
+            price=order.filled_price.amount,  <span class="comment"># Реальная цена исполнения</span>
+            total_value=order.filled_value.amount,
+        )
+        <span class="keyword">await</span> self._writer.write(asdict(event))</code></pre>
+
+                <h2>Аналитические запросы</h2>
+
+<pre><code><span class="comment">-- Воронка: created → filled</span>
+<span class="keyword">SELECT</span>
+    toDate(event_time) <span class="keyword">AS</span> dt,
+    countIf(event_type = <span class="string">'order_created'</span>) <span class="keyword">AS</span> created,
+    countIf(event_type = <span class="string">'order_filled'</span>) <span class="keyword">AS</span> filled,
+    round(filled / created * <span class="number">100</span>, <span class="number">2</span>) <span class="keyword">AS</span> fill_rate_pct
+<span class="keyword">FROM</span> trade_events
+<span class="keyword">WHERE</span> event_date >= today() - <span class="number">30</span>
+<span class="keyword">GROUP BY</span> dt
+<span class="keyword">ORDER BY</span> dt;
+
+<span class="comment">-- OHLCV свечи по минутам</span>
+<span class="keyword">SELECT</span>
+    toStartOfMinute(event_time) <span class="keyword">AS</span> candle_time,
+    symbol,
+    argMin(price, event_time) <span class="keyword">AS</span> open,
+    max(price) <span class="keyword">AS</span> high,
+    min(price) <span class="keyword">AS</span> low,
+    argMax(price, event_time) <span class="keyword">AS</span> close,
+    sum(quantity) <span class="keyword">AS</span> volume
+<span class="keyword">FROM</span> trade_events
+<span class="keyword">WHERE</span> 
+    event_type = <span class="string">'order_filled'</span>
+    <span class="keyword">AND</span> symbol = <span class="string">'BTC/USD'</span>
+    <span class="keyword">AND</span> event_time >= now() - INTERVAL <span class="number">1</span> HOUR
+<span class="keyword">GROUP BY</span> candle_time, symbol
+<span class="keyword">ORDER BY</span> candle_time;
+
+<span class="comment">-- Retention: сколько пользователей вернулись</span>
+<span class="keyword">WITH</span> first_trade <span class="keyword">AS</span> (
+    <span class="keyword">SELECT</span>
+        user_id,
+        min(toDate(event_time)) <span class="keyword">AS</span> first_date
+    <span class="keyword">FROM</span> trade_events
+    <span class="keyword">WHERE</span> event_type = <span class="string">'order_filled'</span>
+    <span class="keyword">GROUP BY</span> user_id
+)
+<span class="keyword">SELECT</span>
+    first_date,
+    count(<span class="keyword">DISTINCT</span> f.user_id) <span class="keyword">AS</span> cohort_size,
+    countIf(<span class="keyword">DISTINCT</span> f.user_id, dateDiff(<span class="string">'day'</span>, first_date, toDate(e.event_time)) = <span class="number">7</span>) <span class="keyword">AS</span> day_7,
+    countIf(<span class="keyword">DISTINCT</span> f.user_id, dateDiff(<span class="string">'day'</span>, first_date, toDate(e.event_time)) = <span class="number">30</span>) <span class="keyword">AS</span> day_30
+<span class="keyword">FROM</span> first_trade f
+<span class="keyword">LEFT JOIN</span> trade_events e <span class="keyword">ON</span> f.user_id = e.user_id
+<span class="keyword">WHERE</span> first_date >= today() - <span class="number">90</span>
+<span class="keyword">GROUP BY</span> first_date
+<span class="keyword">ORDER BY</span> first_date;</code></pre>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Вставка по одной строке</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Классическая ошибка — использовать ClickHouse как PostgreSQL, делая <code>INSERT VALUES</code> на каждый HTTP-запрос. В ClickHouse каждый INSERT создает новый "Part" (файл) на диске. Если их будет слишком много, база "захлебнется" при объединении (merge). Вставляйте батчами по 1000+ строк.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Мутабельность (Updates & Deletes)</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>В ClickHouse нет привычного <code>UPDATE</code>. Есть <code>ALTER TABLE ... UPDATE</code>, который работает асинхронно и переписывает целые куски данных. Это тяжелая операция, не предназначенная для OLTP нагрузки. Если нужно обновлять данные, используйте <code>ReplacingMergeTree</code> или <code>CollapsingMergeTree</code>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Async Insert:</strong> Если вам лень писать свой батчер на стороне приложения, включите <code>async_insert=1</code> в настройках подключения. ClickHouse сам соберет вставки в буфер и запишет их на диск пачкой.</li>
+                    <li><strong>Materialized Views:</strong> Самая мощная фича. Позволяет автоматически агрегировать данные при вставке. Например, данные льются в таблицу <code>events</code>, а MV сама обновляет таблицу <code>daily_stats</code>. Получаем статистику в реальном времени почти бесплатно.</li>
+                    <li><strong>LowCardinality:</strong> Используйте этот тип данных для строк, где значений мало (статусы, валюты). Это ускоряет GROUP BY и уменьшает размер на диске в разы.</li>
+                    <li><strong>TTL:</strong> Настройте автоматическое удаление старых данных: <code>TTL created_at + INTERVAL 1 MONTH DELETE</code>. База сама почистит диск.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>📋 Задание</h4>
+                    <ul class="task-list">
+                        <li>Создай таблицу trade_events с MergeTree</li>
+                        <li>Реализуй BatchBuffer для async insert</li>
+                        <li>Добавь Materialized View для daily stats</li>
+                        <li>Напиши аналитические запросы для дашборда</li>
+                        <li>Интегрируй ClickHouseEventWriter с domain events</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="part5_logging.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 5.1 Логирование</div>
+                        </div>
+                    </a>
+                    <a href="part6_migrations.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">6.1 Zero-Downtime →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

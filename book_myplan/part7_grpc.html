@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>7.2 gRPC Services — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link"><span class="nav-link-icon">🏠</span>Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 7: GraphQL & gRPC</div>
+                    <a href="part7_graphql.html" class="nav-link"><span class="nav-link-icon">🔷</span>7.1 GraphQL API</a>
+                    <a href="part7_grpc.html" class="nav-link active"><span class="nav-link-icon">⚡</span>7.2 gRPC Services</a>
+                    <a href="part7_federation.html" class="nav-link"><span class="nav-link-icon">🌐</span>7.3 Federation</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 7</span>
+                    <span>/</span>
+                    <span>7.2 gRPC Services</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 7.2: gRPC для межсервисной коммуникации</h1>
+                <p class="lead">
+                    Protocol Buffers, streaming, deadlines, interceptors — быстрый RPC между микросервисами.
+                </p>
+
+                <h2>Почему gRPC?</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Аспект</th>
+                            <th>REST</th>
+                            <th>gRPC</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Формат</td>
+                            <td>JSON (текст)</td>
+                            <td>Protobuf (binary)</td>
+                        </tr>
+                        <tr>
+                            <td>Скорость</td>
+                            <td>Медленнее</td>
+                            <td>5-10x быстрее</td>
+                        </tr>
+                        <tr>
+                            <td>Схема</td>
+                            <td>OpenAPI (опционально)</td>
+                            <td>.proto (обязательно)</td>
+                        </tr>
+                        <tr>
+                            <td>Streaming</td>
+                            <td>SSE (ограниченно)</td>
+                            <td>Bidirectional streaming</td>
+                        </tr>
+                        <tr>
+                            <td>Браузеры</td>
+                            <td>Да</td>
+                            <td>Через gRPC-Web</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>Protocol Buffers схема</h2>
+
+                <pre><code class="language-protobuf">// protos/order_service.proto
+syntax = "proto3";
+
+package scaletrade.orders;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Enums
+enum OrderSide {
+  BUY = 0;
+  SELL = 1;
+}
+
+enum OrderStatus {
+  PENDING = 0;
+  FILLED = 1;
+  PARTIALLY_FILLED = 2;
+  CANCELLED = 3;
+}
+
+// Messages
+message Order {
+  int64 id = 1;
+  int64 user_id = 2;
+  string symbol = 3;
+  OrderSide side = 4;
+  string quantity = 5;  // Decimal as string
+  string price = 6;
+  string filled_quantity = 7;
+  OrderStatus status = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message CreateOrderRequest {
+  int64 user_id = 1;
+  string symbol = 2;
+  OrderSide side = 3;
+  string quantity = 4;
+  string price = 5;
+}
+
+message CreateOrderResponse {
+  Order order = 1;
+  repeated string errors = 2;
+}
+
+message GetOrderRequest {
+  int64 order_id = 1;
+}
+
+message ListOrdersRequest {
+  int64 user_id = 1;
+  string symbol = 2;
+  OrderStatus status = 3;
+  int32 page_size = 4;
+  string page_token = 5;
+}
+
+message ListOrdersResponse {
+  repeated Order orders = 1;
+  string next_page_token = 2;
+  int32 total_count = 3;
+}
+
+message CancelOrderRequest {
+  int64 order_id = 1;
+  int64 user_id = 2;
+}
+
+message OrderUpdate {
+  Order order = 1;
+  string update_type = 2; // "created", "filled", "cancelled"
+}
+
+// Service definition
+service OrderService {
+  // Unary RPC
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+  rpc GetOrder(GetOrderRequest) returns (Order);
+  rpc ListOrders(ListOrdersRequest) returns (ListOrdersResponse);
+  rpc CancelOrder(CancelOrderRequest) returns (Order);
+  
+  // Server streaming - сервер шлет поток обновлений
+  rpc WatchOrders(GetOrderRequest) returns (stream OrderUpdate);
+  
+  // Client streaming - клиент шлет много ордеров
+  rpc BatchCreateOrders(stream CreateOrderRequest) returns (CreateOrderResponse);
+  
+  // Bidirectional streaming
+  rpc OrderChat(stream OrderUpdate) returns (stream OrderUpdate);
+}</code></pre>
+
+                <h2>Генерация Python кода из .proto</h2>
+
+                <pre><code class="language-bash"># Установка protobuf компилятора
+poetry add grpcio grpcio-tools betterproto
+
+# Генерация
+python -m grpc_tools.protoc \
+    -I./protos \
+    --python_out=./src/generated \
+    --grpc_python_out=./src/generated \
+    --pyi_out=./src/generated \
+    ./protos/order_service.proto
+
+# Или с betterproto (более питоничный код)
+protoc -I ./protos \
+    --python_betterproto_out=./src/generated \
+    ./protos/order_service.proto</code></pre>
+
+                <h2>Реализация gRPC сервера</h2>
+
+                <pre><code class="language-python"># interface/grpc/order_servicer.py
+import grpc
+from decimal import Decimal
+from datetime import datetime
+from google.protobuf.timestamp_pb2 import Timestamp
+
+from generated import order_service_pb2, order_service_pb2_grpc
+from application.order_service import OrderService
+from domain.entities.order import Order as OrderEntity
+
+class OrderServicer(order_service_pb2_grpc.OrderServiceServicer):
+    def __init__(self, order_service: OrderService):
+        self.order_service = order_service
+    
+    async def CreateOrder(
+        self,
+        request: order_service_pb2.CreateOrderRequest,
+        context: grpc.aio.ServicerContext
+    ) -> order_service_pb2.CreateOrderResponse:
+        """Создание ордера (Unary RPC)"""
+        try:
+            order_entity = await self.order_service.create_order(
+                user_id=request.user_id,
+                symbol=request.symbol,
+                side=request.side.name,
+                quantity=Decimal(request.quantity),
+                price=Decimal(request.price)
+            )
+            
+            return order_service_pb2.CreateOrderResponse(
+                order=self._entity_to_proto(order_entity)
+            )
+        except ValueError as e:
+            return order_service_pb2.CreateOrderResponse(
+                errors=[str(e)]
+            )
+    
+    async def GetOrder(
+        self,
+        request: order_service_pb2.GetOrderRequest,
+        context: grpc.aio.ServicerContext
+    ) -> order_service_pb2.Order:
+        """Получение ордера по ID"""
+        order = await self.order_service.get_by_id(request.order_id)
+        
+        if not order:
+            context.set_code(grpc.StatusCode.NOT_FOUND)
+            context.set_details(f"Order {request.order_id} not found")
+            return order_service_pb2.Order()
+        
+        return self._entity_to_proto(order)
+    
+    async def WatchOrders(
+        self,
+        request: order_service_pb2.GetOrderRequest,
+        context: grpc.aio.ServicerContext
+    ):
+        """Server streaming - подписка на обновления ордера"""
+        async for update in self.order_service.subscribe_to_order(request.order_id):
+            if context.cancelled():
+                break
+            
+            yield order_service_pb2.OrderUpdate(
+                order=self._entity_to_proto(update.order),
+                update_type=update.type
+            )
+    
+    async def BatchCreateOrders(
+        self,
+        request_iterator,
+        context: grpc.aio.ServicerContext
+    ) -> order_service_pb2.CreateOrderResponse:
+        """Client streaming - пакетное создание"""
+        created_orders = []
+        errors = []
+        
+        async for request in request_iterator:
+            try:
+                order = await self.order_service.create_order(
+                    user_id=request.user_id,
+                    symbol=request.symbol,
+                    side=request.side.name,
+                    quantity=Decimal(request.quantity),
+                    price=Decimal(request.price)
+                )
+                created_orders.append(order)
+            except ValueError as e:
+                errors.append(f"{request.symbol}: {e}")
+        
+        return order_service_pb2.CreateOrderResponse(
+            order=self._entity_to_proto(created_orders[0]) if created_orders else None,
+            errors=errors
+        )
+    
+    def _entity_to_proto(self, entity: OrderEntity) -> order_service_pb2.Order:
+        """Конвертация Entity -> Protobuf"""
+        created_ts = Timestamp()
+        created_ts.FromDatetime(entity.created_at)
+        
+        updated_ts = Timestamp()
+        updated_ts.FromDatetime(entity.updated_at)
+        
+        return order_service_pb2.Order(
+            id=entity.id,
+            user_id=entity.user_id,
+            symbol=entity.symbol,
+            side=order_service_pb2.OrderSide.Value(entity.side),
+            quantity=str(entity.quantity),
+            price=str(entity.price),
+            filled_quantity=str(entity.filled_quantity),
+            status=order_service_pb2.OrderStatus.Value(entity.status),
+            created_at=created_ts,
+            updated_at=updated_ts
+        )</code></pre>
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Балансировка нагрузки (Load Balancing)</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>gRPC использует HTTP/2, который держит постоянное TCP-соединение. Обычный L4-балансировщик (как Kubernetes Service) открывает соединение с одним подом, и все 1000 запросов летят в него, даже если рядом стоят 10 свободных подов. Нужен <strong>Client-side Load Balancing</strong> или умный прокси (Envoy).</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Отсутствие Null в Proto3</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>В Proto3 поля имеют дефолтные значения (0 для int, "" для string). Если клиент отправил <code>count=0</code>, сервер получит просто "ничего" и подставит 0. Вы не сможете отличить "клиент передал 0" от "клиент забыл передать поле". Используйте обертки <code>google.protobuf.Int32Value</code> или <code>optional</code> поле.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. Deadlines (Timeouts)</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>По умолчанию таймаута нет. Если сервер завис, клиент будет ждать вечно. Всегда устанавливайте <code>deadline</code> при вызове метода на клиенте. И прокидывайте его дальше, если делаете вызовы внутри.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Buf:</strong> Прекратите использовать <code>protoc</code> напрямую. Утилита <code>buf</code> — это современный стандарт. Она умеет линтить .proto файлы (check breaking changes), форматировать их и генерировать код намного удобнее.</li>
+                    <li><strong>grpcurl:</strong> Это "curl для gRPC". Позволяет дергать методы из консоли без написания кода. Требует включенного <code>Reflection</code> на сервере.</li>
+                    <li><strong>gRPC-Gateway:</strong> Если фронтенду нужен REST, а бэкенды общаются по gRPC — используйте gRPC-Gateway. Он автоматически генерирует REST-прокси на основе ваших .proto файлов.</li>
+                </ul>
+                <h2>Запуск gRPC сервера</h2>
+
+                <pre><code class="language-python"># interface/grpc/server.py
+import asyncio
+import grpc
+from grpc_reflection.v1alpha import reflection
+
+from generated import order_service_pb2_grpc
+from interface.grpc.order_servicer import OrderServicer
+from infrastructure.di import setup_di
+
+async def serve():
+    """Запуск gRPC сервера"""
+    container = setup_di()
+    order_service = await container.get(OrderService)
+    
+    server = grpc.aio.server()
+    order_service_pb2_grpc.add_OrderServiceServicer_to_server(
+        OrderServicer(order_service),
+        server
+    )
+    
+    # Включение reflection для grpcurl/grpcui
+    SERVICE_NAMES = (
+        order_service_pb2.DESCRIPTOR.services_by_name['OrderService'].full_name,
+        reflection.SERVICE_NAME,
+    )
+    reflection.enable_server_reflection(SERVICE_NAMES, server)
+    
+    # TLS для production
+    with open('certs/server.key', 'rb') as f:
+        private_key = f.read()
+    with open('certs/server.crt', 'rb') as f:
+        certificate_chain = f.read()
+    
+    server_credentials = grpc.ssl_server_credentials(
+        [(private_key, certificate_chain)]
+    )
+    
+    server.add_secure_port('[::]:50051', server_credentials)
+    await server.start()
+    
+    print("gRPC server started on port 50051")
+    await server.wait_for_termination()
+
+if __name__ == '__main__':
+    asyncio.run(serve())</code></pre>
+
+                <h2>gRPC клиент</h2>
+
+                <pre><code class="language-python"># clients/order_client.py
+import grpc
+from decimal import Decimal
+from generated import order_service_pb2, order_service_pb2_grpc
+
+class OrderClient:
+    def __init__(self, host: str = "localhost:50051"):
+        # Для production используй SSL
+        credentials = grpc.ssl_channel_credentials()
+        self.channel = grpc.aio.secure_channel(host, credentials)
+        self.stub = order_service_pb2_grpc.OrderServiceStub(self.channel)
+    
+    async def create_order(
+        self,
+        user_id: int,
+        symbol: str,
+        side: str,
+        quantity: Decimal,
+        price: Decimal
+    ):
+        """Создать ордер"""
+        request = order_service_pb2.CreateOrderRequest(
+            user_id=user_id,
+            symbol=symbol,
+            side=order_service_pb2.OrderSide.Value(side),
+            quantity=str(quantity),
+            price=str(price)
+        )
+        
+        # Установка deadline (timeout)
+        response = await self.stub.CreateOrder(
+            request,
+            timeout=5.0,  # 5 секунд
+            metadata=[("user-agent", "scaletrade-client")]
+        )
+        
+        if response.errors:
+            raise ValueError(f"Order creation failed: {response.errors}")
+        
+        return response.order
+    
+    async def watch_orders(self, order_id: int):
+        """Streaming обновлений ордера"""
+        request = order_service_pb2.GetOrderRequest(order_id=order_id)
+        
+        async for update in self.stub.WatchOrders(request):
+            print(f"Order update: {update.order.status} - {update.update_type}")
+            yield update
+    
+    async def close(self):
+        await self.channel.close()
+
+# Использование
+async def main():
+    client = OrderClient("localhost:50051")
+    
+    try:
+        order = await client.create_order(
+            user_id=1,
+            symbol="BTCUSDT",
+            side="BUY",
+            quantity=Decimal("0.1"),
+            price=Decimal("50000")
+        )
+        print(f"Created order: {order.id}")
+        
+        # Подписка на обновления
+        async for update in client.watch_orders(order.id):
+            if update.order.status == order_service_pb2.OrderStatus.FILLED:
+                break
+    finally:
+        await client.close()</code></pre>
+
+                <h2>Interceptors (Middleware)</h2>
+
+                <pre><code class="language-python"># interface/grpc/interceptors.py
+import grpc
+import time
+import structlog
+from typing import Callable, Any
+
+logger = structlog.get_logger()
+
+class LoggingInterceptor(grpc.aio.ServerInterceptor):
+    """Логирование всех gRPC вызовов"""
+    
+    async def intercept_service(
+        self,
+        continuation: Callable,
+        handler_call_details: grpc.HandlerCallDetails
+    ) -> grpc.RpcMethodHandler:
+        start = time.time()
+        
+        method = handler_call_details.method
+        logger.info("grpc_call_start", method=method)
+        
+        try:
+            response = await continuation(handler_call_details)
+            duration = time.time() - start
+            logger.info("grpc_call_success", method=method, duration=duration)
+            return response
+        except Exception as e:
+            duration = time.time() - start
+            logger.error("grpc_call_error", method=method, duration=duration, error=str(e))
+            raise
+
+class AuthInterceptor(grpc.aio.ServerInterceptor):
+    """Проверка JWT токена"""
+    
+    async def intercept_service(
+        self,
+        continuation: Callable,
+        handler_call_details: grpc.HandlerCallDetails
+    ) -> grpc.RpcMethodHandler:
+        metadata = dict(handler_call_details.invocation_metadata)
+        
+        token = metadata.get("authorization", "").replace("Bearer ", "")
+        
+        if not token:
+            raise grpc.RpcError(
+                grpc.StatusCode.UNAUTHENTICATED,
+                "Missing authorization token"
+            )
+        
+        # Проверка JWT
+        try:
+            user_id = verify_jwt(token)
+            # Добавляем user_id в контекст
+            handler_call_details.invocation_metadata.append(
+                ("user-id", str(user_id))
+            )
+        except ValueError:
+            raise grpc.RpcError(
+                grpc.StatusCode.UNAUTHENTICATED,
+                "Invalid token"
+            )
+        
+        return await continuation(handler_call_details)
+
+# Применение
+server = grpc.aio.server(
+    interceptors=[
+        LoggingInterceptor(),
+        AuthInterceptor()
+    ]
+)</code></pre>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">💡 Best Practices</div>
+                    <ul>
+                        <li><strong>Deadlines:</strong> всегда устанавливай timeout на клиенте</li>
+                        <li><strong>Metadata:</strong> передавай trace_id для distributed tracing</li>
+                        <li><strong>Error handling:</strong> используй правильные gRPC status codes</li>
+                        <li><strong>Streaming:</strong> контролируй backpressure</li>
+                        <li><strong>TLS:</strong> в production только secure channels</li>
+                    </ul>
+                </div>
+
+                <div class="task-box">
+                    <h4>🎯 Практика</h4>
+                    <ul class="task-list">
+                        <li>Создай .proto файл для OrderService</li>
+                        <li>Реализуй gRPC server с unary и streaming методами</li>
+                        <li>Напиши клиент с connection pooling</li>
+                        <li>Добавь interceptor для логирования и auth</li>
+                        <li>Протестируй с grpcurl</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="part7_graphql.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 7.1 GraphQL API</div>
+                        </div>
+                    </a>
+                    <a href="part7_federation.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">7.3 Federation →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

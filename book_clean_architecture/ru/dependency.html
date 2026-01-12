@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Глава 7: Dependency Injection - Clean Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
+        p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
+        
+        .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
+        .sidebar-title { color: #f8fafc; }
+        .sidebar-subtitle { color: #60a5fa; }
+        .nav-section { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem 1rem 0.5rem; }
+        .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
+
+        /* Code Styling */
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+        .code-comment { color: #94a3b8; font-style: italic; }
+        .code-keyword { color: #c084fc; font-weight: bold; } 
+        .code-class { color: #fbbf24; font-weight: bold; }   
+        .code-func { color: #60a5fa; font-weight: bold; }    
+        .code-str { color: #a3e635; }                        
+        .code-dec { color: #f472b6; } 
+
+        .card { background: white; border-radius: 1rem; padding: 2.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem; border: 1px solid #e2e8f0; }
+        
+        .diagram { font-family: 'JetBrains Mono', monospace; background: #fff; padding: 1rem; border: 1px dashed #cbd5e1; border-radius: 0.5rem; overflow-x: auto; font-size: 0.8rem; color: #475569; margin-bottom: 2rem; }
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar hidden md:block">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
+            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+        </div>
+        <nav class="py-4">
+            <div class="px-4 mb-4">
+                <div class="flex gap-2 text-xs font-bold text-slate-400">
+                    <a href="dependency.html" class="text-blue-400 font-bold">RU</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../en/dependency.html" class="hover:text-white transition">EN</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../ua/dependency.html" class="hover:text-white transition">UA</a>
+                </div>
+            </div>
+
+            <div class="nav-section">Основы</div>
+            <a href="index.html" class="nav-link ">📘 Введение</a>
+            
+            <div class="nav-section">Слои архитектуры</div>
+            <a href="domain.html" class="nav-link ">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link ">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link ">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link ">🌐 Presentation Layer</a>
+            
+            <div class="nav-section">Принципы и паттерны</div>
+            <a href="solid.html" class="nav-link ">📐 SOLID принципы</a>
+            <a href="invariants.html" class="nav-link ">🛡️ Инварианты</a>
+            <a href="dependency.html" class="nav-link active">💉 Dependency Injection</a>
+            <a href="cqrs_es.html" class="nav-link ">⚡ CQRS и ES</a>
+            
+            <div class="nav-section">Security & Production</div>
+            <a href="security.html" class="nav-link ">🔐 Auth & Permissions</a>
+            <a href="concurrency.html" class="nav-link ">🛑 Concurrency & Migrations</a>
+            <a href="background_tasks.html" class="nav-link ">⏳ Background Tasks</a>
+            <a href="error_handling.html" class="nav-link ">🚫 Error Handling</a>
+            <a href="config_logging.html" class="nav-link ">⚙️ Config & Observability</a>
+
+            <div class="nav-section">DDD Patterns</div>
+            <a href="bounded_context.html" class="nav-link ">🌍 Bounded Contexts</a>
+            <a href="modular_monolith.html" class="nav-link ">🏗️ Modular Monolith</a>
+            <a href="aggregates.html" class="nav-link ">📦 Aggregates</a>
+            <a href="value_objects.html" class="nav-link ">💎 Value Objects</a>
+            <a href="repository_uow.html" class="nav-link ">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link ">📋 Specification</a>
+
+            <div class="nav-section">EDA & Dist. Systems</div>
+            <a href="domain_events.html" class="nav-link ">📣 Domain Events</a>
+            <a href="saga.html" class="nav-link ">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link ">📮 Outbox Pattern</a>
+
+            <div class="nav-section">Frameworks & Практика</div>
+            <a href="frameworks_django.html" class="nav-link ">🐍 Django & Others</a>
+            <a href="advanced_techniques.html" class="nav-link ">🚀 Advanced Tech</a>
+            <a href="deployment.html" class="nav-link ">🚀 Deployment & Protection</a>
+            <a href="testing.html" class="nav-link ">🧪 Тестирование</a>
+            <a href="projects.html" class="nav-link ">🚀 Мини-проекты</a>
+            <a href="antipatterns.html" class="nav-link ">⚠️ Антипаттерны</a>
+        </nav>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
+        
+        <header id="intro" class="mb-12 pb-6 border-b border-gray-200">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Glue Code</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Dependency Injection (DI)</h1>
+            <p class="text-xl text-gray-500 mt-4 font-light">
+                Как собрать приложение из разрозненных классов, не создавая жестких связей.
+            </p>
+        </header>
+
+        <!-- 1. INTRO -->
+        <section class="card">
+            <h2 class="text-2xl font-bold mb-6">1. Проблема: "Кто создаст объект?"</h2>
+            <p>У нас есть `CreateOrderUseCase`. Ему нужен `OrderRepository`. Кто должен создать репозиторий?</p>
+            
+            <div class="grid md:grid-cols-2 gap-8 mt-4">
+                <div class="bg-red-50 p-4 rounded border border-red-200">
+                    <h3 class="font-bold text-red-800 mb-2">❌ Плохо: Создаем внутри</h3>
+                    <pre class="m-0 p-2 text-xs bg-white text-gray-800 border-0">
+class CreateOrderUseCase:
+    def __init__(self):
+        # Жесткая связь! Невозможно протестировать.
+        self.repo = SqlAlchemyRepository() 
+                    </pre>
+                </div>
+                <div class="bg-green-50 p-4 rounded border border-green-200">
+                    <h3 class="font-bold text-green-800 mb-2">✅ Хорошо: Передаем снаружи</h3>
+                    <pre class="m-0 p-2 text-xs bg-white text-gray-800 border-0">
+class CreateOrderUseCase:
+    # Зависимость "инъектируется" (вставляется)
+    def __init__(self, repo: OrderRepository):
+        self.repo = repo
+                    </pre>
+                </div>
+            </div>
+            <p class="mt-4 text-sm text-gray-600">Второй вариант лучше, потому что Use Case больше не знает, что такое SQLAlchemy. Он работает с абстракцией. Но возникает вопрос: <strong>Где создавать эти объекты?</strong></p>
+        </section>
+
+        <!-- 2. COMPOSITION ROOT -->
+        <section id="composition-root" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">2. Composition Root (Корень Композиции)</h2>
+            <p>Это <strong>единое место</strong> в приложении, где мы создаем все объекты и связываем их друг с другом. Обычно это происходит при старте приложения (например, в файле `main.py` или отдельном модуле `dependencies.py`).</p>
+            
+            <div class="diagram">
+    [ main.py / Composition Root ]
+             |
+    1. Создает DB Engine
+    2. Создает SessionFactory
+    3. Создает Repository(session)
+    4. Создает EmailService()
+    5. Создает UseCase(repo, email_service) <--- СБОРКА ГОТОВА
+             |
+             V
+    [ FastAPI Route ] ---> Вызывает готовый UseCase
+            </div>
+        </section>
+
+        <!-- 3. CODE EXAMPLE -->
+        <section id="code" class="card">
+            <h2 class="text-2xl font-bold mb-6">3. Пример ручной сборки (Pure Python)</h2>
+            <p>В Python часто не нужны сложные DI-фреймворки. Обычных функций достаточно.</p>
+
+<pre><code class="language-python"><span class="code-comment"># main.py или container.py</span>
+
+<span class="code-comment"># 1. Импортируем реализации (Infrastructure)</span>
+<span class="code-keyword">from</span> infrastructure.db <span class="code-keyword">import</span> create_engine, session_factory
+<span class="code-keyword">from</span> infrastructure.repositories <span class="code-keyword">import</span> SqlAlchemyOrderRepository
+<span class="code-keyword">from</span> infrastructure.adapters <span class="code-keyword">import</span> SmtpEmailService
+
+<span class="code-comment"># 2. Импортируем Use Case (Application)</span>
+<span class="code-keyword">from</span> application.use_cases <span class="code-keyword">import</span> CreateOrderUseCase
+
+<span class="code-comment"># Глобальные настройки (можно брать из env)</span>
+DB_URL = <span class="code-str">"postgresql://user:pass@localhost/db"</span>
+engine = create_engine(DB_URL)
+
+<span class="code-comment"># ФАБРИКА ЗАВИСИМОСТЕЙ (Composition Root)</span>
+<span class="code-keyword">def</span> <span class="code-func">get_create_order_use_case</span>() -> CreateOrderUseCase:
+    <span class="code-comment"># a. Создаем сессию БД</span>
+    session = session_factory(bind=engine)
+    
+    <span class="code-comment"># b. Создаем адаптеры (Infrastructure)</span>
+    repo = SqlAlchemyOrderRepository(session)
+    email_service = SmtpEmailService(<span class="code-str">"smtp.gmail.com"</span>, ...)
+    
+    <span class="code-comment"># c. Собираем Use Case (Injection)</span>
+    use_case = CreateOrderUseCase(
+        repo=repo, 
+        email_service=email_service
+    )
+    
+    <span class="code-keyword">return</span> use_case
+</code></pre>
+        </section>
+
+        <!-- 4. FASTAPI INTEGRATION -->
+        <section id="fastapi" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">4. Интеграция с FastAPI (Depends)</h2>
+            <p>FastAPI имеет встроенную систему DI (`Depends`), которая идеально подходит для роли Composition Root.</p>
+
+<pre><code class="language-python"><span class="code-keyword">from</span> fastapi <span class="code-keyword">import</span> APIRouter, Depends
+<span class="code-comment"># Импортируем нашу фабрику (см. выше)</span>
+<span class="code-keyword">from</span> .container <span class="code-keyword">import</span> get_create_order_use_case
+
+router = APIRouter()
+
+<span class="code-dec">@router.post</span>(<span class="code-str">"/orders"</span>)
+<span class="code-keyword">def</span> <span class="code-func">create_order_endpoint</span>(
+    data: CreateOrderDTO,
+    <span class="code-comment"># FastAPI вызывает функцию get_create_order_use_case, </span>
+    <span class="code-comment"># забирает готовый UseCase и кладет его в переменную use_case</span>
+    use_case: CreateOrderUseCase = Depends(get_create_order_use_case)
+):
+    <span class="code-keyword">return</span> use_case.execute(data)
+</code></pre>
+            <div class="bg-yellow-50 p-4 rounded border border-yellow-200 mt-4 text-sm text-yellow-900">
+                <strong>Лайфхак:</strong> Если вам нужно управлять жизненным циклом (например, закрывать сессию БД после запроса), используйте `yield` в функции-зависимости.
+            </div>
+        </section>
+
+        <!-- 5. UOW INJECTION -->
+        <section id="uow-di" class="card border-blue-200 bg-blue-50">
+            <h2 class="text-2xl font-bold mb-4 text-blue-900">5. Подключение Unit of Work</h2>
+            <p>С UoW схема чуть сложнее, так как Репозиторий создается не сразу, а внутри контекста `with`.</p>
+
+<pre><code class="language-python"><span class="code-comment"># container.py</span>
+
+<span class="code-comment"># 1. Сначала создаем фабрику сессий (не саму сессию!)</span>
+<span class="code-keyword">from</span> sqlalchemy.orm <span class="code-keyword">import</span> sessionmaker
+session_factory = sessionmaker(bind=engine)
+
+<span class="code-keyword">def</span> <span class="code-func">get_uow</span>():
+    <span class="code-comment"># Передаем фабрику сессий в UoW</span>
+    <span class="code-keyword">return</span> SqlAlchemyUnitOfWork(session_factory)
+
+<span class="code-keyword">def</span> <span class="code-func">get_use_case_with_uow</span>(uow = Depends(get_uow)):
+    <span class="code-comment"># Use Case теперь зависит от UoW, а не от Репозитория</span>
+    <span class="code-keyword">return</span> CreateOrderWithUowUseCase(uow)
+
+<span class="code-comment"># application/use_cases.py</span>
+<span class="code-keyword">class</span> <span class="code-class">CreateOrderWithUowUseCase</span>:
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, uow: UnitOfWork):
+        self.uow = uow
+
+    <span class="code-keyword">def</span> <span class="code-func">execute</span>(self, cmd):
+        <span class="code-keyword">with</span> self.uow:
+            order = Order(...)
+            <span class="code-comment"># Репозиторий доступен через UoW</span>
+            self.uow.orders.save(order) 
+            <span class="code-comment"># commit автоматический при выходе</span>
+</code></pre>
+        </section>
+
+    
+        <!-- 6. DISHKA -->
+        <section id="dishka" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                6. Dishka: Современный DI фреймворк
+                <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Recommended</span>
+            </h2>
+            <p>Если вам надоело писать ручные фабрики, а FastAPI Depends кажется слишком привязанным к вебу — попробуйте <strong>Dishka</strong>.</p>
+            <p>Это современный (2024+) IoC контейнер, который работает везде (FastAPI, Aiogram, Typer, Pure Python) и имеет очень чистый API.</p>
+
+            <h3 class="font-bold text-lg mt-4 mb-2">Почему Dishka?</h3>
+            <ul class="list-disc list-inside mb-4 text-sm">
+                <li><strong>Scope Control:</strong> Четкое разделение на Singleton, Request, Session скоупы.</li>
+                <li><strong>Clean API:</strong> Использует современные type hints.</li>
+                <li><strong>Framework Agnostic:</strong> Один контейнер для бота и API.</li>
+            </ul>
+
+<pre><code class="language-python">from dishka import Provider, Scope, provide, make_async_container
+from dishka.integrations.fastapi import FromDishka, DishkaApp
+
+# 1. Провайдер (Аналог нашего container.py)
+class AppProvider(Provider):
+    
+    @provide(scope=Scope.APP)
+    def get_engine(self) -> AsyncEngine:
+        return create_async_engine("sqlite+aiosqlite:///:memory:")
+
+    @provide(scope=Scope.APP)
+    def get_session_maker(self, engine: AsyncEngine) -> async_sessionmaker:
+        return async_sessionmaker(engine)
+
+    @provide(scope=Scope.REQUEST)
+    async def get_session(self, factory: async_sessionmaker) -> AsyncIterable[AsyncSession]:
+        async with factory() as session:
+            yield session
+
+    @provide(scope=Scope.REQUEST)
+    def get_uow(self, session: AsyncSession) -> UnitOfWork:
+        return SqlAlchemyUoW(session)
+
+    @provide(scope=Scope.REQUEST)
+    def get_create_order_use_case(self, uow: UnitOfWork) -> CreateOrderUseCase:
+        return CreateOrderUseCase(uow)
+
+# 2. Интеграция с FastAPI
+@router.post("/orders")
+async def create_order(
+    cmd: CreateOrderCommand,
+    # Dishka сама найдет нужный провайдер по типу
+    use_case: FromDishka[CreateOrderUseCase] 
+):
+    return await use_case.execute(cmd)
+</code></pre>
+        </section>
+
+        <!-- NAVIGATION FOOTER -->
+        
+        <!-- NAVIGATION FOOTER -->
+        
+        <!-- NAVIGATION FOOTER -->
+        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="invariants.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Назад</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Invariants</span></a><a href="cqrs_es.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далее</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Cqrs Es &rarr;</span></a></div></div>
+    </main>
+</body>
+</html>

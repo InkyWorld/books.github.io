@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>9.1 REST API Design — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 9: API</div>
+                    <a href="part9_restdesign.html" class="nav-link active">9.1 REST Design</a>
+                    <a href="part9_idempotency.html" class="nav-link">9.2 Idempotency</a>
+                    <a href="part9_openapi.html" class="nav-link">9.3 OpenAPI</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 9</span>
+                    <span>/</span>
+                    <span>9.1 REST Design</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 9.1: REST API Design</h1>
+                <p class="lead">API — это UI для разработчиков. Если API неудобный, его никто не будет использовать (или будут, но с ненавистью).</p>
+
+                <h2>Richardson Maturity Model</h2>
+                <div class="maturity-steps">
+                    <div class="step">
+                        <h3>Level 0: The Swamp of POX</h3>
+                        <p>Один endpoint (напр. `/api`), все запросы POST XML. Как SOAP.</p>
+                    </div>
+                    <div class="step">
+                        <h3>Level 1: Resources</h3>
+                        <p>Разные endpoints для разных ресурсов: `/users`, `/orders`. Но всё еще может быть только POST.</p>
+                    </div>
+                    <div class="step">
+                        <h3>Level 2: HTTP Verbs (Target)</h3>
+                        <p>Используем правильные методы (GET получить, DELETE удалить) и статус коды. Это то, что мы обычно зовём REST.</p>
+                    </div>
+                    <div class="step">
+                        <h3>Level 3: HATEOAS</h3>
+                        <p>Hypermedia As The Engine Of Application State. Ответ содержит ссылки на возможные действия.</p>
+<pre><code class="language-json">{
+  "id": 1,
+  "status": "pending",
+  "_links": {
+    "self": { "href": "/orders/1" },
+    "cancel": { "href": "/orders/1/cancel", "method": "POST" }
+  }
+}</code></pre>
+                    </div>
+                </div>
+
+                <h2>HTTP Методы: Best Practices</h2>
+
+                <h3>POST vs PUT vs PATCH</h3>
+                <ul>
+                    <li><strong>POST:</strong> Создание ресурса <em>без знания его ID</em>. Сервер назначает ID. (Не идемпотентен).</li>
+                    <li><strong>PUT:</strong> Полная замена ресурса. Клиент знает ID. Если вы шлете `PUT /users/1` с `{name: "Alex"}`, а email не передали — email должен затереться (стать null). (Идемпотентен).</li>
+                    <li><strong>PATCH:</strong> Частичное обновление. `{name: "Alex"}` обновит только имя. (Может быть не идемпотентен, но обычно да).</li>
+                </ul>
+
+                <h2>API Versioning</h2>
+                <p>Изменения неизбежны. Как не сломать клиентов?</p>
+
+                <div class="comparison-table">
+                    <div class="comparison-col good">
+                        <h4>URL Versioning</h4>
+                        <p><code>/api/v1/orders</code></p>
+                        <ul>
+                            <li>✅ Просто и наглядно</li>
+                            <li>✅ Кешируется браузером</li>
+                            <li>❌ "Грязно" в URL</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-col">
+                        <h4>Header Versioning</h4>
+                        <p><code>Accept: application/vnd.myapi+json;version=1</code></p>
+                        <ul>
+                            <li>✅ Чистые URL</li>
+                            <li>✅ RESTful</li>
+                            <li>❌ Сложно тестить курлом/браузером</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Offset-пагинация на больших данных</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p><code>LIMIT 10 OFFSET 1000000</code> убьет вашу базу. БД прочитает миллион строк, выкинет их и отдаст 10. Используйте Cursor Pagination (Keyset pagination) или <code>WHERE id > last_seen_id LIMIT 10</code>.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Протекание абстракций в API</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Не отдавайте клиенту структуру вашей БД 1-в-1. Если вы переименуете колонку в базе, API сломается. Используйте DTO (Data Transfer Objects) / Pydantic Models для отделения контракта API от схемы хранения.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. HTTP 200 OK + {error: "failed"}</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Самый страшный грех. Мониторинг видит 200 OK и молчит, а у клиентов ничего не работает. Всегда возвращайте 4xx/5xx коды.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>RFC 7807 (Problem Details):</strong> Стандартный формат ошибок. Вместо изобретения своего велосипеда <code>{code: 1, msg: "oops"}</code>, используйте стандарт <code>{type: "/errors/balance-low", title: "Low Balance", status: 400, detail: "..."}</code>.</li>
+                    <li><strong>Envelope Pattern:</strong> Не возвращайте массив JSON корневым элементом (<code>[{}, {}]</code>). Оборачивайте в объект: <code>{ "items": [...], "meta": {...} }</code>. Это позволит добавить поля (например, total_count) в будущем без breaking change.</li>
+                    <li><strong>ETag & If-None-Match:</strong> Экономьте трафик. Если клиент прислал хеш (ETag), который совпадает с текущим, отдайте <code>304 Not Modified</code> без тела ответа.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>🎯 Практика</h4>
+                    <ul class="task-list">
+                        <li>Спроектируй API для интернет-магазина (swagger.yaml)</li>
+                        <li>Реализуй Cursor Based пагинацию</li>
+                        <li>Внедри RFC 7807 для обработки ошибок</li>
+                        <li>Сделай версионирование через URL и через Header</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

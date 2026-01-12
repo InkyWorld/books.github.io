@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0.1 Python Internals — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <!-- ... Navigation will be updated later or kept simple for now ... -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 0: Core</div>
+                    <a href="part0_internals.html" class="nav-link active">0.1 Python Internals</a>
+                    <a href="part0_networking.html" class="nav-link">0.2 Networking & Linux</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 9: API</div>
+                    <a href="part9_restdesign.html" class="nav-link">9.1 REST Design</a>
+                    <a href="part9_idempotency.html" class="nav-link">9.2 Idempotency</a>
+                    <a href="part9_openapi.html" class="nav-link">9.3 OpenAPI</a>
+                </div>
+                 <div class="nav-section">
+                    <div class="nav-section-title">Часть 10: Git & Culture</div>
+                    <a href="part10_git.html" class="nav-link">10.1 Git Advanced</a>
+                    <a href="part10_commits.html" class="nav-link">10.2 Semantic Commits</a>
+                    <a href="part10_codereview.html" class="nav-link">10.3 Code Review</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 0</span>
+                    <span>/</span>
+                    <span>0.1 Internals</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 0.1: Python Internals</h1>
+                <p class="lead">Чтобы писать эффективный код, нужно понимать, как он выполняется. 
+                Разбираемся с GIL, Garbage Collector и управлением памятью.</p>
+
+                <h2>1. Global Interpreter Lock (GIL)</h2>
+                <p>GIL — это мьютекс, который защищает доступ к объектам Python, предотвращая возможность одновременного выполнения нескольких потоков байт-кода Python.</p>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">Миф</div>
+                    <p>Многие считают, что из-за GIL многопоточность в Python бесполезна. Это не так. GIL мешает только CPU-bound задачам.</p>
+                </div>
+
+                <h3>Когда GIL не мешает? (I/O Bound)</h3>
+                <p>При операциях ввода-вывода (сеть, диск) GIL отпускается.</p>
+                <ul>
+                    <li>Запросы в БД (PostgreSQL, Redis)</li>
+                    <li>HTTP-запросы</li>
+                    <li>Чтение/запись файлов</li>
+                </ul>
+
+                <h3>Когда GIL мешает? (CPU Bound)</h3>
+                <p>Тяжелые вычисления на чистом Python.</p>
+                <ul>
+                    <li>Обработка изображений</li>
+                    <li>Сложная математика</li>
+                    <li>Сериализация больших JSON</li>
+                </ul>
+
+                <h2>2. Memory Model & Garbage Collection</h2>
+                <p>В Python всё — объект. Управление памятью основано на двух механизмах:</p>
+                
+                <ol>
+                    <li><strong>Reference Counting (Счётчик ссылок):</strong> Основной механизм. Как только счётчик ссылок на объект становится 0, память освобождается немедленно.</li>
+                    <li><strong>Garbage Collector (GC):</strong> Вспомогательный механизм для обнаружения <em>циклических ссылок</em>.</li>
+                </ol>
+
+<pre><code class="language-python">import sys
+
+a = []
+b = a
+print(sys.getrefcount(a))  # 3 (a, b, и аргумент getrefcount)
+</code></pre>
+
+                <h2>3. Asyncio Event Loop</h2>
+                <p>Asyncio — это кооперативная многозадачность. Основа — Event Loop (цикл событий).</p>
+
+                <div class="comparison-table">
+                    <div class="comparison-col">
+                        <h4>Sync (Blocking)</h4>
+                        <p>Код ждёт завершения ввода-вывода, блокируя весь поток.</p>
+<pre><code class="language-python">import time
+def task():
+    time.sleep(1) # Block
+    print("Done")
+</code></pre>
+                    </div>
+                    <div class="comparison-col good">
+                        <h4>Async (Non-blocking)</h4>
+                        <p>Event Loop переключается на другую задачу во время ожидания.</p>
+<pre><code class="language-python">import asyncio
+async def task():
+    await asyncio.sleep(1) # Yield
+    print("Done")
+</code></pre>
+                    </div>
+                </div>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. gc.disable() и Reference Counting</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Вызов <code>gc.disable()</code> отключает только циклический сборщик мусора. Reference Counting продолжает работать всегда. В некоторых высоконагруженных приложениях (как Instagram) отключали GC для уменьшения Copy-on-Write при форке процессов.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Memory Leak в Asyncio</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если вы создаете Task и не сохраняете ссылку на него (fire-and-forget), сборщик мусора может удалить задачу до её завершения в старых версиях Python. Всегда сохраняйте ссылки на фоновые задачи (например в <code>set</code>).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>__slots__:</strong> Используйте <code>__slots__</code> в классах, если создаете миллионы экземпляров. Это экономит память, отказываясь от <code>__dict__</code>.</li>
+                    <li><strong>uvloop:</strong> Быстрая, drop-in замена стандартному event loop на основе libuv (как в Node.js). Просто добавьте <code>uvloop.install()</code>.</li>
+                    <li><strong>orjson:</strong> Самая быстрая библиотека для JSON в Python. Использует Rust, обходит многие ограничения GIL при сериализации.</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5: Presentation Layer - Clean Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
+        p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
+        
+        .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
+        .sidebar-title { color: #f8fafc; }
+        .sidebar-subtitle { color: #60a5fa; }
+        .nav-section { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem 1rem 0.5rem; }
+        .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
+
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+        .code-comment { color: #94a3b8; font-style: italic; }
+        .code-keyword { color: #c084fc; font-weight: bold; } 
+        .code-class { color: #fbbf24; font-weight: bold; }   
+        .code-func { color: #60a5fa; font-weight: bold; }    
+        .code-str { color: #a3e635; }                        
+        .code-dec { color: #f472b6; } 
+
+        .badge { display: inline-flex; align-items: center; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 0.5rem; }
+        .badge-green { background-color: #dcfce7; color: #15803d; }
+        .badge-red { background-color: #fee2e2; color: #b91c1c; }
+        .badge-cyan { background-color: #cffafe; color: #0e7490; }
+        
+        .card { background: white; border-radius: 1rem; padding: 2.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem; border: 1px solid #e2e8f0; }
+        
+        .ascii-art { font-family: 'JetBrains Mono', monospace; white-space: pre; font-size: 0.75rem; background: #fff; padding: 1rem; border: 1px dashed #cbd5e1; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 2rem; color: #475569; }
+        
+        details > summary { list-style: none; cursor: pointer; font-weight: 700; color: #2563eb; outline: none; padding: 1rem; background: #f8fafc; border-radius: 0.5rem; margin-bottom: 0.5rem; border: 1px solid #e2e8f0; }
+        details[open] > summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0; background: #eff6ff; }
+        details > div { padding: 1.5rem; border: 1px solid #e2e8f0; border-top: 0; border-bottom-left-radius: 0.5rem; border-bottom-right-radius: 0.5rem; background: #fff; }
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar hidden md:block">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
+            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+        </div>
+        <nav class="py-4">
+            <div class="px-4 mb-4">
+                <div class="flex gap-2 text-xs font-bold text-slate-400">
+                    <a href="../ru/presentation.html" class="hover:text-white transition">RU</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="presentation.html" class="text-blue-400 font-bold">EN</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../ua/presentation.html" class="hover:text-white transition">UA</a>
+                </div>
+            </div>
+
+            <div class="nav-section">Basics</div>
+            <a href="index.html" class="nav-link ">📘 Introduction</a>
+            
+            <div class="nav-section">Architecture Layers</div>
+            <a href="domain.html" class="nav-link ">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link ">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link ">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link active">🌐 Presentation Layer</a>
+            
+            <div class="nav-section">Principles & Patterns</div>
+            <a href="solid.html" class="nav-link ">📐 SOLID Principles</a>
+            <a href="invariants.html" class="nav-link ">🛡️ Invariants</a>
+            <a href="dependency.html" class="nav-link ">💉 Dependency Injection</a>
+            <a href="cqrs_es.html" class="nav-link ">⚡ CQRS & ES</a>
+            
+            <div class="nav-section">Security & Production</div>
+            <a href="security.html" class="nav-link ">🔐 Auth & Permissions</a>
+            <a href="concurrency.html" class="nav-link ">🛑 Concurrency & Migrations</a>
+            <a href="background_tasks.html" class="nav-link ">⏳ Background Tasks</a>
+            <a href="error_handling.html" class="nav-link ">🚫 Error Handling</a>
+            <a href="config_logging.html" class="nav-link ">⚙️ Config & Observability</a>
+
+            <div class="nav-section">DDD Patterns</div>
+            <a href="bounded_context.html" class="nav-link ">🌍 Bounded Contexts</a>
+            <a href="modular_monolith.html" class="nav-link ">🏗️ Modular Monolith</a>
+            <a href="aggregates.html" class="nav-link ">📦 Aggregates</a>
+            <a href="value_objects.html" class="nav-link ">💎 Value Objects</a>
+            <a href="repository_uow.html" class="nav-link ">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link ">📋 Specification</a>
+
+            <div class="nav-section">EDA & Dist. Systems</div>
+            <a href="domain_events.html" class="nav-link ">📣 Domain Events</a>
+            <a href="saga.html" class="nav-link ">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link ">📮 Outbox Pattern</a>
+
+            <div class="nav-section">Frameworks & Practice</div>
+            <a href="frameworks_django.html" class="nav-link ">🐍 Django & Others</a>
+            <a href="advanced_techniques.html" class="nav-link ">🚀 Advanced Tech</a>
+            <a href="deployment.html" class="nav-link ">🚀 Deployment & Protection</a>
+            <a href="testing.html" class="nav-link ">🧪 Testing</a>
+            <a href="projects.html" class="nav-link ">🚀 Mini-projects</a>
+            <a href="antipatterns.html" class="nav-link ">⚠️ Antipatterns</a>
+        </nav>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
+        
+        <header id="intro" class="mb-12 pb-6 border-b border-gray-200">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-cyan-100 text-cyan-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Layer 4</span>
+                <span class="text-gray-400 text-sm font-mono">FastAPI / Django / Flask</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Presentation Layer</h1>
+            <p class="text-xl text-gray-500 mt-4 font-light">
+                The entry point to the application. Here we accept HTTP requests, call Use Cases, and return beautiful responses.
+            </p>
+        </header>
+
+        <!-- ASCII DIAGRAM -->
+        <div class="ascii-art">
+    ┌───────────────────────────────────────────────────────────────────────┐
+    │                      PRESENTATION LAYER                               │
+    │                                                                       │
+    │   ┌─────────────┐     ┌─────────────┐    ┌─────────────────────────┐  │
+    │   │   Router    │───▶│  Controller │───▶│  Response Serializer    │  │
+    │   │ (endpoints) │     │  (handler)  │    │  (DTO → JSON)           │  │
+    │   └─────────────┘     └──────┬──────┘    └─────────────────────────┘  │
+    │                             │                                         │
+    │                             ▼                                         │
+    │                    ┌─────────────────┐                                │
+    │                    │   Use Case      │  ◀── Application Layer        │
+    │                    │   (execute)     │                                │
+    │                    └─────────────────┘                                │
+    └──────────────────────────────────────────────────────────────────────┘
+        </div>
+
+        <!-- ANATOMY -->
+        <section class="card">
+            <h2 class="text-2xl font-bold mb-6">Layer Anatomy</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="flex items-center gap-2 font-bold text-green-800 mb-4 border-b border-green-200 pb-2 w-full">
+                        ✅ MUST HAVE
+                    </h3>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex items-start">
+                            <span class="badge badge-green mt-1">Route</span>
+                            <div><strong>Routers/Endpoints:</strong> Defining URL paths and HTTP methods (GET, POST, PUT, DELETE).</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="badge badge-green mt-1">Schema</span>
+                            <div><strong>Request/Response Schemas:</strong> Pydantic models for validating incoming data and formatting responses.</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="badge badge-green mt-1">Error</span>
+                            <div><strong>Exception Handlers:</strong> Converting DomainError into HTTP responses (400, 404, 409).</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="badge badge-green mt-1">Auth</span>
+                            <div><strong>Middleware:</strong> Authentication, request logging, CORS.</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="flex items-center gap-2 font-bold text-red-800 mb-4 border-b border-red-200 pb-2 w-full">
+                        ⛔ FORBIDDEN
+                    </h3>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex items-start">
+                            <span class="badge badge-red mt-1">Logic</span>
+                            <div><strong>Business Logic:</strong> No `if order.total > 1000: apply_discount()`. This is the job of a Use Case or Entity!</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="badge badge-red mt-1">DB</span>
+                            <div><strong>SQL / ORM:</strong> No `session.query()` in endpoints. Everything through Use Case → Repository.</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="badge badge-red mt-1">Domain</span>
+                            <div><strong>Returning Entities:</strong> Do not return `Order` directly. First convert to DTO/Schema.</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SCHEMAS -->
+        <section id="schemas" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">1. Request/Response Schemas (Pydantic)</h2>
+            <p><strong>Pydantic</strong> is a data validation library. In FastAPI, it is built-in. We use it to create API "contracts".</p>
+            <p>Important: Pydantic schemas are <strong>not the same</strong> as DTOs from the Application Layer. Schemas know about JSON, serialization, HTTP. DTOs are pure data.</p>
+
+<pre><code class="language-python"><span class="code-comment"># presentation/schemas/order.py</span>
+<span class="code-keyword">from</span> pydantic <span class="code-keyword">import</span> BaseModel, EmailStr, Field, field_validator
+<span class="code-keyword">from</span> typing <span class="code-keyword">import</span> List
+<span class="code-keyword">from</span> datetime <span class="code-keyword">import</span> datetime
+
+<span class="code-comment"># ═══════════════════════════════════════════════════</span>
+<span class="code-comment"># REQUEST SCHEMAS (Incoming Data)</span>
+<span class="code-comment"># ═══════════════════════════════════════════════════</span>
+
+<span class="code-keyword">class</span> <span class="code-class">OrderItemRequest</span>(BaseModel):
+    <span class="code-str">"""One item in the order"""</span>
+    name: str = Field(..., min_length=1, max_length=200, description=<span class="code-str">"Item name"</span>)
+    price: float = Field(..., gt=0, description=<span class="code-str">"Item price (greater than 0)"</span>)
+    quantity: int = Field(default=1, ge=1, le=100, description=<span class="code-str">"Quantity"</span>)
+
+    <span class="code-dec">@field_validator</span>(<span class="code-str">'name'</span>)
+    <span class="code-keyword">def</span> <span class="code-func">name_must_not_be_empty</span>(cls, v):
+        <span class="code-keyword">if</span> <span class="code-keyword">not</span> v.strip():
+            <span class="code-keyword">raise</span> ValueError(<span class="code-str">'Name cannot be empty'</span>)
+        <span class="code-keyword">return</span> v.strip()
+
+
+<span class="code-keyword">class</span> <span class="code-class">CreateOrderRequest</span>(BaseModel):
+    <span class="code-str">"""Request to create an order"""</span>
+    customer_email: EmailStr  <span class="code-comment"># Automatic email validation</span>
+    items: List[OrderItemRequest] = Field(..., min_length=1)
+    
+    <span class="code-keyword">class</span> <span class="code-class">Config</span>:
+        <span class="code-comment"># Example data for Swagger documentation</span>
+        json_schema_extra = {
+            <span class="code-str">"example"</span>: {
+                <span class="code-str">"customer_email"</span>: <span class="code-str">"user@example.com"</span>,
+                <span class="code-str">"items"</span>: [{<span class="code-str">"name"</span>: <span class="code-str">"Python Book"</span>, <span class="code-str">"price"</span>: 29.99, <span class="code-str">"quantity"</span>: 1}]
+            }
+        }
+
+
+<span class="code-comment"># ═══════════════════════════════════════════════════</span>
+<span class="code-comment"># RESPONSE SCHEMAS (Outgoing Data)</span>
+<span class="code-comment"># ═══════════════════════════════════════════════════</span>
+
+<span class="code-keyword">class</span> <span class="code-class">OrderItemResponse</span>(BaseModel):
+    name: str
+    price: float
+    quantity: int
+    subtotal: float  <span class="code-comment"># Calculated field</span>
+
+
+<span class="code-keyword">class</span> <span class="code-class">OrderResponse</span>(BaseModel):
+    <span class="code-str">"""Response with order data"""</span>
+    id: str
+    customer_email: str
+    items: List[OrderItemResponse]
+    total_amount: float
+    status: str
+    created_at: datetime
+    
+    <span class="code-keyword">class</span> <span class="code-class">Config</span>:
+        from_attributes = <span class="code-keyword">True</span>  <span class="code-comment"># Allows creating from ORM models</span>
+
+
+<span class="code-keyword">class</span> <span class="code-class">ErrorResponse</span>(BaseModel):
+    <span class="code-str">"""Standard error format"""</span>
+    error: str
+    detail: str
+    code: str <span class="code-comment"># E.g.: "ORDER_ALREADY_PAID"</span>
+</code></pre>
+        </section>
+
+        <!-- ROUTES -->
+        <section id="routes" class="card">
+            <h2 class="text-2xl font-bold mb-6">2. Routers and Endpoints (FastAPI)</h2>
+            <p>A router is a "thin" layer. Its task: accept data, call a Use Case, return the result. <strong>No logic!</strong></p>
+
+<pre><code class="language-python"><span class="code-comment"># presentation/routers/orders.py</span>
+<span class="code-keyword">from</span> fastapi <span class="code-keyword">import</span> APIRouter, Depends, HTTPException, status
+<span class="code-keyword">from</span> typing <span class="code-keyword">import</span> List
+<span class="code-keyword">import</span> uuid
+
+<span class="code-comment"># Import schemas (Presentation Layer)</span>
+<span class="code-keyword">from</span> ..schemas.order <span class="code-keyword">import</span> CreateOrderRequest, OrderResponse, ErrorResponse
+
+<span class="code-comment"># Import Use Cases and DTOs (Application Layer)</span>
+<span class="code-keyword">from</span> application.use_cases <span class="code-keyword">import</span> CreateOrderUseCase, GetOrderUseCase
+<span class="code-keyword">from</span> application.dto <span class="code-keyword">import</span> CreateOrderCommand
+
+<span class="code-comment"># Import DI (dependency container)</span>
+<span class="code-keyword">from</span> ..dependencies <span class="code-keyword">import</span> get_create_order_use_case, get_order_use_case
+
+router = APIRouter(prefix=<span class="code-str">"/orders"</span>, tags=[<span class="code-str">"Orders"</span>])
+
+
+<span class="code-dec">@router.post</span>(
+    <span class="code-str">"/"</span>,
+    response_model=OrderResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary=<span class="code-str">"Create new order"</span>,
+    responses={
+        400: {<span class="code-str">"model"</span>: ErrorResponse, <span class="code-str">"description"</span>: <span class="code-str">"Invalid data"</span>},
+        409: {<span class="code-str">"model"</span>: ErrorResponse, <span class="code-str">"description"</span>: <span class="code-str">"State conflict"</span>}
+    }
+)
+<span class="code-keyword">async def</span> <span class="code-func">create_order</span>(
+    request: CreateOrderRequest,
+    use_case: CreateOrderUseCase = Depends(get_create_order_use_case)
+) -> OrderResponse:
+    <span class="code-str">"""
+    Creates a new order.
+    
+    - **customer_email**: Customer's email
+    - **items**: List of items (minimum 1)
+    """</span>
+    
+    <span class="code-comment"># 1. Convert Pydantic Schema → Application DTO</span>
+    command = CreateOrderCommand(
+        customer_email=request.customer_email,
+        items=[
+            {<span class="code-str">"name"</span>: item.name, <span class="code-str">"price"</span>: item.price, <span class="code-str">"quantity"</span>: item.quantity}
+            <span class="code-keyword">for</span> item <span class="code-keyword">in</span> request.items
+        ]
+    )
+    
+    <span class="code-comment"># 2. Call Use Case (all logic IS THERE)</span>
+    result = use_case.execute(command)
+    
+    <span class="code-comment"># 3. Convert result to Response Schema</span>
+    <span class="code-keyword">return</span> OrderResponse(
+        id=result.order_id,
+        customer_email=result.customer_email,
+        items=[
+            OrderItemResponse(
+                name=i[<span class="code-str">'name'</span>],
+                price=i[<span class="code-str">'price'</span>],
+                quantity=i[<span class="code-str">'quantity'</span>],
+                subtotal=i[<span class="code-str">'price'</span>] * i[<span class="code-str">'quantity'</span>]
+            ) <span class="code-keyword">for</span> i <span class="code-keyword">in</span> result.items
+        ],
+        total_amount=result.total_amount,
+        status=result.status,
+        created_at=result.created_at
+    )
+
+
+<span class="code-dec">@router.get</span>(<span class="code-str">"/{order_id}"</span>, response_model=OrderResponse)
+<span class="code-keyword">async def</span> <span class="code-func">get_order</span>(
+    order_id: uuid.UUID,
+    use_case: GetOrderUseCase = Depends(get_order_use_case)
+) -> OrderResponse:
+    <span class="code-str">"""Get order by ID"""</span>
+    result = use_case.execute(order_id)
+    
+    <span class="code-keyword">if</span> result <span class="code-keyword">is</span> <span class="code-keyword">None</span>:
+        <span class="code-keyword">raise</span> HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=<span class="code-str">f"Order {order_id} not found"</span>
+        )
+    
+    <span class="code-keyword">return</span> OrderResponse(**result.dict())
+
+
+<span class="code-dec">@router.post</span>(<span class="code-str">"/{order_id}/pay"</span>, response_model=OrderResponse)
+<span class="code-keyword">async def</span> <span class="code-func">pay_order</span>(
+    order_id: uuid.UUID,
+    use_case: PayOrderUseCase = Depends(get_pay_order_use_case)
+) -> OrderResponse:
+    <span class="code-str">"""Pay for order"""</span>
+    result = use_case.execute(order_id)
+    <span class="code-keyword">return</span> OrderResponse(**result.dict())
+</code></pre>
+        </section>
+
+        <!-- EXCEPTION HANDLING -->
+        <section id="exceptions" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">3. Error Handling (Exception Handlers)</h2>
+            <p>The Domain throws a `DomainError`. The Presentation Layer must intercept them and turn them into understandable HTTP responses.</p>
+
+<pre><code class="language-python"><span class="code-comment"># presentation/exception_handlers.py</span>
+<span class="code-keyword">from</span> fastapi <span class="code-keyword">import</span> Request
+<span class="code-keyword">from</span> fastapi.responses <span class="code-keyword">import</span> JSONResponse
+<span class="code-keyword">from</span> starlette <span class="code-keyword">import</span> status
+
+<span class="code-comment"># Import domain errors</span>
+<span class="code-keyword">from</span> domain.exceptions <span class="code-keyword">import</span> (
+    DomainError,
+    InvalidEmailError,
+    OrderNotFoundError,
+    OrderAlreadyPaidError,
+    InsufficientFundsError
+)
+
+
+<span class="code-comment"># Mapping: Domain Error → HTTP Status + Code</span>
+ERROR_MAPPING = {
+    InvalidEmailError: (status.HTTP_400_BAD_REQUEST, <span class="code-str">"INVALID_EMAIL"</span>),
+    OrderNotFoundError: (status.HTTP_404_NOT_FOUND, <span class="code-str">"ORDER_NOT_FOUND"</span>),
+    OrderAlreadyPaidError: (status.HTTP_409_CONFLICT, <span class="code-str">"ORDER_ALREADY_PAID"</span>),
+    InsufficientFundsError: (status.HTTP_402_PAYMENT_REQUIRED, <span class="code-str">"INSUFFICIENT_FUNDS"</span>),
+}
+
+
+<span class="code-keyword">async def</span> <span class="code-func">domain_error_handler</span>(request: Request, exc: DomainError):
+    <span class="code-str">"""
+    Global handler for all domain errors.
+    Converts DomainError into a beautiful JSON response.
+    """</span>
+    <span class="code-comment"># Search for mapping for a specific error type</span>
+    error_type = type(exc)
+    status_code, error_code = ERROR_MAPPING.get(
+        error_type, 
+        (status.HTTP_400_BAD_REQUEST, <span class="code-str">"DOMAIN_ERROR"</span>)
+    )
+    
+    <span class="code-keyword">return</span> JSONResponse(
+        status_code=status_code,
+        content={
+            <span class="code-str">"error"</span>: error_type.__name__,
+            <span class="code-str">"detail"</span>: str(exc),
+            <span class="code-str">"code"</span>: error_code
+        }
+    )
+
+
+<span class="code-comment"># Registration in main.py:</span>
+<span class="code-comment"># app.add_exception_handler(DomainError, domain_error_handler)</span>
+</code></pre>
+
+            <div class="bg-green-50 p-4 rounded border border-green-200 mt-4 text-sm text-green-900">
+                <strong>Advantage:</strong> The Domain remains pure. It doesn't know about HTTP codes. And we can easily change the response format without touching the business logic.
+            </div>
+        </section>
+
+        <!-- DEPENDENCIES -->
+        <section id="deps" class="card bg-gray-50 border-gray-200">
+            <h2 class="text-2xl font-bold mb-4">4. Dependency Injection in FastAPI</h2>
+            <p>FastAPI uses the `Depends()` system for dependency injection. This is our Composition Root.</p>
+
+<pre><code class="language-python"><span class="code-comment"># presentation/dependencies.py</span>
+<span class="code-keyword">from</span> functools <span class="code-keyword">import</span> lru_cache
+<span class="code-keyword">from</span> fastapi <span class="code-keyword">import</span> Depends
+<span class="code-keyword">from</span> sqlalchemy.orm <span class="code-keyword">import</span> Session
+
+<span class="code-comment"># Infrastructure</span>
+<span class="code-keyword">from</span> infrastructure.db.session <span class="code-keyword">import</span> get_session
+<span class="code-keyword">from</span> infrastructure.repositories <span class="code-keyword">import</span> SqlAlchemyOrderRepository
+<span class="code-keyword">from</span> infrastructure.adapters.email <span class="code-keyword">import</span> SmtpEmailService
+<span class="code-keyword">from</span> infrastructure.uow <span class="code-keyword">import</span> SqlAlchemyUnitOfWork
+
+<span class="code-comment"># Application</span>
+<span class="code-keyword">from</span> application.use_cases <span class="code-keyword">import</span> CreateOrderUseCase, GetOrderUseCase, PayOrderUseCase
+
+<span class="code-comment"># Configuration (can be moved to a separate file)</span>
+<span class="code-keyword">from</span> config <span class="code-keyword">import</span> settings
+
+
+<span class="code-dec">@lru_cache</span>()
+<span class="code-keyword">def</span> <span class="code-func">get_email_service</span>():
+    <span class="code-str">"""Singleton: created once for the entire application lifetime"""</span>
+    <span class="code-keyword">return</span> SmtpEmailService(
+        host=settings.SMTP_HOST,
+        port=settings.SMTP_PORT,
+        user=settings.SMTP_USER,
+        password=settings.SMTP_PASSWORD
+    )
+
+
+<span class="code-keyword">def</span> <span class="code-func">get_unit_of_work</span>(session: Session = Depends(get_session)):
+    <span class="code-str">"""Created for each request (Request Scope)"""</span>
+    <span class="code-keyword">return</span> SqlAlchemyUnitOfWork(session)
+
+
+<span class="code-keyword">def</span> <span class="code-func">get_create_order_use_case</span>(
+    uow = Depends(get_unit_of_work),
+    email_service = Depends(get_email_service)
+) -> CreateOrderUseCase:
+    <span class="code-str">"""Assemble Use Case with all dependencies"""</span>
+    <span class="code-keyword">return</span> CreateOrderUseCase(
+        uow=uow,
+        email_service=email_service
+    )
+
+
+<span class="code-keyword">def</span> <span class="code-func">get_order_use_case</span>(
+    uow = Depends(get_unit_of_work)
+) -> GetOrderUseCase:
+    <span class="code-keyword">return</span> GetOrderUseCase(uow=uow)
+
+
+<span class="code-keyword">def</span> <span class="code-func">get_pay_order_use_case</span>(
+    uow = Depends(get_unit_of_work),
+    email_service = Depends(get_email_service)
+) -> PayOrderUseCase:
+    <span class="code-keyword">return</span> PayOrderUseCase(
+        uow=uow,
+        email_service=email_service
+    )
+</code></pre>
+        </section>
+
+        <!-- MAIN APP -->
+        <section id="main" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">5. Application Assembly (main.py)</h2>
+
+<pre><code class="language-python"><span class="code-comment"># main.py</span>
+<span class="code-keyword">from</span> fastapi <span class="code-keyword">import</span> FastAPI
+<span class="code-keyword">from</span> fastapi.middleware.cors <span class="code-keyword">import</span> CORSMiddleware
+
+<span class="code-comment"># Routers</span>
+<span class="code-keyword">from</span> presentation.routers <span class="code-keyword">import</span> orders, users, payments
+
+<span class="code-comment"># Error Handlers</span>
+<span class="code-keyword">from</span> presentation.exception_handlers <span class="code-keyword">import</span> domain_error_handler
+<span class="code-keyword">from</span> domain.exceptions <span class="code-keyword">import</span> DomainError
+
+
+<span class="code-keyword">def</span> <span class="code-func">create_app</span>() -> FastAPI:
+    <span class="code-str">"""Application Factory. Allows creating different configurations for tests."""</span>
+    
+    app = FastAPI(
+        title=<span class="code-str">"Order Service API"</span>,
+        description=<span class="code-str">"Order Management Service (Clean Architecture)"</span>,
+        version=<span class="code-str">"1.0.0"</span>,
+        docs_url=<span class="code-str">"/docs"</span>,
+        redoc_url=<span class="code-str">"/redoc"</span>
+    )
+    
+    <span class="code-comment"># CORS for frontend</span>
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[<span class="code-str">"http://localhost:3000"</span>],
+        allow_methods=[<span class="code-str">"*"</span>],
+        allow_headers=[<span class="code-str">"*"</span>]
+    )
+    
+    <span class="code-comment"># Register error handlers</span>
+    app.add_exception_handler(DomainError, domain_error_handler)
+    
+    <span class="code-comment"># Connect routers</span>
+    app.include_router(orders.router, prefix=<span class="code-str">"/api/v1"</span>)
+    app.include_router(users.router, prefix=<span class="code-str">"/api/v1"</span>)
+    app.include_router(payments.router, prefix=<span class="code-str">"/api/v1"</span>)
+    
+    <span class="code-keyword">return</span> app
+
+
+<span class="code-comment"># Create instance</span>
+app = create_app()
+
+
+<span class="code-comment"># Run: uvicorn main:app --reload</span>
+</code></pre>
+        </section>
+
+        <!-- DJANGO EXAMPLE -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">6. Alternative: Django Views</h2>
+            <p>If you are using Django, the principles are the same. Just the syntax is different.</p>
+
+            <details>
+                <summary>Django Class-Based View (CBV)</summary>
+                <div>
+<pre><code class="language-python"><span class="code-comment"># orders/views.py</span>
+<span class="code-keyword">from</span> django.http <span class="code-keyword">import</span> JsonResponse
+<span class="code-keyword">from</span> django.views <span class="code-keyword">import</span> View
+<span class="code-keyword">import</span> json
+
+<span class="code-keyword">from</span> application.use_cases <span class="code-keyword">import</span> CreateOrderUseCase
+<span class="code-keyword">from</span> application.dto <span class="code-keyword">import</span> CreateOrderCommand
+<span class="code-keyword">from</span> domain.exceptions <span class="code-keyword">import</span> DomainError
+
+<span class="code-comment"># DI manual (or use django-injector)</span>
+<span class="code-keyword">from</span> .dependencies <span class="code-keyword">import</span> get_create_order_use_case
+
+
+<span class="code-keyword">class</span> <span class="code-class">OrderCreateView</span>(View):
+    
+    <span class="code-keyword">def</span> <span class="code-func">post</span>(self, request):
+        <span class="code-keyword">try</span>:
+            <span class="code-comment"># 1. Parse JSON</span>
+            data = json.loads(request.body)
+            
+            <span class="code-comment"># 2. Create Command</span>
+            command = CreateOrderCommand(
+                customer_email=data[<span class="code-str">'customer_email'</span>],
+                items=data[<span class="code-str">'items'</span>]
+            )
+            
+            <span class="code-comment"># 3. Call Use Case</span>
+            use_case = get_create_order_use_case()
+            result = use_case.execute(command)
+            
+            <span class="code-comment"># 4. Return response</span>
+            <span class="code-keyword">return</span> JsonResponse(result.dict(), status=201)
+            
+        <span class="code-keyword">except</span> DomainError <span class="code-keyword">as</span> e:
+            <span class="code-keyword">return</span> JsonResponse({
+                <span class="code-str">'error'</span>: type(e).__name__,
+                <span class="code-str">'detail'</span>: str(e)
+            }, status=400)
+        
+        <span class="code-keyword">except</span> KeyError <span class="code-keyword">as</span> e:
+            <span class="code-keyword">return</span> JsonResponse({
+                <span class="code-str">'error'</span>: <span class="code-str">'ValidationError'</span>,
+                <span class="code-str">'detail'</span>: <span class="code-str">f'Missing field: {e}'</span>
+            }, status=400)
+</code></pre>
+                </div>
+            </details>
+        </section>
+
+        <!-- ANTIPATTERNS -->
+        <section id="antipatterns" class="mb-12">
+            <h2 class="text-2xl font-bold text-red-700 mb-6">⚠️ Presentation Layer Antipatterns</h2>
+            
+            <div class="space-y-6">
+                <details class="group bg-white border border-red-200 rounded-lg p-4">
+                    <summary class="font-bold text-red-800 group-hover:text-red-600">1. Fat Controller</summary>
+                    <div class="mt-3 text-sm">
+                        <p class="mb-2">When all logic is in the endpoint.</p>
+                        <pre><span class="code-comment"># ❌ BAD: Logic in the controller</span>
+@router.post("/orders")
+async def create_order(data: dict, db: Session = Depends(get_db)):
+    <span class="code-comment"># Validation</span>
+    if not data.get('email'):
+        raise HTTPException(400, "Email required")
+    
+    <span class="code-comment"># Business logic (MUST BE IN USE CASE!)</span>
+    if len(data['items']) > 10:
+        raise HTTPException(400, "Too many items")
+    
+    total = sum(i['price'] for i in data['items'])
+    
+    <span class="code-comment"># SQL in controller (MUST BE IN REPOSITORY!)</span>
+    order = Order(email=data['email'], total=total)
+    db.add(order)
+    db.commit()
+    
+    return {"id": order.id}</pre>
+                    </div>
+                </details>
+
+                <details class="group bg-white border border-red-200 rounded-lg p-4">
+                    <summary class="font-bold text-red-800 group-hover:text-red-600">2. Returning Entity Directly</summary>
+                    <div class="mt-3 text-sm">
+                        <p class="mb-2">An entity has methods and private fields. JSON serialization might break or expose unnecessary data.</p>
+                        <pre><span class="code-comment"># ❌ BAD</span>
+return order  <span class="code-comment"># Entity directly</span>
+
+<span class="code-comment"># ✅ GOOD</span>
+return OrderResponse(
+    id=str(order.id),
+    email=order.customer.value,
+    total=order.total_price.amount
+)</pre>
+                    </div>
+                </details>
+
+                <details class="group bg-white border border-red-200 rounded-lg p-4">
+                    <summary class="font-bold text-red-800 group-hover:text-red-600">3. Business Logic in Middleware</summary>
+                    <div class="mt-3 text-sm">
+                        <p class="mb-2">Middleware is intended for cross-cutting concerns: logging, authentication, CORS. NOT for business rules!</p>
+                        <pre><span class="code-comment"># ❌ BAD: Checking limits in middleware</span>
+class OrderLimitMiddleware:
+    async def __call__(self, request, call_next):
+        user = get_user(request)
+        if user.order_count > 100:  <span class="code-comment"># Business rule!</span>
+            return JSONResponse({"error": "Limit"}, 403)
+        return await call_next(request)</pre>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+        <!-- NAVIGATION -->
+        
+    
+        <!-- NAVIGATION FOOTER -->
+        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="infrastructure.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Back</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Infrastructure</span></a><a href="solid.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Next</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">SOLID Principles &rarr;</span></a></div></div>
+    </main>
+</body>
+</html>

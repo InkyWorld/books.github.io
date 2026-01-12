@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17.2 Rate Limiting — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 17: System Design</div>
+                    <a href="part17_circuit.html" class="nav-link">17.1 Resilience</a>
+                    <a href="part17_ratelimit.html" class="nav-link active">17.2 Rate Limiting</a>
+                    <a href="part17_distlock.html" class="nav-link">17.3 Dist Locks</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 17</span>
+                    <span>/</span>
+                    <span>17.2 Rate Limiting</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 17.2: Ограничение нагрузки (Rate Limiting)</h1>
+                <p class="lead">Как вежливо отказать клиенту (429 Too Many Requests), чтобы не упасть самому.</p>
+
+                <h2>Алгоритмы</h2>
+
+                <h3>1. Token Bucket (Ведро с токенами)</h3>
+                <p>Представьте ведро, в которое капают монетки со скоростью 10 штук в секунду. Максимум в ведре — 100 монеток (Burst capacity). Чтобы сделать запрос, нужно забрать монетку.</p>
+                <ul>
+                    <li>Разрешает кратковременные всплески (Burst).</li>
+                    <li>Самый популярный (используется в AWS, Stripe, Nginx).</li>
+                </ul>
+
+                <h3>2. Leaky Bucket (Дырявое ведро)</h3>
+                <p>Запросы падают в ведро и вытекают оттуда с постоянной скоростью. Если ведро полное — новые запросы отбрасываются.</p>
+                <ul>
+                    <li>Сглаживает трафик в идеально ровный поток.</li>
+                    <li>Используется в очередях обработки (Queue consumers).</li>
+                </ul>
+
+                <h3>3. Fixed Window Counter</h3>
+                <p>Счетчик запросов с 12:00 до 12:01. Если > 100, то блок.</p>
+                <p><em>Проблема:</em> В 12:00:59 пришло 100 запросов и в 12:01:01 еще 100. Сервер получает 200 запросов за 2 секунды.</p>
+
+                <h3>4. Sliding Window Log</h3>
+                <p>Храним timestamp каждого запроса в Redis Sorted Set. Точно, но дорого по памяти.</p>
+
+                <h2>Реализация в Redis</h2>
+                <div class="code-block">
+                    <pre><code>-- Lua script for atomic check
+local current = redis.call('INCR', key)
+if current == 1 then
+    redis.call('EXPIRE', key, window)
+end
+if current > limit then
+    return 0 -- Rejected
+end
+return 1 -- Allowed</code></pre>
+                </div>
+
+                <h2>🪨 Подводные камни</h2>
+                <ul>
+                    <li><strong>Distributed Rate Limiting:</strong> Когда у вас 50 инстансов API, локальный лимит в памяти не работает. Нужен центральный Redis. Но Redis добавляет latency.</li>
+                    <li><strong>Race Conditions:</strong> Без атомарности (Lua) вы пропустите больше запросов, чем нужно.</li>
+                    <li><strong>User vs IP:</strong> Лимитировать по IP опасно (весь офис сидит за одним NAT). Лимитируйте по API Key или User ID. Для анонимов — по IP, но с большим лимитом.</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

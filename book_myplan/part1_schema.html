@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.1 Схема и хранение данных — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">
+                        <span class="nav-link-icon">🏠</span>
+                        Главная
+                    </a>
+                    <a href="setup.html" class="nav-link">
+                        <span class="nav-link-icon">⚙️</span>
+                        Настройка проекта
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
+                    <a href="part1_schema.html" class="nav-link active">
+                        <span class="nav-link-icon">📊</span>
+                        1.1 Схема и хранение
+                    </a>
+                    <a href="part1_transactions.html" class="nav-link">
+                        <span class="nav-link-icon">🔄</span>
+                        1.2 Транзакции
+                    </a>
+                    <a href="part1_indexes.html" class="nav-link">
+                        <span class="nav-link-icon">🔍</span>
+                        1.3 Индексы
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 2: Архитектура</div>
+                    <a href="part2_litestar.html" class="nav-link">
+                        <span class="nav-link-icon">🚀</span>
+                        2.1 Litestar + DDD
+                    </a>
+                    <a href="part2_dishka.html" class="nav-link">
+                        <span class="nav-link-icon">💉</span>
+                        2.2 DI с Dishka
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 3: Распределённые</div>
+                    <a href="part3_faststream.html" class="nav-link">
+                        <span class="nav-link-icon">📨</span>
+                        3.1 RabbitMQ + Faststream
+                    </a>
+                    <a href="part3_redis.html" class="nav-link">
+                        <span class="nav-link-icon">⚡</span>
+                        3.2 Redis Patterns
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 4: Надёжность</div>
+                    <a href="part4_testing.html" class="nav-link">
+                        <span class="nav-link-icon">🧪</span>
+                        4.1 Advanced Testing
+                    </a>
+                    <a href="part4_resiliency.html" class="nav-link">
+                        <span class="nav-link-icon">🛡️</span>
+                        4.2 Resiliency
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 5: Observability</div>
+                    <a href="part5_logging.html" class="nav-link">
+                        <span class="nav-link-icon">📝</span>
+                        5.1 Логирование
+                    </a>
+                    <a href="part5_clickhouse.html" class="nav-link">
+                        <span class="nav-link-icon">📈</span>
+                        5.2 ClickHouse
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 6: Production</div>
+                    <a href="part6_migrations.html" class="nav-link">
+                        <span class="nav-link-icon">🔀</span>
+                        6.1 Zero-Downtime
+                    </a>
+                    <a href="part6_quality.html" class="nav-link">
+                        <span class="nav-link-icon">✅</span>
+                        6.2 Code Quality
+                    </a>
+                    <a href="part6_django.html" class="nav-link">
+                        <span class="nav-link-icon">🔗</span>
+                        6.3 Django Admin
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 1</span>
+                    <span>/</span>
+                    <span>1.1 Схема и хранение</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 1.1: Проектирование схемы и оптимизация хранения</h1>
+                <p class="lead">
+                    Понимаем базу данных как инженер, а не как пользователь ORM. 
+                    Правильный выбор типов данных — это фундамент производительной системы.
+                </p>
+
+                <h2>UUID vs BigInt: Цена удобства</h2>
+                
+                <p>
+                    Классическая дилемма: UUID удобен для распределённых систем, но имеет скрытую цену.
+                    Давай разберёмся, когда что использовать.
+                </p>
+
+                <h3>Проблема UUID</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Характеристика</th>
+                            <th>BigInt (8 bytes)</th>
+                            <th>UUID (16 bytes)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Размер индекса</td>
+                            <td>1x</td>
+                            <td>2x</td>
+                        </tr>
+                        <tr>
+                            <td>Размер FK</td>
+                            <td>8 bytes</td>
+                            <td>16 bytes</td>
+                        </tr>
+                        <tr>
+                            <td>WAL записи</td>
+                            <td>Компактные</td>
+                            <td>В 2 раза больше</td>
+                        </tr>
+                        <tr>
+                            <td>Cache hit ratio</td>
+                            <td>Выше</td>
+                            <td>Ниже (меньше помещается)</td>
+                        </tr>
+                        <tr>
+                            <td>Сортировка</td>
+                            <td>Быстрая</td>
+                            <td>Медленнее</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">⚠️ Важно</div>
+                    <p>
+                        Случайные UUID (v4) приводят к <strong>фрагментации B-Tree индекса</strong>. 
+                        Каждая вставка может потребовать случайного I/O. Для High Load это критично.
+                    </p>
+                </div>
+
+                <h3>Решение: UUIDv7 или Hybrid</h3>
+                
+                <p>
+                    <strong>UUIDv7</strong> — это UUID с временной меткой в начале. Он сортируемый и не вызывает фрагментации:
+                </p>
+
+<pre><code><span class="comment"># src/scaletrade/domain/value_objects/identifiers.py</span>
+<span class="keyword">import</span> uuid
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime, timezone
+<span class="keyword">from</span> typing <span class="keyword">import</span> Self
+
+
+<span class="keyword">class</span> <span class="class-name">OrderId</span>:
+    <span class="string">"""UUID v7 - сортируемый по времени создания."""</span>
+    
+    __slots__ = (<span class="string">"_value"</span>,)
+    
+    <span class="keyword">def</span> <span class="function">__init__</span>(self, value: uuid.UUID) -> <span class="keyword">None</span>:
+        self._value = value
+    
+    <span class="decorator">@classmethod</span>
+    <span class="keyword">def</span> <span class="function">generate</span>(cls) -> Self:
+        <span class="string">"""Генерируем UUIDv7 (RFC 9562)."""</span>
+        <span class="comment"># Python 3.11+ не имеет встроенного uuid7, используем библиотеку</span>
+        <span class="keyword">import</span> uuid6  <span class="comment"># pip install uuid6</span>
+        <span class="keyword">return</span> cls(uuid6.uuid7())
+    
+    <span class="decorator">@classmethod</span>
+    <span class="keyword">def</span> <span class="function">from_string</span>(cls, value: <span class="type">str</span>) -> Self:
+        <span class="keyword">return</span> cls(uuid.UUID(value))
+    
+    <span class="keyword">def</span> <span class="function">__str__</span>(self) -> <span class="type">str</span>:
+        <span class="keyword">return</span> <span class="type">str</span>(self._value)
+    
+    <span class="keyword">def</span> <span class="function">__eq__</span>(self, other: object) -> <span class="type">bool</span>:
+        <span class="keyword">if not</span> <span class="function">isinstance</span>(other, OrderId):
+            <span class="keyword">return</span> <span class="keyword">False</span>
+        <span class="keyword">return</span> self._value == other._value
+    
+    <span class="keyword">def</span> <span class="function">__hash__</span>(self) -> <span class="type">int</span>:
+        <span class="keyword">return</span> <span class="function">hash</span>(self._value)
+    
+    <span class="decorator">@property</span>
+    <span class="keyword">def</span> <span class="function">timestamp</span>(self) -> datetime:
+        <span class="string">"""Извлекаем время создания из UUIDv7."""</span>
+        <span class="comment"># Первые 48 бит — Unix timestamp в миллисекундах</span>
+        ts_ms = self._value.int >> <span class="number">80</span>
+        <span class="keyword">return</span> datetime.fromtimestamp(ts_ms / <span class="number">1000</span>, tz=timezone.utc)</code></pre>
+
+                <h3>Гибридный подход</h3>
+                <p>
+                    Можно использовать <strong>BigInt для внутренних FK</strong> и <strong>UUID для публичного API</strong>:
+                </p>
+
+<pre><code><span class="comment"># SQLAlchemy модель с гибридным подходом</span>
+<span class="keyword">class</span> <span class="class-name">Order</span>(Base):
+    __tablename__ = <span class="string">"orders"</span>
+    
+    <span class="comment"># Внутренний ID для FK и джоинов (быстрый)</span>
+    id: Mapped[<span class="type">int</span>] = mapped_column(BigInteger, primary_key=<span class="keyword">True</span>)
+    
+    <span class="comment"># Публичный ID для API (безопасный)</span>
+    public_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=<span class="keyword">True</span>), 
+        default=uuid6.uuid7,
+        unique=<span class="keyword">True</span>,
+        index=<span class="keyword">True</span>
+    )</code></pre>
+
+                <h2>Decimal для денег: без компромиссов</h2>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">🚨 Никогда не используй FLOAT для денег</div>
+                    <p>
+                        <code>0.1 + 0.2 = 0.30000000000000004</code> — это не ошибка, это IEEE 754.
+                        В финансах это недопустимо.
+                    </p>
+                </div>
+
+                <div class="comparison-table">
+                    <div class="comparison-col bad">
+                        <h4>❌ Неправильно</h4>
+<pre><code>price = Column(Float)
+
+<span class="comment"># 0.1 + 0.2 = ?</span>
+>>> 0.1 + 0.2
+0.30000000000000004</code></pre>
+                    </div>
+                    <div class="comparison-col good">
+                        <h4>✅ Правильно</h4>
+<pre><code>price = Column(Numeric(19, 4))
+
+<span class="comment"># Точные вычисления</span>
+>>> Decimal("0.1") + Decimal("0.2")
+Decimal('0.3')</code></pre>
+                    </div>
+                </div>
+
+                <h3>Value Object для денег</h3>
+
+<pre><code><span class="comment"># src/scaletrade/domain/value_objects/money.py</span>
+<span class="keyword">from</span> dataclasses <span class="keyword">import</span> dataclass
+<span class="keyword">from</span> decimal <span class="keyword">import</span> Decimal, ROUND_HALF_UP
+<span class="keyword">from</span> enum <span class="keyword">import</span> StrEnum
+<span class="keyword">from</span> typing <span class="keyword">import</span> Self
+
+
+<span class="keyword">class</span> <span class="class-name">Currency</span>(StrEnum):
+    USD = <span class="string">"USD"</span>
+    EUR = <span class="string">"EUR"</span>
+    RUB = <span class="string">"RUB"</span>
+
+
+<span class="decorator">@dataclass</span>(frozen=<span class="keyword">True</span>, slots=<span class="keyword">True</span>)
+<span class="keyword">class</span> <span class="class-name">Money</span>:
+    <span class="string">"""Неизменяемый Value Object для денежных значений."""</span>
+    
+    amount: Decimal
+    currency: Currency
+    
+    <span class="keyword">def</span> <span class="function">__post_init__</span>(self) -> <span class="keyword">None</span>:
+        <span class="comment"># Валидация при создании</span>
+        <span class="keyword">if</span> self.amount < <span class="number">0</span>:
+            <span class="keyword">raise</span> ValueError(<span class="string">"Amount cannot be negative"</span>)
+        
+        <span class="comment"># Округляем до 4 знаков (стандарт для финансов)</span>
+        <span class="keyword">object</span>.__setattr__(
+            self, 
+            <span class="string">"amount"</span>, 
+            self.amount.quantize(Decimal(<span class="string">"0.0001"</span>), rounding=ROUND_HALF_UP)
+        )
+    
+    <span class="keyword">def</span> <span class="function">__add__</span>(self, other: Self) -> Self:
+        self._check_same_currency(other)
+        <span class="keyword">return</span> Money(self.amount + other.amount, self.currency)
+    
+    <span class="keyword">def</span> <span class="function">__sub__</span>(self, other: Self) -> Self:
+        self._check_same_currency(other)
+        result = self.amount - other.amount
+        <span class="keyword">if</span> result < <span class="number">0</span>:
+            <span class="keyword">raise</span> ValueError(<span class="string">"Result cannot be negative"</span>)
+        <span class="keyword">return</span> Money(result, self.currency)
+    
+    <span class="keyword">def</span> <span class="function">__mul__</span>(self, multiplier: Decimal | <span class="type">int</span>) -> Self:
+        <span class="keyword">return</span> Money(self.amount * Decimal(multiplier), self.currency)
+    
+    <span class="keyword">def</span> <span class="function">_check_same_currency</span>(self, other: Self) -> <span class="keyword">None</span>:
+        <span class="keyword">if</span> self.currency != other.currency:
+            <span class="keyword">raise</span> ValueError(
+                <span class="string">f"Cannot operate on different currencies: "</span>
+                <span class="string">f"</span>{self.currency}<span class="string"> vs </span>{other.currency}<span class="string">"</span>
+            )
+    
+    <span class="decorator">@classmethod</span>
+    <span class="keyword">def</span> <span class="function">zero</span>(cls, currency: Currency) -> Self:
+        <span class="keyword">return</span> cls(Decimal(<span class="string">"0"</span>), currency)
+    
+    <span class="decorator">@classmethod</span>
+    <span class="keyword">def</span> <span class="function">from_cents</span>(cls, cents: <span class="type">int</span>, currency: Currency) -> Self:
+        <span class="string">"""Создаём из центов (атомарных единиц)."""</span>
+        <span class="keyword">return</span> cls(Decimal(cents) / <span class="number">100</span>, currency)</code></pre>
+
+                <h2>Партиционирование таблицы Orders</h2>
+                
+                <p>
+                    При высокой нагрузке таблица <code>orders</code> вырастет до миллиардов записей.
+                    <strong>Партиционирование по времени</strong> позволяет:
+                </p>
+                <ul>
+                    <li>Быстрее искать по диапазону дат (сканируем только нужные партиции)</li>
+                    <li>Эффективно удалять старые данные (DROP PARTITION вместо DELETE)</li>
+                    <li>Распараллелить запросы по партициям</li>
+                </ul>
+
+<pre><code><span class="comment">-- Создаём партиционированную таблицу</span>
+<span class="keyword">CREATE TABLE</span> orders (
+    id              BIGINT <span class="keyword">GENERATED ALWAYS AS IDENTITY</span>,
+    public_id       UUID <span class="keyword">NOT NULL DEFAULT</span> gen_random_uuid(),
+    user_id         BIGINT <span class="keyword">NOT NULL</span>,
+    symbol          VARCHAR(20) <span class="keyword">NOT NULL</span>,
+    side            VARCHAR(4) <span class="keyword">NOT NULL CHECK</span> (side <span class="keyword">IN</span> ('BUY', 'SELL')),
+    quantity        NUMERIC(19, 8) <span class="keyword">NOT NULL CHECK</span> (quantity > 0),
+    price           NUMERIC(19, 4) <span class="keyword">NOT NULL CHECK</span> (price > 0),
+    status          VARCHAR(20) <span class="keyword">NOT NULL DEFAULT</span> 'pending',
+    created_at      TIMESTAMPTZ <span class="keyword">NOT NULL DEFAULT</span> now(),
+    updated_at      TIMESTAMPTZ <span class="keyword">NOT NULL DEFAULT</span> now(),
+    
+    <span class="keyword">PRIMARY KEY</span> (id, created_at)  <span class="comment">-- PK должен включать ключ партиции!</span>
+) <span class="keyword">PARTITION BY RANGE</span> (created_at);
+
+<span class="comment">-- Создаём партиции на 2024 год</span>
+<span class="keyword">CREATE TABLE</span> orders_2024_01 <span class="keyword">PARTITION OF</span> orders
+    <span class="keyword">FOR VALUES FROM</span> ('2024-01-01') <span class="keyword">TO</span> ('2024-02-01');
+
+<span class="keyword">CREATE TABLE</span> orders_2024_02 <span class="keyword">PARTITION OF</span> orders
+    <span class="keyword">FOR VALUES FROM</span> ('2024-02-01') <span class="keyword">TO</span> ('2024-03-01');
+
+<span class="comment">-- ... и так далее</span>
+
+<span class="comment">-- Индекс на public_id (для API lookups)</span>
+<span class="keyword">CREATE UNIQUE INDEX</span> idx_orders_public_id <span class="keyword">ON</span> orders (public_id);
+
+<span class="comment">-- Индекс для поиска ордеров пользователя</span>
+<span class="keyword">CREATE INDEX</span> idx_orders_user_created <span class="keyword">ON</span> orders (user_id, created_at <span class="keyword">DESC</span>);</code></pre>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">💡 Автоматизация партиций</div>
+                    <p>
+                        В продакшене используй <code>pg_partman</code> — расширение PostgreSQL, 
+                        которое автоматически создаёт и удаляет партиции.
+                    </p>
+                </div>
+
+                <h2>Database Constraints: защита на уровне БД</h2>
+                
+                <p>
+                    Бизнес-правила должны быть защищены на уровне базы данных, а не только в коде.
+                    Код можно обойти, базу — нет.
+                </p>
+
+                <h3>CHECK Constraints</h3>
+
+<pre><code><span class="comment">-- Баланс не может быть отрицательным</span>
+<span class="keyword">ALTER TABLE</span> accounts 
+<span class="keyword">ADD CONSTRAINT</span> chk_balance_positive <span class="keyword">CHECK</span> (balance >= 0);
+
+<span class="comment">-- Статус ордера из допустимого списка</span>
+<span class="keyword">ALTER TABLE</span> orders
+<span class="keyword">ADD CONSTRAINT</span> chk_order_status <span class="keyword">CHECK</span> (
+    status <span class="keyword">IN</span> ('pending', 'filled', 'cancelled', 'rejected')
+);
+
+<span class="comment">-- Цена покупки должна быть меньше цены продажи (для лимитных ордеров)</span>
+<span class="keyword">ALTER TABLE</span> limit_orders
+<span class="keyword">ADD CONSTRAINT</span> chk_price_range <span class="keyword">CHECK</span> (stop_price < limit_price);</code></pre>
+
+                <h3>EXCLUDE Constraint: продвинутые правила</h3>
+                
+                <p>
+                    <strong>Задача:</strong> Пользователь не может создать новый ордер по символу, 
+                    если у него есть незакрытый ордер по тому же символу.
+                </p>
+
+<pre><code><span class="comment">-- Требуется расширение btree_gist</span>
+<span class="keyword">CREATE EXTENSION IF NOT EXISTS</span> btree_gist;
+
+<span class="comment">-- Запрещаем пересечение активных ордеров</span>
+<span class="keyword">ALTER TABLE</span> orders
+<span class="keyword">ADD CONSTRAINT</span> excl_one_active_order_per_symbol
+<span class="keyword">EXCLUDE USING</span> gist (
+    user_id <span class="keyword">WITH</span> =,
+    symbol <span class="keyword">WITH</span> =,
+    <span class="comment">-- Диапазон "жизни" ордера: от создания до закрытия</span>
+    tstzrange(created_at, closed_at, '[)') <span class="keyword">WITH</span> &&
+) <span class="keyword">WHERE</span> (status = 'pending');
+
+<span class="comment">-- Это значит: не может быть двух записей, где:</span>
+<span class="comment">-- 1. user_id одинаковый</span>
+<span class="comment">-- 2. symbol одинаковый</span>
+<span class="comment">-- 3. временные диапазоны пересекаются</span>
+<span class="comment">-- 4. статус = pending</span></code></pre>
+
+                <h2>SQLAlchemy 2.0: модели</h2>
+                
+                <p>Собираем всё вместе в SQLAlchemy модель:</p>
+
+<pre><code><span class="comment"># src/scaletrade/infrastructure/database/models.py</span>
+<span class="keyword">from</span> datetime <span class="keyword">import</span> datetime
+<span class="keyword">from</span> decimal <span class="keyword">import</span> Decimal
+<span class="keyword">from</span> enum <span class="keyword">import</span> StrEnum
+<span class="keyword">from</span> typing <span class="keyword">import</span> Optional
+<span class="keyword">import</span> uuid
+
+<span class="keyword">from</span> sqlalchemy <span class="keyword">import</span> (
+    BigInteger, CheckConstraint, Index, Numeric, String, func
+)
+<span class="keyword">from</span> sqlalchemy.dialects.postgresql <span class="keyword">import</span> UUID, TIMESTAMP
+<span class="keyword">from</span> sqlalchemy.orm <span class="keyword">import</span> DeclarativeBase, Mapped, mapped_column
+
+
+<span class="keyword">class</span> <span class="class-name">OrderSide</span>(StrEnum):
+    BUY = <span class="string">"BUY"</span>
+    SELL = <span class="string">"SELL"</span>
+
+
+<span class="keyword">class</span> <span class="class-name">OrderStatus</span>(StrEnum):
+    PENDING = <span class="string">"pending"</span>
+    FILLED = <span class="string">"filled"</span>
+    CANCELLED = <span class="string">"cancelled"</span>
+    REJECTED = <span class="string">"rejected"</span>
+
+
+<span class="keyword">class</span> <span class="class-name">Base</span>(DeclarativeBase):
+    <span class="keyword">pass</span>
+
+
+<span class="keyword">class</span> <span class="class-name">Order</span>(Base):
+    __tablename__ = <span class="string">"orders"</span>
+    
+    <span class="comment"># Primary Key (включает ключ партиции)</span>
+    id: Mapped[<span class="type">int</span>] = mapped_column(BigInteger, primary_key=<span class="keyword">True</span>)
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=<span class="keyword">True</span>),
+        primary_key=<span class="keyword">True</span>,  <span class="comment"># Часть композитного PK для партиционирования</span>
+        server_default=func.now()
+    )
+    
+    <span class="comment"># Public identifier</span>
+    public_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=<span class="keyword">True</span>),
+        default=uuid.uuid4,
+        unique=<span class="keyword">True</span>
+    )
+    
+    <span class="comment"># Relations</span>
+    user_id: Mapped[<span class="type">int</span>] = mapped_column(BigInteger, nullable=<span class="keyword">False</span>)
+    
+    <span class="comment"># Order details</span>
+    symbol: Mapped[<span class="type">str</span>] = mapped_column(String(20), nullable=<span class="keyword">False</span>)
+    side: Mapped[OrderSide] = mapped_column(String(4), nullable=<span class="keyword">False</span>)
+    
+    <span class="comment"># Money fields - ALWAYS Numeric, never Float!</span>
+    quantity: Mapped[Decimal] = mapped_column(
+        Numeric(19, 8), 
+        nullable=<span class="keyword">False</span>
+    )
+    price: Mapped[Decimal] = mapped_column(
+        Numeric(19, 4), 
+        nullable=<span class="keyword">False</span>
+    )
+    
+    <span class="comment"># Status</span>
+    status: Mapped[OrderStatus] = mapped_column(
+        String(20), 
+        default=OrderStatus.PENDING
+    )
+    
+    <span class="comment"># Timestamps</span>
+    updated_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=<span class="keyword">True</span>),
+        server_default=func.now(),
+        onupdate=func.now()
+    )
+    closed_at: Mapped[Optional[datetime]] = mapped_column(
+        TIMESTAMP(timezone=<span class="keyword">True</span>),
+        nullable=<span class="keyword">True</span>
+    )
+    
+    __table_args__ = (
+        <span class="comment"># CHECK constraints</span>
+        CheckConstraint(<span class="string">"quantity > 0"</span>, name=<span class="string">"chk_quantity_positive"</span>),
+        CheckConstraint(<span class="string">"price > 0"</span>, name=<span class="string">"chk_price_positive"</span>),
+        CheckConstraint(
+            <span class="string">"side IN ('BUY', 'SELL')"</span>, 
+            name=<span class="string">"chk_order_side"</span>
+        ),
+        
+        <span class="comment"># Indexes</span>
+        Index(<span class="string">"idx_orders_user_created"</span>, <span class="string">"user_id"</span>, <span class="string">"created_at"</span>),
+        Index(<span class="string">"idx_orders_status"</span>, <span class="string">"status"</span>, postgresql_where=(status == <span class="string">"pending"</span>)),
+        
+        <span class="comment"># Partitioning hint (DDL выполняется отдельно)</span>
+        {<span class="string">"postgresql_partition_by"</span>: <span class="string">"RANGE (created_at)"</span>}
+    )</code></pre>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Float для денег</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Никогда. Используйте <code>Numeric/Decimal</code> или целые числа (центы/копейки). Float — это погрешности при округлении, которые в финансах недопустимы.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Boolean и NULL</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Избегайте <code>Nullable Boolean</code>. Это три состояния: True, False и "Неизвестно". Обычно это ошибка проектирования. Устанавливайте <code>NOT NULL DEFAULT FALSE</code>.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. Удаление строк с FK без индекса</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если вы удаляете запись из родительской таблицы, Postgres проверяет все дочерние таблицы на ссылки. Если на FK-колонке в дочерней таблице нет индекса, это приведет к полному сканированию дочерней таблицы и блокировкам.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Timestamp:</strong> Всегда используйте <code>TIMESTAMPTZ</code> (timestamp with time zone). Храните всё в UTC. Просто <code>TIMESTAMP</code> — это мина замедленного действия.</li>
+                    <li><strong>UUIDv7:</strong> Вместо v4 используйте v7. Они отсортированы по времени, что критично для производительности B-Tree индексов (уменьшает фрагментацию страниц).</li>
+                    <li><strong>Soft Delete:</strong> Не используйте флажок <code>is_deleted</code>. Это ломает уникальные индексы и FK. Лучше перемещайте удаленные данные в таблицу <code>xxx_archive</code>.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>📋 Задание</h4>
+                    <ul class="task-list">
+                        <li>Создай Value Object <code>Money</code> с поддержкой арифметики</li>
+                        <li>Создай SQLAlchemy модель <code>Account</code> с балансом (Decimal)</li>
+                        <li>Напиши миграцию Alembic для создания партиционированной таблицы orders</li>
+                        <li>Добавь EXCLUDE constraint для предотвращения дублирующих активных ордеров</li>
+                        <li>Напиши тест, проверяющий что CHECK constraint работает (попытка создать отрицательный баланс)</li>
+                    </ul>
+                </div>
+
+                <div class="info-box info">
+                    <div class="info-box-title">💡 Что дальше?</div>
+                    <p>
+                        В следующем модуле мы погрузимся в <strong>транзакции и конкурентный доступ</strong>: 
+                        уровни изоляции, блокировки, deadlocks и паттерн SELECT FOR UPDATE.
+                    </p>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="setup.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← Настройка проекта</div>
+                        </div>
+                    </a>
+                    <a href="part1_transactions.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">1.2 Транзакции →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

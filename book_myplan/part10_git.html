@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>10.1 Git Advanced — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 10: Git & Culture</div>
+                    <a href="part10_git.html" class="nav-link active">10.1 Git Advanced</a>
+                    <a href="part10_commits.html" class="nav-link">10.2 Semantic Commits</a>
+                    <a href="part10_codereview.html" class="nav-link">10.3 Code Review</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 10</span>
+                    <span>/</span>
+                    <span>10.1 Git Advanced</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 10.1: Git Advanced</h1>
+                <p class="lead">Git — это не только commit и push. Это машина времени. Учимся переписывать историю (безопасно) и искать баги.</p>
+
+                <h2>Merge vs Rebase</h2>
+                <div class="comparison-table">
+                    <div class="comparison-col">
+                        <h4>Merge</h4>
+                        <p><code>git merge feature</code></p>
+                        <ul>
+                            <li>Создаёт "Merge commit".</li>
+                            <li>Сохраняет истинную историю (когда и кем сделано).</li>
+                            <li>Ветки заплетаются в "косичку".</li>
+                            <li>Сложно читать историю проекта.</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-col good">
+                        <h4>Rebase</h4>
+                        <p><code>git rebase main</code></p>
+                        <ul>
+                            <li>Переписывает историю веток.</li>
+                            <li>История становится линейной (как будто делали всё по очереди).</li>
+                            <li>Легче делать cherry-pick и bisect.</li>
+                            <li>⚠️ Требует force push, если ветка была на сервере.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h2>Interactive Rebase: Магия чистоты</h2>
+                <p>Перед тем как отдать код на ревью, причешите историю.</p>
+                <p><code>git rebase -i HEAD~5</code> (5 последних коммитов)</p>
+                
+                <ul>
+                    <li><strong>pick:</strong> Оставить коммит как есть.</li>
+                    <li><strong>reword:</strong> Изменить сообщение коммита.</li>
+                    <li><strong>squash:</strong> Слить этот коммит с предыдущим.</li>
+                    <li><strong>fixup:</strong> Слить с предыдущим, но выкинуть сообщение этого коммита.</li>
+                    <li><strong>drop:</strong> Удалить коммит.</li>
+                </ul>
+
+                <h2>Git Bisect: Бинарный поиск бага</h2>
+                <p>У вас 1000 коммитов. Где-то сломался тест. Вчера работало, сегодня нет. Кто виноват?</p>
+
+<pre><code class="language-bash">git bisect start
+git bisect bad            # Текущая версия сломана
+git bisect good v1.0.0    # Версия v1.0.0 работала
+
+# Git переключится на середину (commit 500)
+# Проверяем (запускаем тест)
+pytest tests/test_api.py
+
+# Если упал:
+git bisect bad
+# Если прошел:
+git bisect good
+
+# Git сужает поиск... и так за log(N) шагов найдёт виновника.
+</code></pre>
+
+                <h2>Git Stash</h2>
+                <p>Надо срочно переключиться на hotfix, а текущая работа не закончена.</p>
+                <ul>
+                    <li><code>git stash push -m "WIP feature login"</code> — спрятать изменения.</li>
+                    <li><code>git stash pop</code> — вернуть обратно.</li>
+                </ul>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Секреты в истории</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если вы закоммитили <code>.env</code> или приватный ключ, а потом удалили его следующим коммитом — <strong>он всё еще в истории</strong> (.git folder). Его можно достать. Решение: менять ключи и чистить историю через BFG Repo-Cleaner.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Rebase публичных веток</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Золотое правило: <strong>Rebase только для локальных веток</strong>. Если вы сделаете rebase ветки <code>develop</code>, вы "перепишете историю" для всех коллег. У них при <code>git pull</code> возникнет ад конфликтов.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. Force Push без страховки</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p><code>git push --force</code> — это молоток, который затирает удаленную ветку вашей локальной копией. Если коллега запушил туда свои правки 5 минут назад, вы их уничтожите. Всегда используйте <code>git push --force-with-lease</code>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Git Worktrees:</strong> Если вам нужно срочно пофиксить баг в другой ветке, но не хочется делать <code>stash</code> и ломать текущее окружение (node_modules/venv), используйте worktree. Это позволяет иметь несколько рабочих папок для одного репозитория.</li>
+                    <li><strong>Git Reflog:</strong> Гит помнит всё. Даже если вы сделали <code>reset --hard</code> и удалили коммит, <code>git reflog</code> покажет вам хеш потерянного состояния, и вы сможете на него вернуться.</li>
+                    <li><strong>Partial Add (git add -p):</strong> Позволяет коммитить файл кусками (hunks). Удобно, когда в одном файле и фича, и дебаг-принты (которые не надо коммитить).</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>🎯 Практика</h4>
+                    <ul class="task-list">
+                        <li>Сделай Interactive Rebase: объедини 3 коммита в один</li>
+                        <li>Найди "битый" коммит с помощью `git bisect`</li>
+                        <li>Настрой алиас `git lg` для красивого лога</li>
+                        <li>Восстанови удаленную ветку через Reflog</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

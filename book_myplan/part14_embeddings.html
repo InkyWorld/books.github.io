@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>14.2 Embeddings — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 14: ML Ops</div>
+                    <a href="part14_mlflow.html" class="nav-link">14.1 MLflow</a>
+                    <a href="part14_embeddings.html" class="nav-link active">14.2 Embeddings</a>
+                    <a href="part14_llm.html" class="nav-link">14.3 LLM & RAG</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 14</span>
+                    <span>/</span>
+                    <span>14.2 Embeddings</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 14.2: Векторные представления (Embeddings)</h1>
+                <p class="lead">Как объяснить компьютеру, что "Король" - "Мужчина" + "Женщина" = "Королева"? Превратить слова в числа.</p>
+
+                <h2>Что такое эмбеддинг?</h2>
+                <p>Это вектор (массив чисел), который отражает семантический смысл текста (или картинки/аудио). Чем ближе по смыслу тексты, тем ближе их вектора в многомерном пространстве (Cosine Similarity).</p>
+
+                <h2>Векторные базы данных</h2>
+                <p>Обычные БД (Postgres) ищут по точному совпадению или по LIKE. Векторные БД ищут "похожие" объекты (Nearest Neighbor Search).</p>
+                <ul>
+                    <li><strong>FAISS:</strong> Библиотека от Facebook. Очень быстрая, работает в памяти.</li>
+                    <li><strong>Milvus / Qdrant / Weaviate:</strong> Полноценные векторные БД.</li>
+                    <li><strong>pgvector:</strong> Расширение для PostgreSQL. Идеально, если не хотите тащить новую инфрструктуру. Хранит вектора прямо рядом с данными пользователя.</li>
+                </ul>
+
+                <h2>Применение</h2>
+
+                <h3>1. Семантический поиск</h3>
+                <p>Пользователь пишет "как сбросить пароль", а вы находите статью "восстановление доступа", хотя слов "сбросить" и "пароль" там может не быть. Обычный Full-Text Search (Elasticsearch) здесь справится хуже.</p>
+
+                <h3>2. Рекомендательные системы</h3>
+                <p>Превращаем пользователя в вектор (на основе истории просмотров) и товары в вектора. Ищем товары, векторно близкие к пользователю.</p>
+
+                <h3>3. Классификация и кластеризация</h3>
+                <p>Группируем похожие тикеты в техподдержку, чтобы находить массовые сбои.</p>
+
+                <h2>Как получить эмбеддинги?</h2>
+                <ul>
+                    <li>OpenAI API (<code>text-embedding-ada-002</code> / <code>text-embedding-3-small</code>).</li>
+                    <li>HuggingFace (локальные модели, например, <code>e5-base</code>, <code>bert-base-multilingual</code>). Бесплатно и приватно.</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

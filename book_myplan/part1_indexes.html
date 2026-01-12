@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.3 Индексы и планировщик — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">
+                        <span class="nav-link-icon">🏠</span>
+                        Главная
+                    </a>
+                    <a href="setup.html" class="nav-link">
+                        <span class="nav-link-icon">⚙️</span>
+                        Настройка проекта
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
+                    <a href="part1_schema.html" class="nav-link">
+                        <span class="nav-link-icon">📊</span>
+                        1.1 Схема и хранение
+                    </a>
+                    <a href="part1_transactions.html" class="nav-link">
+                        <span class="nav-link-icon">🔄</span>
+                        1.2 Транзакции
+                    </a>
+                    <a href="part1_indexes.html" class="nav-link active">
+                        <span class="nav-link-icon">🔍</span>
+                        1.3 Индексы
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 2: Архитектура</div>
+                    <a href="part2_litestar.html" class="nav-link">
+                        <span class="nav-link-icon">🚀</span>
+                        2.1 Litestar + DDD
+                    </a>
+                    <a href="part2_dishka.html" class="nav-link">
+                        <span class="nav-link-icon">💉</span>
+                        2.2 DI с Dishka
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 3: Распределённые</div>
+                    <a href="part3_faststream.html" class="nav-link">
+                        <span class="nav-link-icon">📨</span>
+                        3.1 RabbitMQ + Faststream
+                    </a>
+                    <a href="part3_redis.html" class="nav-link">
+                        <span class="nav-link-icon">⚡</span>
+                        3.2 Redis Patterns
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 4: Надёжность</div>
+                    <a href="part4_testing.html" class="nav-link">
+                        <span class="nav-link-icon">🧪</span>
+                        4.1 Advanced Testing
+                    </a>
+                    <a href="part4_resiliency.html" class="nav-link">
+                        <span class="nav-link-icon">🛡️</span>
+                        4.2 Resiliency
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 5: Observability</div>
+                    <a href="part5_logging.html" class="nav-link">
+                        <span class="nav-link-icon">📝</span>
+                        5.1 Логирование
+                    </a>
+                    <a href="part5_clickhouse.html" class="nav-link">
+                        <span class="nav-link-icon">📈</span>
+                        5.2 ClickHouse
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 6: Production</div>
+                    <a href="part6_migrations.html" class="nav-link">
+                        <span class="nav-link-icon">🔀</span>
+                        6.1 Zero-Downtime
+                    </a>
+                    <a href="part6_quality.html" class="nav-link">
+                        <span class="nav-link-icon">✅</span>
+                        6.2 Code Quality
+                    </a>
+                    <a href="part6_django.html" class="nav-link">
+                        <span class="nav-link-icon">🔗</span>
+                        6.3 Django Admin
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 1</span>
+                    <span>/</span>
+                    <span>1.3 Индексы</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 1.3: Индексы и планировщик запросов</h1>
+                <p class="lead">
+                    Индексы — это не магия, а структуры данных. Понимая их устройство, 
+                    ты сможешь оптимизировать запросы на миллионах записей.
+                </p>
+
+                <h2>Типы индексов в PostgreSQL</h2>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Тип</th>
+                            <th>Структура</th>
+                            <th>Когда использовать</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>B-Tree</strong></td>
+                            <td>Сбалансированное дерево</td>
+                            <td>По умолчанию. Равенство, диапазоны, сортировка</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hash</strong></td>
+                            <td>Хэш-таблица</td>
+                            <td>Только равенство (=). Редко нужен</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GIN</strong></td>
+                            <td>Generalized Inverted</td>
+                            <td>JSONB, массивы, полнотекстовый поиск</td>
+                        </tr>
+                        <tr>
+                            <td><strong>GiST</strong></td>
+                            <td>Generalized Search Tree</td>
+                            <td>Геометрия, диапазоны, полнотекстовый поиск</td>
+                        </tr>
+                        <tr>
+                            <td><strong>BRIN</strong></td>
+                            <td>Block Range Index</td>
+                            <td>Огромные таблицы с естественной сортировкой</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2>B-Tree: рабочая лошадка</h2>
+                
+                <p>99% твоих индексов будут B-Tree. Важно понимать, когда он работает:</p>
+
+<pre><code><span class="comment">-- B-Tree работает для:</span>
+<span class="keyword">WHERE</span> column = value           <span class="comment">-- Равенство</span>
+<span class="keyword">WHERE</span> column > value           <span class="comment">-- Диапазон</span>
+<span class="keyword">WHERE</span> column <span class="keyword">BETWEEN</span> a <span class="keyword">AND</span> b   <span class="comment">-- Диапазон</span>
+<span class="keyword">WHERE</span> column <span class="keyword">IN</span> (a, b, c)      <span class="comment">-- Множественное равенство</span>
+<span class="keyword">WHERE</span> column <span class="keyword">LIKE</span> 'prefix%'    <span class="comment">-- Префиксный поиск</span>
+<span class="keyword">ORDER BY</span> column               <span class="comment">-- Сортировка</span>
+
+<span class="comment">-- B-Tree НЕ работает для:</span>
+<span class="keyword">WHERE</span> column <span class="keyword">LIKE</span> '%suffix'    <span class="comment">-- Суффиксный поиск</span>
+<span class="keyword">WHERE</span> lower(column) = 'test'  <span class="comment">-- Функция над колонкой</span>
+<span class="keyword">WHERE</span> column::text = 'test'   <span class="comment">-- Приведение типа</span></code></pre>
+
+                <h3>Составные индексы: порядок имеет значение</h3>
+
+<pre><code><span class="comment">-- Индекс на (user_id, created_at)</span>
+<span class="keyword">CREATE INDEX</span> idx_orders_user_created <span class="keyword">ON</span> orders (user_id, created_at <span class="keyword">DESC</span>);
+
+<span class="comment">-- ✅ Работает:</span>
+<span class="keyword">WHERE</span> user_id = <span class="number">1</span>                              <span class="comment">-- Первая колонка</span>
+<span class="keyword">WHERE</span> user_id = <span class="number">1</span> <span class="keyword">AND</span> created_at > '2024-01-01' <span class="comment">-- Обе колонки</span>
+<span class="keyword">WHERE</span> user_id = <span class="number">1</span> <span class="keyword">ORDER BY</span> created_at <span class="keyword">DESC</span>     <span class="comment">-- Колонка + сортировка</span>
+
+<span class="comment">-- ❌ НЕ работает:</span>
+<span class="keyword">WHERE</span> created_at > '2024-01-01'                 <span class="comment">-- Только вторая колонка!</span>
+<span class="keyword">ORDER BY</span> user_id, created_at <span class="keyword">ASC</span>               <span class="comment">-- Другой порядок сортировки</span></code></pre>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">💡 Правило составных индексов</div>
+                    <p>
+                        Индекс работает слева направо. Если первая колонка не используется в WHERE — 
+                        индекс бесполезен (кроме Index Only Scan).
+                    </p>
+                </div>
+
+                <h2>Частичные индексы (Partial Index)</h2>
+                
+                <p>
+                    Зачем индексировать миллионы закрытых ордеров, если мы ищем только активные?
+                </p>
+
+<pre><code><span class="comment">-- Индекс ТОЛЬКО для активных ордеров</span>
+<span class="keyword">CREATE INDEX</span> idx_orders_pending 
+<span class="keyword">ON</span> orders (user_id, created_at)
+<span class="keyword">WHERE</span> status = 'pending';
+
+<span class="comment">-- Размер: ~0.1% от полного индекса</span>
+<span class="comment">-- Скорость: в 100+ раз быстрее на поиске активных</span>
+
+<span class="comment">-- Другие примеры:</span>
+<span class="keyword">CREATE INDEX</span> idx_users_active <span class="keyword">ON</span> users (email) <span class="keyword">WHERE</span> deleted_at <span class="keyword">IS NULL</span>;
+<span class="keyword">CREATE INDEX</span> idx_tasks_unprocessed <span class="keyword">ON</span> tasks (priority) <span class="keyword">WHERE</span> processed = <span class="keyword">false</span>;</code></pre>
+
+                <h3>Важно: запрос должен соответствовать условию</h3>
+
+<pre><code><span class="comment">-- ✅ Индекс используется:</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> orders 
+<span class="keyword">WHERE</span> user_id = <span class="number">1</span> <span class="keyword">AND</span> status = 'pending';
+
+<span class="comment">-- ❌ Индекс НЕ используется (status отличается):</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> orders 
+<span class="keyword">WHERE</span> user_id = <span class="number">1</span> <span class="keyword">AND</span> status = 'filled';</code></pre>
+
+                <h2>Покрывающие индексы (Covering Index / INCLUDE)</h2>
+                
+                <p>
+                    <strong>Index Only Scan</strong> — когда все данные есть в индексе и не нужно читать таблицу.
+                </p>
+
+<pre><code><span class="comment">-- Запрос: получить цену последних ордеров пользователя</span>
+<span class="keyword">SELECT</span> price, created_at 
+<span class="keyword">FROM</span> orders 
+<span class="keyword">WHERE</span> user_id = <span class="number">1</span> 
+<span class="keyword">ORDER BY</span> created_at <span class="keyword">DESC</span> 
+<span class="keyword">LIMIT</span> <span class="number">10</span>;
+
+<span class="comment">-- Обычный индекс: Index Scan + Heap Fetch (читаем таблицу)</span>
+<span class="keyword">CREATE INDEX</span> idx_v1 <span class="keyword">ON</span> orders (user_id, created_at <span class="keyword">DESC</span>);
+
+<span class="comment">-- Покрывающий индекс: Index Only Scan (таблицу НЕ читаем!)</span>
+<span class="keyword">CREATE INDEX</span> idx_v2 <span class="keyword">ON</span> orders (user_id, created_at <span class="keyword">DESC</span>) 
+<span class="keyword">INCLUDE</span> (price);
+
+<span class="comment">-- INCLUDE колонки:</span>
+<span class="comment">-- - Хранятся в листьях B-Tree</span>
+<span class="comment">-- - НЕ используются для поиска/сортировки</span>
+<span class="comment">-- - Позволяют избежать чтения таблицы</span></code></pre>
+
+                <div class="info-box warning">
+                    <div class="info-box-title">⚠️ Когда Index Only Scan не работает</div>
+                    <p>
+                        Если в таблице много "мёртвых" строк (после UPDATE/DELETE), 
+                        PostgreSQL всё равно пойдёт в таблицу проверять visibility. 
+                        Решение: регулярный <code>VACUUM</code>.
+                    </p>
+                </div>
+
+                <h2>GIN индексы для JSONB</h2>
+                
+                <p>Если храним данные в JSONB, нужен GIN индекс:</p>
+
+<pre><code><span class="comment">-- Таблица с метаданными в JSONB</span>
+<span class="keyword">CREATE TABLE</span> orders (
+    id BIGINT <span class="keyword">PRIMARY KEY</span>,
+    metadata JSONB
+);
+
+<span class="comment">-- Пример данных</span>
+{
+    "source": "mobile_app",
+    "tags": ["vip", "urgent"],
+    "client": {"type": "corporate", "tier": 1}
+}
+
+<span class="comment">-- GIN индекс на всё содержимое</span>
+<span class="keyword">CREATE INDEX</span> idx_orders_metadata <span class="keyword">ON</span> orders <span class="keyword">USING</span> gin (metadata);
+
+<span class="comment">-- Запросы, использующие GIN:</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> metadata @> '{"source": "mobile_app"}';
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> metadata ? 'tags';
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> metadata->'tags' ? 'vip';
+
+<span class="comment">-- GIN для конкретного пути (меньше размер)</span>
+<span class="keyword">CREATE INDEX</span> idx_orders_source <span class="keyword">ON</span> orders <span class="keyword">USING</span> gin ((metadata->'source'));</code></pre>
+
+                <h2>EXPLAIN ANALYZE: читаем план запроса</h2>
+                
+                <p>
+                    <code>EXPLAIN (ANALYZE, BUFFERS)</code> — главный инструмент оптимизации. 
+                    Показывает, как PostgreSQL выполняет запрос.
+                </p>
+
+<pre><code><span class="keyword">EXPLAIN</span> (<span class="keyword">ANALYZE</span>, <span class="keyword">BUFFERS</span>, <span class="keyword">FORMAT TEXT</span>)
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> orders 
+<span class="keyword">WHERE</span> user_id = <span class="number">1</span> <span class="keyword">AND</span> status = 'pending'
+<span class="keyword">ORDER BY</span> created_at <span class="keyword">DESC</span> 
+<span class="keyword">LIMIT</span> <span class="number">10</span>;</code></pre>
+
+                <h3>Типы сканирования</h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Тип</th>
+                            <th>Что значит</th>
+                            <th>Хорошо/Плохо</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Seq Scan</strong></td>
+                            <td>Полное сканирование таблицы</td>
+                            <td>❌ Плохо на больших таблицах</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Index Scan</strong></td>
+                            <td>Индекс + чтение таблицы</td>
+                            <td>✅ Хорошо</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Index Only Scan</strong></td>
+                            <td>Только индекс (покрывающий)</td>
+                            <td>✅✅ Отлично</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Bitmap Index Scan</strong></td>
+                            <td>Построение битовой карты по индексу</td>
+                            <td>✅ Хорошо для множества строк</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h3>Пример анализа</h3>
+
+<pre><code><span class="comment">-- Результат EXPLAIN ANALYZE:</span>
+Limit  (cost=0.43..12.87 rows=10 width=120) (actual time=0.023..0.045 rows=10 loops=1)
+  Buffers: shared hit=4
+  ->  Index Scan using idx_orders_user_created on orders  
+        (cost=0.43..1234.56 rows=1000 width=120) 
+        (actual time=0.022..0.042 rows=10 loops=1)
+        Index Cond: (user_id = 1)
+        Filter: (status = 'pending')
+        Rows Removed by Filter: 5
+        Buffers: shared hit=4
+Planning Time: 0.123 ms
+Execution Time: 0.067 ms
+
+<span class="comment">-- Что видим:</span>
+<span class="comment">-- 1. Index Scan — используется индекс ✅</span>
+<span class="comment">-- 2. Buffers: shared hit=4 — всё из кеша, 0 чтений с диска ✅</span>
+<span class="comment">-- 3. Rows Removed by Filter: 5 — фильтр status убрал 5 строк</span>
+<span class="comment">-- 4. Execution Time: 0.067 ms — очень быстро ✅</span></code></pre>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">🚨 Красные флаги в EXPLAIN</div>
+                    <ul>
+                        <li><strong>Seq Scan</strong> на большой таблице</li>
+                        <li><strong>Buffers: shared read=10000</strong> — много чтений с диска</li>
+                        <li><strong>Rows Removed by Filter: 1000000</strong> — фильтр неэффективен</li>
+                        <li><strong>Sort Method: external merge</strong> — сортировка на диске</li>
+                    </ul>
+                </div>
+
+                <h2>Практические кейсы оптимизации</h2>
+
+                <h3>Кейс 1: Пагинация на миллионах записей</h3>
+
+                <div class="comparison-table">
+                    <div class="comparison-col bad">
+                        <h4>❌ OFFSET (медленно)</h4>
+<pre><code><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> orders
+<span class="keyword">WHERE</span> user_id = <span class="number">1</span>
+<span class="keyword">ORDER BY</span> created_at <span class="keyword">DESC</span>
+<span class="keyword">LIMIT</span> <span class="number">20</span> <span class="keyword">OFFSET</span> <span class="number">100000</span>;
+
+<span class="comment">-- Читает 100020 строк,</span>
+<span class="comment">-- отбрасывает 100000</span></code></pre>
+                    </div>
+                    <div class="comparison-col good">
+                        <h4>✅ Keyset (cursor)</h4>
+<pre><code><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> orders
+<span class="keyword">WHERE</span> user_id = <span class="number">1</span>
+  <span class="keyword">AND</span> created_at < :last_seen
+<span class="keyword">ORDER BY</span> created_at <span class="keyword">DESC</span>
+<span class="keyword">LIMIT</span> <span class="number">20</span>;
+
+<span class="comment">-- Читает ровно 20 строк!</span></code></pre>
+                    </div>
+                </div>
+
+                <h3>Кейс 2: COUNT(*) на больших таблицах</h3>
+
+<pre><code><span class="comment">-- ❌ Медленно: полное сканирование</span>
+<span class="keyword">SELECT</span> COUNT(*) <span class="keyword">FROM</span> orders <span class="keyword">WHERE</span> user_id = <span class="number">1</span>;
+
+<span class="comment">-- ✅ Приблизительный подсчёт (мгновенно)</span>
+<span class="keyword">SELECT</span> reltuples::bigint <span class="keyword">AS</span> estimate
+<span class="keyword">FROM</span> pg_class
+<span class="keyword">WHERE</span> relname = 'orders';
+
+<span class="comment">-- ✅ Точный подсчёт с кешированием в Redis</span>
+<span class="comment">-- Обновляем счётчик при INSERT/DELETE через триггер</span></code></pre>
+
+                <h3>Кейс 3: Функциональный индекс</h3>
+
+<pre><code><span class="comment">-- Запрос: поиск по email без учёта регистра</span>
+<span class="keyword">SELECT</span> * <span class="keyword">FROM</span> users <span class="keyword">WHERE</span> lower(email) = 'test@example.com';
+
+<span class="comment">-- Обычный индекс на email НЕ поможет!</span>
+
+<span class="comment">-- ✅ Функциональный индекс</span>
+<span class="keyword">CREATE INDEX</span> idx_users_email_lower <span class="keyword">ON</span> users (lower(email));
+
+<span class="comment">-- Теперь запрос использует индекс</span></code></pre>
+
+                <h2>Мониторинг индексов</h2>
+
+<pre><code><span class="comment">-- Неиспользуемые индексы (кандидаты на удаление)</span>
+<span class="keyword">SELECT</span> 
+    schemaname || '.' || relname <span class="keyword">AS</span> table,
+    indexrelname <span class="keyword">AS</span> index,
+    pg_size_pretty(pg_relation_size(indexrelid)) <span class="keyword">AS</span> size,
+    idx_scan <span class="keyword">AS</span> scans
+<span class="keyword">FROM</span> pg_stat_user_indexes
+<span class="keyword">WHERE</span> idx_scan = <span class="number">0</span>
+<span class="keyword">ORDER BY</span> pg_relation_size(indexrelid) <span class="keyword">DESC</span>;
+
+<span class="comment">-- Дубликаты индексов</span>
+<span class="keyword">SELECT</span> 
+    pg_size_pretty(sum(pg_relation_size(idx))::bigint) <span class="keyword">AS</span> size,
+    (array_agg(idx))[<span class="number">1</span>] <span class="keyword">AS</span> idx1, 
+    (array_agg(idx))[<span class="number">2</span>] <span class="keyword">AS</span> idx2
+<span class="keyword">FROM</span> (
+    <span class="keyword">SELECT</span> indexrelid::regclass <span class="keyword">AS</span> idx, 
+           (indrelid::text || E'\n' || indclass::text || E'\n' || 
+            indkey::text || E'\n' || coalesce(indexprs::text, '') || 
+            E'\n' || coalesce(indpred::text, '')) <span class="keyword">AS</span> key
+    <span class="keyword">FROM</span> pg_index
+) sub
+<span class="keyword">GROUP BY</span> key <span class="keyword">HAVING</span> count(*) > <span class="number">1</span>;</code></pre>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Индекс на Low Cardinality колонках</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Создание B-Tree индекса на колонке с малым количеством уникальных значений (например, <code>gender</code> или <code>status</code>) часто бесполезно. Планировщик скорее выберет Seq Scan, так как читать индекс, а потом прыгать в кучу (Heap) дороже, чем прочитать всё подряд.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Блокировка таблицы при создании</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p><code>CREATE INDEX</code> блокирует таблицу на запись (Exclusive Lock). На большой таблице в проде это вызовет даунтайм. <strong>Всегда</strong> используйте <code>CREATE INDEX CONCURRENTLY</code>.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. Функции убивают индекс</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Запрос <code>WHERE date(created_at) = '2023-01-01'</code> НЕ использует индекс по <code>created_at</code>. Используйте диапазон <code>WHERE created_at >= ... AND created_at < ...</code> или функциональный индекс.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Проверка существования:</strong> Не делайте <code>SELECT count(*)</code>, чтобы проверить наличие записи. Это медленно. Делайте <code>SELECT 1 FROM table WHERE condition LIMIT 1</code>.</li>
+                    <li><strong>Ненужные индексы:</strong> Регулярно проверяйте <code>pg_stat_user_indexes</code>. Индекс, который не используется для чтения (<code>idx_scan</code>), но замедляет запись — это технический долг.</li>
+                    <li><strong>Hypothetical Indexes:</strong> В некоторых расширениях можно создать "виртуальный" индекс, чтобы проверить через EXPLAIN, будет ли он использоваться, не создавая его физически.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>📋 Задание</h4>
+                    <ul class="task-list">
+                        <li>Создай частичный индекс для активных ордеров и проверь через EXPLAIN</li>
+                        <li>Создай покрывающий индекс и добейся Index Only Scan</li>
+                        <li>Добавь GIN индекс для JSONB поля с метаданными</li>
+                        <li>Реализуй keyset-пагинацию вместо OFFSET</li>
+                        <li>Напиши запрос для поиска неиспользуемых индексов</li>
+                    </ul>
+                </div>
+
+                <div class="nav-footer">
+                    <a href="part1_transactions.html">
+                        <div>
+                            <div class="nav-label">Назад</div>
+                            <div class="nav-title">← 1.2 Транзакции</div>
+                        </div>
+                    </a>
+                    <a href="part2_litestar.html">
+                        <div>
+                            <div class="nav-label">Далее</div>
+                            <div class="nav-title">2.1 Litestar + DDD →</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

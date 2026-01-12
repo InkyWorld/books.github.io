@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.3 Dramatiq — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 8: Async</div>
+                    <a href="part8_asyncio.html" class="nav-link">8.1 Asyncio Advanced</a>
+                    <a href="part8_celery.html" class="nav-link">8.2 Celery</a>
+                    <a href="part8_dramatiq.html" class="nav-link active">8.3 Dramatiq</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 8</span>
+                    <span>/</span>
+                    <span>8.3 Dramatiq</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 8.3: Dramatiq (Альтернатива Celery)</h1>
+                <p class="lead">Если Celery кажется слишком сложным, магическим и тяжелым. Dramatiq — это "Python 3 way" для фоновых задач.</p>
+
+                <h2>Почему Dramatiq?</h2>
+                <ul>
+                    <li>✅ <strong>Простота:</strong> Меньше магии, меньше настроек.</li>
+                    <li>✅ <strong>Потоки (Threads) по умолчанию:</strong> В отличие от Celery (Prefork), Dramatiq использует треды. Это потребляет меньше памяти, но требует потокобезопасного кода. (Можно переключить на процессы).</li>
+                    <li>✅ <strong>Приоритеты:</strong> Поддержка приоритетов сообщений "из коробки".</li>
+                    <li>✅ <strong>Надёжность:</strong> Автоматический retry с exponental backoff по умолчанию.</li>
+                </ul>
+
+                <h2>Пример использования</h2>
+
+<pre><code class="language-python">import dramatiq
+from dramatiq.brokers.rabbitmq import RabbitmqBroker
+
+broker = RabbitmqBroker(url="amqp://guest:guest@localhost:5672")
+dramatiq.set_broker(broker)
+
+@dramatiq.actor(max_retries=3)
+def send_welcome_email(user_id: int):
+    # Если тут упадет исключение, Dramatiq сам сделает retry
+    # через 100мс, потом 200мс, потом 400мс...
+    user = get_user(user_id)
+    email_client.send(user.email, "Welcome!")
+
+# Вызов
+send_welcome_email.send(123)
+</code></pre>
+
+                <h2>Middleware</h2>
+                <p>Dramatiq построен на мидлварах (как веб-фреймворки). Почти вся логика — это плагины.</p>
+                <ul>
+                    <li><strong>AgeLimit:</strong> Не выполнять задачи, которые пролежали в очереди слишком долго (TTL).</li>
+                    <li><strong>TimeLimit:</strong> Убивает задачу (Signal), если она висит > X минут.</li>
+                    <li><strong>Callbacks:</strong> Выполнить задачу B, если задача А успешна (<code>on_success</code>).</li>
+                    <li><strong>Pipelines:</strong> Аналог Celery Chain.</li>
+                </ul>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Threads & GIL & Safety</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>По умолчанию используются потоки. Это экономит память (в отличие от Celery Prefork), но:</p>
+                            <ul>
+                                <li>CPU-bound задачи упрутся в GIL.</li>
+                                <li>Ваш код должен быть Thread-Safe. Глобальные переменные или не-потокобезопасные клиенты БД приведут к гонкам.</li>
+                                <li><code>sys.exit()</code> в задаче убьет весь процесс воркера!</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Отсутствие Result Backend</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Dramatiq идеологически против RPC-паттерна (<code>result = task.delay().get()</code>). Метод <code>send()</code> возвращает объект Message, а не Result. Если вам нужен результат выполнения, задача должна явно записать его в БД или Redis, либо отправить сообщение в другую очередь.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Custom Middleware:</strong> Писать мидлвари в Dramatiq очень легко. Напишите мидлварь, которая прокидывает <code>request_id</code> из сообщения в <code>contextvars</code> логгера, чтобы видеть сквозной трейс.</li>
+                    <li><strong>Periodiq:</strong> В Dramatiq нет встроенного планировщика (как Celery Beat). Используйте пакет <code>periodiq</code> — он легковесный и надежный.</li>
+                    <li><strong>Graceful Shutdown:</strong> Dramatiq отлично обрабатывает <code>SIGTERM</code>. В Kubernetes ставьте <code>terminationGracePeriodSeconds: 60</code>, чтобы дать текущим задачам доработаться (Warm Shutdown).</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>🎯 Практика</h4>
+                    <ul class="task-list">
+                        <li>Замени Celery на Dramatiq в простом сервисе</li>
+                        <li>Напиши Middleware для замера времени выполнения задач</li>
+                        <li>Настрой Periodiq для cron-задач</li>
+                        <li>Реализуй обработку ошибок с отправкой в DLQ</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

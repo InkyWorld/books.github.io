@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8.1 Asyncio Advanced — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 8: Async</div>
+                    <a href="part8_asyncio.html" class="nav-link active">8.1 Asyncio Advanced</a>
+                    <a href="part8_celery.html" class="nav-link">8.2 Celery</a>
+                    <a href="part8_dramatiq.html" class="nav-link">8.3 Dramatiq</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 8</span>
+                    <span>/</span>
+                    <span>8.1 Asyncio</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 8.1: Asyncio Advanced</h1>
+                <p class="lead">Asyncio в продакшене — это не просто await. Это грациозное завершение, контроль конкурентности и обработка ошибок в фоне.</p>
+
+                <h2>Structured Concurrency (TaskGroup)</h2>
+                <p>В Python 3.11+ появился `TaskGroup`. Это как `try...except` для асинхронных задач. Если одна задача падает, остальные отменяются.</p>
+
+<pre><code class="language-python">async def main():
+    try:
+        async with asyncio.TaskGroup() as tg:
+            tg.create_task(task1())
+            tg.create_task(db_query())
+    except ExceptionGroup as e:
+         # Все ошибки собираются здесь
+        print(f"Caught errors: {e}")
+</code></pre>
+
+                <h2>Контроль параллелизма (Semaphore)</h2>
+                <p>Если вы запустите `await asyncio.gather(*[fetch(url) for url in urls])`, где 1000 url'ов, вы положите или сеть, или удаленный сервис.</p>
+
+<pre><code class="language-python">sem = asyncio.Semaphore(10) # Максимум 10 одновременных задач
+
+async def safe_fetch(url):
+    async with sem:
+        return await client.get(url)
+
+await asyncio.gather(*[safe_fetch(u) for u in urls])
+</code></pre>
+
+                <h2>Blocking Code in Asyncio</h2>
+                <p>Иногда нужно вызвать библиотеку, которая не умеет async (например, requests, стандартный open(), cpu-bound задача). Блокировать Event Loop нельзя!</p>
+
+<pre><code class="language-python"># Правильно: выносим в thread pool
+result = await asyncio.to_thread(sync_function, arg1)
+</code></pre>
+
+                <h2>Graceful Shutdown</h2>
+                <p>Когда Kubernetes убивает под, он шлет SIGTERM. У вас есть 30 секунд, чтобы завершить текущие запросы.</p>
+                <ol>
+                    <li>Поймать SIGTERM.</li>
+                    <li>Остановить прием новых подключений.</li>
+                    <li>Отменить все `BackgroundTasks`.</li>
+                    <li>Дождаться завершения обработки текущих запросов.</li>
+                    <li>Закрыть коннекты к БД.</li>
+                    <li>Выйти.</li>
+                </ol>
+
+            <span class="keyword">await</span> asyncio.sleep(self._buffer.flush_interval)</code></pre>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Garbage Collection фоновых задач</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если вы делаете <code>asyncio.create_task(db_op())</code> и не сохраняете ссылку на результат, Garbage Collector может удалить эту задачу в любой момент (даже если она выполняется!). Python 3.14+ обещает это исправить, но пока всегда сохраняйте ссылки в глобальный <code>set</code>.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Блокировка Event Loop</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Один вызов <code>requests.get()</code> или <code>time.sleep(1)</code> останавливает ВЕСЬ сервер. Никто не может подключиться, никто не получает ответы. Используйте <code>asyncio.to_thread</code> для синхронного легаси кода.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>asyncio.shield():</strong> Защищает задачу от отмены. Если пользователь закрыл браузер во время обработки заказа, Litestar пошлет CancelledError. Оберните критическую секцию в <code>shield</code>, чтобы транзакция дошла до конца.</li>
+                    <li><strong>uvloop:</strong> Drop-in замена стандартного цикла событий. Просто <code>uvloop.install()</code> — и ваше приложение работает быстрее Node.js.</li>
+                    <li><strong>TaskGroup (Python 3.11):</strong> Используйте вместо <code>gather</code>. Это Structured Concurrency: если одна задача падает, остальные корректно отменяются, а ошибки группируются.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>🎯 Практика</h4>
+                    <ul class="task-list">
+                        <li>Реализуй Graceful Shutdown для сервера</li>
+                        <li>Напиши worker pool на asyncio.Queue</li>
+                        <li>Используй TaskGroup для параллельных запросов</li>
+                        <li>Интегрируй uvloop</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

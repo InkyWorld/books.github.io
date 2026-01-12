@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11.2 HashiCorp Vault — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 11: Security</div>
+                    <a href="part11_oauth.html" class="nav-link">11.1 OAuth2 & JWT</a>
+                    <a href="part11_vault.html" class="nav-link active">11.2 HashiCorp Vault</a>
+                    <a href="part11_owasp.html" class="nav-link">11.3 OWASP Top 10</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 11</span>
+                    <span>/</span>
+                    <span>11.2 Vault</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 11.2: HashiCorp Vault</h1>
+                <p class="lead">Хранить пароли в <code>.env</code> файлах — это нормально для локальной разработки. В проде нужен Vault.</p>
+
+                <h2>Почему не ENV переменные?</h2>
+                <ul>
+                    <li>Сложно ротировать (нужно рестартить приложение).</li>
+                    <li>Видны в <code>docker inspect</code> или логах CI.</li>
+                    <li>Сложно управлять доступом (кто видел этот ENV?).</li>
+                </ul>
+
+                <h2>Dynamic Secrets (Киллер-фича)</h2>
+                <p>Vault умеет генерировать временные логины/пароли для баз данных на лету.</p>
+                <ol>
+                    <li>Приложение стучится в Vault: "Дай доступ к Postgres".</li>
+                    <li>Vault идёт в Postgres, создаёт <code>CREATE USER tmp_app_123 PASSWORD 'random'</code>.</li>
+                    <li>Vault возвращает креды приложению.</li>
+                    <li>Через 1 час Vault сам удалит этого юзера (Lease expired).</li>
+                </ol>
+                <p><strong>Результат:</strong> Даже если пароль украли, он протухнет через час.</p>
+
+                <h2>Transit Engine (Encryption as a Service)</h2>
+                <p>Приложение не должно шифровать данные само (ключи утекут). Приложение шлёт данные в Vault, Vault возвращает шифротекст.</p>
+
+<pre><code class="language-python"># Приложение не знает ключ шифрования!
+ciphertext = client.secrets.transit.encrypt(
+    name="payment-card-key",
+    plaintext="4400 1234 5678 9010"
+)
+# Сохраняем ciphertext в нашу БД
+</code></pre>
+
+                <h2>Kubernetes Auth Method</h2>
+                <p>Как приложению авторизоваться в Vault? Пароль в конфиг не положишь (проблема курицы и яйца).</p>
+                <p>Решение: <strong>Service Account Token</strong>.</p>
+                <ol>
+                    <li>Pod запускается с ServiceAccount.</li>
+                    <li>K8s монтирует JWT токен в под.</li>
+                    <li>Приложение шлёт этот токен в Vault.</li>
+                    <li>Vault проверяет токен через K8s API Server ("Это правда под сервиса payment?").</li>
+                    <li>Vault выдаёт Vault Token.</li>
+                </ol>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Sealed State</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Когда Vault перезагружается, он "запечатан" (Sealed). Он не отдаст секреты, пока оператор не введет 3 из 5 ключей распечатывания (Shamir's Secret Sharing). В облаке настраивайте <strong>Auto Unseal</strong> через AWS KMS / Cloud KMS, иначе продакшн будет лежать до прихода админа.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. Single Point of Failure</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Если Vault упал — упало всё. Приложения не могут подключиться к БД. Vault должен работать в HA-режиме (Raft Storage или Consul), разнесенный по разным Availability Zones.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>Vault Agent Sidecar:</strong> Не надо тащить библиотеку `hvac` в код приложения. Запустите Vault Agent рядом (sidecar контейнер). Он сам сходит в Vault, получит секреты и положит их в файл (например, `.env` или `config.yaml`) на shared volume. Приложение просто читает файл. <strong>Zero Code Change.</strong></li>
+                    <li><strong>Totp Engine:</strong> Vault умеет генерировать 2FA коды. Удобно для общих аккаунтов (хотя лучше избегать общих аккаунтов).</li>
+                    <li><strong>Audit Device:</strong> Всегда включайте аудит лог. Вы должны знать, кто и когда читал секрет продакшн базы.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>🎯 Практика</h4>
+                    <ul class="task-list">
+                        <li>Запусти Vault в dev-режиме и KV хранилище</li>
+                        <li>Настрой Dynamic Secrets для Postgres (чтобы Vault создавал юзеров)</li>
+                        <li>Используй Transit Engine для шифрования "чувствительных данных"</li>
+                        <li>Внедри Vault Agent для инъекции конфига в файл</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

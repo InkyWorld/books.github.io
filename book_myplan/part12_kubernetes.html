@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>12.1 Kubernetes Basics — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 12: K8s</div>
+                    <a href="part12_kubernetes.html" class="nav-link active">12.1 K8s Basics</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 12</span>
+                    <span>/</span>
+                    <span>12.1 Basics</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 12.1: Kubernetes Basics</h1>
+                <p class="lead">Kubernetes (K8s) — это операционная система облака. Он управляет контейнерами, чтобы вы могли спать спокойно (или нет).</p>
+
+                <h2>Основные абстракции</h2>
+
+                <h3>1. Pod (Стручок)</h3>
+                <p>Минимальная единица деплоя. Обычно это 1 контейнер (ваше приложение), иногда + sidecar (логгер, прокси).</p>
+                <div class="info-box">
+                    <p>Поды смертны. Если под упал, K8s создаст новый, с ДРУГИМ IP адресом. Не рассчитывайте на IP пода.</p>
+                </div>
+
+                <h3>2. Deployment</h3>
+                <p>Декларативное описание желаемого состояния. "Хочу 3 реплики приложения payment".</p>
+                <p>Deployment создаёт ReplicaSet, который следит, чтобы подов всегда было 3. Если нода сгорела, K8s поднимет поды на другой ноде.</p>
+
+                <h3>3. Service</h3>
+                <p>Постоянный адрес для группы подов. Работает как Load Balancer внутри кластера.</p>
+                <ul>
+                    <li><strong>ClusterIP:</strong> Доступен только изнутри кластера (default).</li>
+                    <li><strong>NodePort:</strong> Открывает порт на каждой ноде.</li>
+                    <li><strong>LoadBalancer:</strong> Заказывает внешний IP у облачного провайдера (AWS/GCP).</li>
+                </ul>
+
+                <h3>4. ConfigMap & Secret</h3>
+                <ul>
+                    <li><strong>ConfigMap:</strong> Конфигурация (config.yaml, env vars). Не секретно.</li>
+                    <li><strong>Secret:</strong> Пароли, сертификаты. Хранится в base64 (но это не шифрование!).</li>
+                </ul>
+
+                <h2>Probes (Пробы)</h2>
+                <p>Как K8s понимает, что приложение живо?</p>
+                <ul>
+                    <li><strong>Liveness Probe:</strong> "Ты живой?". Если нет — рестарт пода (kill & restart). Нужен для дедлоков.</li>
+                    <li><strong>Readiness Probe:</strong> "Ты готов принимать трафик?". Если нет — убирает под из сервиса (перестаёт слать трафик). Нужен на старте (пока грузится model в память) или при перегрузке.</li>
+                    <li><strong>Startup Probe:</strong> Для очень медленного старта.</li>
+                </ul>
+
+                <h2>Resources (Requests & Limits)</h2>
+                <p>Самая частая причина проблем.</p>
+                <ul>
+                    <li><strong>Request:</strong> "Мне ТОЧНО нужно 512Mb". K8s гарантирует это.</li>
+                    <li><strong>Limit:</strong> "Не давай мне больше 1Gb". Если превысит — OOMKill (Out Of Memory Kill).</li>
+                </ul>
+
+                <div class="info-box danger">
+                    <div class="info-box-title">OOMKill</div>
+                    <p>Если Java/Python приложение течёт по памяти и достигает Limit, линукс убивает процесс (Signal 9). В логах будет пусто. Смотрите <code>kubectl describe pod</code>.</p>
+                </div>
+
+                <h2>🪨 Подводные камни</h2>
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>1. Graceful Shutdown</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Когда K8s удаляет под, он шлет <code>SIGTERM</code>. Приложение должно перестать принимать новые запросы, дообработать старые и только потом выйти. Если вы игнорируете сигнал, через 30с прилетит <code>SIGKILL</code>, оборвав соединения клиентам.</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>2. CPU Throttling</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Установка <code>limits.cpu</code> заставляет ядро "замораживать" процесс, если тот превысил квоту за 100мс. Это приводит к диким лагам API, хотя CPU на ноде свободен. Лучшая практика: ставить <code>requests.cpu</code> (для шедулинга), но убирать <code>limits.cpu</code> (для Latency Sensitive сервисов).</p>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <div class="accordion-header">
+                            <strong>3. :latest tag is evil</strong>
+                        </div>
+                        <div class="accordion-content">
+                            <p>Тег <code>:latest</code> — это русская рулетка. Вы не знаете, какая версия запущена. K8s кэширует слои, и <code>imagePullPolicy: Always</code> не всегда спасает. Используйте SHA-хеши или семантические версии <code>v1.2.3</code>.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>💡 Лайфхаки</h2>
+                <ul>
+                    <li><strong>K9s:</strong> Лучший TUI (Terminal UI) для работы с кластером. Позволяет смотреть логи, делать shell в поды, рестартить деплойменты горячими клавишами. Must have.</li>
+                    <li><strong>Skaffold / Tilt:</strong> Инструменты для локальной разработки в K8s. Они следят за изменением кода, пересобирают контейнер и обновляют его в кластере за секунды..</li>
+                    <li><strong>Ephemerral Debug Containers:</strong> В K8s 1.23+ появилась команда <code>kubectl debug</code>. Она позволяет прицепить контейнер с инструментами (curl, ping, htop) к вашему "голому" (distroless) поду для отладки.</li>
+                </ul>
+
+                <div class="task-box">
+                    <h4>🎯 Практика</h4>
+                    <ul class="task-list">
+                        <li>Напиши Deployment с Readyness/Liveness пробами</li>
+                        <li>Спровоцируй OOMKill, выставив маленький limit.memory</li>
+                        <li>Реализуй перехват SIGTERM в Python (signal handler)</li>
+                        <li>Запусти приложение локально через Minikube/Kind</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

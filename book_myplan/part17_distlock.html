@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17.3 Distributed Locks — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 17: System Design</div>
+                    <a href="part17_circuit.html" class="nav-link">17.1 Resilience</a>
+                    <a href="part17_ratelimit.html" class="nav-link">17.2 Rate Limiting</a>
+                    <a href="part17_distlock.html" class="nav-link active">17.3 Dist Locks</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 17</span>
+                    <span>/</span>
+                    <span>17.3 Distributed Locks</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 17.3: Распределенные блокировки</h1>
+                <p class="lead">Как убедиться, что CRON-задачу выполняет только один сервер из десяти?</p>
+
+                <h2>Проблема</h2>
+                <p>У вас 5 реплик сервиса `Billing`. Каждую минуту они просыпаются, чтобы списать абонентскую плату. Если не синхронизировать их, клиент заплатит 5 раз.</p>
+
+                <h2>Решения</h2>
+
+                <h3>1. Postgres Advisory Locks</h3>
+                <p>Самый простой и надежный способ, если у вас уже есть Postgres.</p>
+                <div class="code-block">
+                    <pre><code>-- Try to acquire lock. Returns true/false instantly.
+SELECT pg_try_advisory_lock(12345); 
+
+-- Release
+SELECT pg_advisory_unlock(12345);</code></pre>
+                </div>
+                <p>Блокировка привязана к сессии (соединению). Если сервис упадет, Postgres сам снимет лок. Очень надежно.</p>
+
+                <h3>2. Redis (Simple Lock)</h3>
+                <div class="code-block">
+                    <pre><code>SET resource_name my_random_value NX PX 30000</code></pre>
+                </div>
+                <ul>
+                    <li><code>NX</code>: Писать только если ключа нет.</li>
+                    <li><code>PX 30000</code>: Expire через 30 секунд (чтобы лок не завис навечно, если сервис упадет).</li>
+                </ul>
+                <div class="info-box danger">
+                    <p>Не используйте просто `SETNX` и потом `EXPIRE` двумя командами! Это не атомарно.</p>
+                </div>
+
+                <h3>3. Redlock (Redis Distributed Lock)</h3>
+                <p>Алгоритм для кластера Redis. Пишем лок на большинство (N/2 + 1) мастер-нод. Считается спорным (Мартин Клеппман критиковал его из-за зависимости от системных часов), но для большинства задач подходит.</p>
+
+                <h2>🪨 Подводные камни</h2>
+                
+                <h3>Zombie Processes и Fencing Tokens</h3>
+                <p>Представьте:</p>
+                <ol>
+                    <li>Воркер 1 берет лок.</li>
+                    <li>Воркер 1 засыпает (GC pause) на 40 секунд. Лок истекает (TTL 30c).</li>
+                    <li>Воркер 2 берет лок.</li>
+                    <li>Воркер 1 просыпается и думает, что лок у него. Он начинает писать в базу.</li>
+                    <li>Воркер 2 тоже пишет в базу. <strong>Data Corruption!</strong></li>
+                </ol>
+                <p><strong>Решение (Fencing Tokens):</strong> При каждом взятии лока увеличиваем число (epoch). База данных должна проверять: "Если epoch меньше текущего, отклонить запись".</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

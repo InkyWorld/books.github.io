@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Глава 3: Application Layer - Clean Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
+        p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
+        
+        .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
+        .sidebar-title { color: #f8fafc; }
+        .sidebar-subtitle { color: #60a5fa; }
+        .nav-section { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem 1rem 0.5rem; }
+        .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
+
+        /* Code Styling */
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+        .code-comment { color: #94a3b8; font-style: italic; }
+        .code-keyword { color: #c084fc; font-weight: bold; } 
+        .code-class { color: #fbbf24; font-weight: bold; }   
+        .code-func { color: #60a5fa; font-weight: bold; }    
+        .code-str { color: #a3e635; }                        
+        .code-dec { color: #f472b6; } 
+
+        .badge { display: inline-flex; align-items: center; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 0.5rem; }
+        .badge-green { background-color: #dcfce7; color: #15803d; }
+        .badge-red { background-color: #fee2e2; color: #b91c1c; }
+        .badge-purple { background-color: #f3e8ff; color: #6b21a8; }
+        
+        .card { background: white; border-radius: 1rem; padding: 2.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem; border: 1px solid #e2e8f0; }
+        
+        details > summary { list-style: none; cursor: pointer; font-weight: 700; color: #2563eb; outline: none; }
+        details[open] > summary { margin-bottom: 1rem; color: #1e40af; }
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar hidden md:block">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
+            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+        </div>
+        <nav class="py-4">
+            <div class="px-4 mb-4">
+                <div class="flex gap-2 text-xs font-bold text-slate-400">
+                    <a href="../ru/application.html" class="hover:text-white transition">RU</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../en/application.html" class="hover:text-white transition">EN</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="application.html" class="text-blue-400 font-bold">UA</a>
+                </div>
+            </div>
+
+            <div class="nav-section">Основи</div>
+            <a href="index.html" class="nav-link ">📘 Вступ</a>
+            
+            <div class="nav-section">Шари архітектури</div>
+            <a href="domain.html" class="nav-link ">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link active">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link ">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link ">🌐 Presentation Layer</a>
+            
+            <div class="nav-section">Принципи та патерни</div>
+            <a href="solid.html" class="nav-link ">📐 SOLID принципи</a>
+            <a href="invariants.html" class="nav-link ">🛡️ Інваріанти</a>
+            <a href="dependency.html" class="nav-link ">💉 Dependency Injection</a>
+            <a href="cqrs_es.html" class="nav-link ">⚡ CQRS і ES</a>
+            
+            <div class="nav-section">Security & Production</div>
+            <a href="security.html" class="nav-link ">🔐 Auth & Permissions</a>
+            <a href="concurrency.html" class="nav-link ">🛑 Concurrency & Migrations</a>
+            <a href="background_tasks.html" class="nav-link ">⏳ Background Tasks</a>
+            <a href="error_handling.html" class="nav-link ">🚫 Error Handling</a>
+            <a href="config_logging.html" class="nav-link ">⚙️ Config & Observability</a>
+
+            <div class="nav-section">DDD Patterns</div>
+            <a href="bounded_context.html" class="nav-link ">🌍 Bounded Contexts</a>
+            <a href="modular_monolith.html" class="nav-link ">🏗️ Modular Monolith</a>
+            <a href="aggregates.html" class="nav-link ">📦 Aggregates</a>
+            <a href="value_objects.html" class="nav-link ">💎 Value Objects</a>
+            <a href="repository_uow.html" class="nav-link ">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link ">📋 Specification</a>
+
+            <div class="nav-section">EDA & Dist. Systems</div>
+            <a href="domain_events.html" class="nav-link ">📣 Domain Events</a>
+            <a href="saga.html" class="nav-link ">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link ">📮 Outbox Pattern</a>
+
+            <div class="nav-section">Frameworks & Практика</div>
+            <a href="frameworks_django.html" class="nav-link ">🐍 Django & Others</a>
+            <a href="advanced_techniques.html" class="nav-link ">🚀 Advanced Tech</a>
+            <a href="deployment.html" class="nav-link ">🚀 Deployment & Protection</a>
+            <a href="testing.html" class="nav-link ">🧪 Тестування</a>
+            <a href="projects.html" class="nav-link ">🚀 Міні-проєкти</a>
+            <a href="antipatterns.html" class="nav-link ">⚠️ Антипатерни</a>
+        </nav>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
+        
+        <header id="intro" class="mb-12 pb-6 border-b border-gray-200">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Шар 2</span>
+                <span class="text-gray-400 text-sm font-mono">Оркестрація / Потік логіки</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Application Layer (Шар Додатку)</h1>
+            <p class="text-xl text-gray-500 mt-4 font-light">
+                Цей шар відповідає на питання "ЩО робить додаток?". Він бере дані ззовні, командує сутностям виконати бізнес-логіку та зберігає результат.
+            </p>
+        </header>
+
+        <!-- ANATOMY -->
+        <section class="card">
+            <h2 class="text-2xl font-bold mb-6">Анатомія Шару</h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="flex items-center gap-2 font-bold text-green-800 mb-4 border-b border-green-200 pb-2 w-full">
+                        ✅ MUST HAVE (Має бути)
+                    </h3>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex items-start">
+                            <span class="badge badge-green mt-1">Action</span>
+                            <div><strong>Use Cases (Interactors):</strong> Класи, що реалізують один конкретний сценарій (наприклад, `CreateOrderUseCase`).</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="badge badge-green mt-1">Data</span>
+                            <div><strong>DTO (Data Transfer Objects):</strong> Прості структури даних для входу (Commands) та виходу.</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="badge badge-green mt-1">Contracts</span>
+                            <div><strong>Ports (Interfaces):</strong> Абстракції для спілкування із зовнішнім світом (Repository Interface, EmailService Interface).</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="badge badge-green mt-1">Logic</span>
+                            <div><strong>Оркестрація:</strong> Завантажити юзера -> Перевірити права -> Створити замовлення -> Зберегти.</div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="flex items-center gap-2 font-bold text-red-800 mb-4 border-b border-red-200 pb-2 w-full">
+                        ⛔ FORBIDDEN (Суворо заборонено)
+                    </h3>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex items-start">
+                            <span class="badge badge-red mt-1">Rules</span>
+                            <div><strong>Складна Бізнес-логіка:</strong> Розрахунок знижок, перевірки статусів, інваріанти — все це має бути всередині Entities, а не тут!</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="badge badge-red mt-1">Tech</span>
+                            <div><strong>SQL / ORM / HTTP:</strong> Use Case не повинен знати, звідки прийшли дані (REST, CLI, Kafka) і де вони зберігаються (Postgres, Mongo).</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="badge badge-red mt-1">Web</span>
+                            <div><strong>Web Frameworks:</strong> Жодних `flask.request` або `fastapi.Depends` всередині Use Case.</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 1. DTO -->
+        <section id="dto" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">1. DTO & Commands</h2>
+            <p><strong>DTO (Data Transfer Object)</strong> — це коробка для передачі даних. Вона не має поведінки.</p>
+            <p>Зовнішній світ (Web API) надсилає нам JSON (примітиви: рядки, числа). Домен працює зі складними об'єктами (Money, Email). Application Layer повинен прийняти примітиви через DTO і перетворити їх на об'єкти Домену.</p>
+            
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4 text-sm">
+                <strong>Command vs Query:</strong>
+                <ul class="list-disc pl-5 mt-1">
+                    <li><strong>Command (Команда):</strong> DTO, який щось змінює (`CreateOrderDTO`).</li>
+                    <li><strong>Query (Запит):</strong> DTO для отримання даних (`GetOrderDTO`).</li>
+                </ul>
+            </div>
+
+<pre><code class="language-python"><span class="code-comment"># application/dto.py</span>
+<span class="code-keyword">from</span> dataclasses <span class="code-keyword">import</span> dataclass
+<span class="code-keyword">from</span> typing <span class="code-keyword">import</span> List
+
+<span class="code-comment"># Input DTO (Command)</span>
+<span class="code-dec">@dataclass(frozen=True)</span>
+<span class="code-keyword">class</span> <span class="code-class">CreateOrderCommand</span>:
+    customer_email: str
+    items: List[dict] <span class="code-comment"># [{'name': 'Book', 'price': 10.5}]</span>
+
+    <span class="code-keyword">def</span> <span class="code-func">__post_init__</span>(self):
+        <span class="code-comment"># Проста валідація вхідних даних (не бізнес-правила!)</span>
+        <span class="code-keyword">if</span> <span class="code-keyword">not</span> self.customer_email:
+            <span class="code-keyword">raise</span> ValueError(<span class="code-str">"Email є обов'язковим"</span>)
+        <span class="code-keyword">if</span> <span class="code-keyword">not</span> self.items:
+            <span class="code-keyword">raise</span> ValueError(<span class="code-str">"Список товарів не може бути порожнім"</span>)
+
+<span class="code-comment"># Output DTO (Result)</span>
+<span class="code-dec">@dataclass(frozen=True)</span>
+<span class="code-keyword">class</span> <span class="code-class">OrderResultDTO</span>:
+    order_id: str
+    total_amount: float
+    status: str
+</code></pre>
+        </section>
+
+        <!-- 2. PORTS -->
+        <section id="ports" class="card">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold">2. Ports (Інтерфейси)</h2>
+                <span class="badge badge-purple">Dependency Inversion</span>
+            </div>
+            <p>Use Case хоче зберегти замовлення. Але він не може викликати `SQLAlchemy`. Тому він оголошує <strong>Порт</strong> (Інтерфейс): <em>"Мені потрібен хтось, хто вміє зберігати замовлення"</em>.</p>
+            <p>Пізніше, в шарі Infrastructure, ми реалізуємо цей інтерфейс. Це дозволяє Use Case залежати від абстракції, а не від деталей.</p>
+
+<pre><code class="language-python"><span class="code-comment"># application/interfaces.py</span>
+<span class="code-keyword">from</span> abc <span class="code-keyword">import</span> ABC, abstractmethod
+<span class="code-keyword">from</span> typing <span class="code-keyword">import</span> Optional
+<span class="code-keyword">import</span> uuid
+
+<span class="code-comment"># Ми імпортуємо Entity, тому що Порт працює з Доменом</span>
+<span class="code-keyword">from</span> domain.entities <span class="code-keyword">import</span> Order 
+
+<span class="code-keyword">class</span> <span class="code-class">OrderRepository</span>(ABC):
+    <span class="code-str">"""Абстрактний клас репозиторію. Ніякого SQL тут!"""</span>
+    
+    <span class="code-dec">@abstractmethod</span>
+    <span class="code-keyword">def</span> <span class="code-func">save</span>(self, order: Order) -> <span class="code-keyword">None</span>:
+        <span class="code-keyword">pass</span>
+
+    <span class="code-dec">@abstractmethod</span>
+    <span class="code-keyword">def</span> <span class="code-func">get_by_id</span>(self, oid: uuid.UUID) -> Optional[Order]:
+        <span class="code-keyword">pass</span>
+
+<span class="code-keyword">class</span> <span class="code-class">EmailService</span>(ABC):
+    <span class="code-dec">@abstractmethod</span>
+    <span class="code-keyword">def</span> <span class="code-func">send_order_confirmation</span>(self, email: str, order_id: str):
+        <span class="code-keyword">pass</span>
+</code></pre>
+        </section>
+
+        <!-- 3. USE CASES -->
+        <section id="usecases" class="mb-16">
+            <h2 class="text-2xl font-bold mb-6">3. Use Cases (Реалізація Сценарію)</h2>
+            <p>Це найважливіший код у цьому шарі. Він об'єднує все докупи.</p>
+            <h3 class="text-lg font-bold mb-2 text-gray-700">Алгоритм Use Case:</h3>
+            <ol class="list-decimal pl-6 mb-6 space-y-1 text-sm font-mono bg-gray-50 p-4 rounded border">
+                <li>Прийняти DTO (Command).</li>
+                <li>Конвертувати примітиви у Value Objects (str -> Email).</li>
+                <li>Завантажити/Створити Entity (або декілька).</li>
+                <li>Викликати методи Entity (вся бізнес-логіка виконується ТАМ).</li>
+                <li>Зберегти Entity через Репозиторій.</li>
+                <li>Повернути результат (Output DTO).</li>
+            </ol>
+
+<pre><code class="language-python"><span class="code-comment"># application/use_cases.py</span>
+<span class="code-keyword">import</span> uuid
+<span class="code-keyword">from</span> domain.entities <span class="code-keyword">import</span> Order
+<span class="code-keyword">from</span> domain.value_objects <span class="code-keyword">import</span> Money, Email
+<span class="code-keyword">from</span> .interfaces <span class="code-keyword">import</span> OrderRepository, EmailService
+<span class="code-keyword">from</span> .dto <span class="code-keyword">import</span> CreateOrderCommand, OrderResultDTO
+
+<span class="code-keyword">class</span> <span class="code-class">CreateOrderUseCase</span>:
+    <span class="code-comment"># DEPENDENCY INJECTION:</span>
+    <span class="code-comment"># Ми просимо будь-які реалізації цих інтерфейсів.</span>
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(
+        self, 
+        repo: OrderRepository, 
+        email_service: EmailService
+    ):
+        self.repo = repo
+        self.email_service = email_service
+
+    <span class="code-keyword">def</span> <span class="code-func">execute</span>(self, command: CreateOrderCommand) -> OrderResultDTO:
+        <span class="code-comment"># 1. Підготовка Value Objects</span>
+        <span class="code-comment"># Якщо email некоректний, помилка вилетить ТУТ (захист інваріантів)</span>
+        email_vo = Email(command.customer_email)
+        order_id = uuid.uuid4()
+
+        <span class="code-comment"># 2. Створення Сутності</span>
+        order = Order(order_id, email_vo)
+
+        <span class="code-comment"># 3. Виконання бізнес-дій</span>
+        <span class="code-keyword">for</span> item <span class="code-keyword">in</span> command.items:
+            price_vo = Money(item[<span class="code-str">'price'</span>])
+            <span class="code-comment"># Вся логіка "чи можна додати товар" всередині order.add_item()</span>
+            order.add_item(item[<span class="code-str">'name'</span>], price_vo)
+
+        <span class="code-comment"># 4. Збереження через Порт</span>
+        self.repo.save(order)
+
+        <span class="code-comment"># 5. Побічні ефекти (сповіщення)</span>
+        self.email_service.send_order_confirmation(
+            email=email_vo.value, 
+            order_id=str(order.id)
+        )
+
+        <span class="code-comment"># 6. Повернення результату (Primitives only!)</span>
+        <span class="code-keyword">return</span> OrderResultDTO(
+            order_id=str(order.id),
+            total_amount=order.total_price.amount,
+            status=<span class="code-str">"created"</span>
+        )
+</code></pre>
+        </section>
+
+        <!-- 4. ORCHESTRATION -->
+        <section id="orchestration" class="card bg-gray-50 border-gray-200">
+            <h2 class="text-2xl font-bold mb-4">4. Оркестрація кількох сутностей</h2>
+            <p>Часто потрібно, щоб взаємодіяли дві сутності. Наприклад: <em>"При створенні замовлення, якщо у Користувача статус VIP, застосувати знижку"</em>.</p>
+            <p><strong>Хто це робить?</strong> Use Case. Він диригент.</p>
+
+<pre><code class="language-python"><span class="code-comment"># application/use_cases.py (розширений приклад)</span>
+
+<span class="code-keyword">def</span> <span class="code-func">execute</span>(self, command: CreateOrderCommand):
+    <span class="code-comment"># 1. Завантажуємо користувача через репозиторій</span>
+    user = self.user_repo.get_by_email(command.email)
+    
+    <span class="code-comment"># 2. Створюємо замовлення</span>
+    order = Order(...)
+    
+    <span class="code-comment"># 3. Оркестрація: логіка взаємодії</span>
+    <span class="code-comment"># Ми беремо дані з однієї сутності і передаємо в іншу</span>
+    <span class="code-keyword">if</span> user.is_vip():
+        order.apply_discount(percent=10)
+    
+    <span class="code-comment"># 4. Зберігаємо</span>
+    self.order_repo.save(order)
+</code></pre>
+            <div class="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded text-sm text-yellow-800">
+                <strong>Важливо:</strong> Use Case не повинен сам розраховувати знижку (`total * 0.9`). Він повинен викликати метод `order.apply_discount()`. Логіка має залишатися в Сутностях!
+            </div>
+        </section>
+
+        <!-- ANTIPATTERNS -->
+        <section id="antipatterns" class="mb-12">
+            <h2 class="text-2xl font-bold text-red-700 mb-6">⚠️ Антипатерни Application Layer</h2>
+            
+            <div class="space-y-6">
+                <details class="group bg-white border border-red-200 rounded-lg p-4 open:ring-2 open:ring-red-100">
+                    <summary class="font-bold text-red-800 group-hover:text-red-600">1. Fat Use Case (Товстий сценарій)</summary>
+                    <div class="mt-3 text-sm">
+                        <p class="mb-2">Це коли Use Case починає робити обчислення замість сутностей.</p>
+                        <pre class="bg-slate-800 text-slate-200 p-4 rounded-lg text-xs border border-slate-700"><span class="code-comment"># ❌ ПОГАНО</span>
+total = 0
+for item in items:
+    total += item.price <span class="code-comment"># Логіка розрахунку суми витекла з Домену!</span>
+order.total = total
+
+<span class="code-comment"># ✅ ДОБРЕ</span>
+order.calculate_total() <span class="code-comment"># Use Case просто делегує</span></pre>
+                    </div>
+                </details>
+
+                <details class="group bg-white border border-red-200 rounded-lg p-4 open:ring-2 open:ring-red-100">
+                    <summary class="font-bold text-red-800 group-hover:text-red-600">2. Leaking Infrastructure</summary>
+                    <div class="mt-3 text-sm">
+                        <p class="mb-2">Передача об'єктів фреймворку або БД в Use Case.</p>
+                        <pre class="bg-slate-800 text-slate-200 p-4 rounded-lg text-xs border border-slate-700"><span class="code-comment"># ❌ ПОГАНО</span>
+def execute(self, request: starlette.requests.Request): <span class="code-comment"># Прив'язка до Web!</span>
+    pass
+
+<span class="code-comment"># ❌ ПОГАНО</span>
+def execute(self, session: sqlalchemy.Session): <span class="code-comment"># Прив'язка до БД!</span>
+    pass</pre>
+                    </div>
+                </details>
+
+                <details class="group bg-white border border-red-200 rounded-lg p-4 open:ring-2 open:ring-red-100">
+                    <summary class="font-bold text-red-800 group-hover:text-red-600">3. Returning Entities (Повернення сутностей)</summary>
+                    <div class="mt-3 text-sm">
+                        <p class="mb-2">Use Case не повинен повертати назовні (в Web) об'єкти `Order`. Він повинен повертати `OrderResultDTO`.</p>
+                        <p>Чому? Тому що Entity має поведінку, а API потрібно просто віддати JSON. Плюс, якщо ви зміните Entity, ви зламаєте API контракт.</p>
+                    </div>
+                </details>
+            </div>
+        </section>
+
+    
+        <!-- NAVIGATION FOOTER -->
+        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="domain.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Назад</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Domain</span></a><a href="infrastructure.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далі</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Infrastructure &rarr;</span></a></div></div>
+    </main>
+</body>
+</html>

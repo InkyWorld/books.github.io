@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>17.1 Resilience Patterns — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 17: System Design</div>
+                    <a href="part17_circuit.html" class="nav-link active">17.1 Resilience</a>
+                    <a href="part17_ratelimit.html" class="nav-link">17.2 Rate Limiting</a>
+                    <a href="part17_distlock.html" class="nav-link">17.3 Dist Locks</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 17</span>
+                    <span>/</span>
+                    <span>17.1 Resilience Patterns</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 17.1: Устойчивость (Resilience)</h1>
+                <p class="lead">Как писать код, который работает, когда всё вокруг ломается.</p>
+
+                <h2>Circuit Breaker ("Предохранитель")</h2>
+                <p>Если сервис оплаты лежит и возвращает 500 ошибку за 30 секунд (timeout), не нужно продолжать долбить его. Вы только добьёте его и потратите свои треды на ожидание.</p>
+                
+                <h3>Состояния Circuit Breaker:</h3>
+                <ul>
+                    <li><strong>Closed:</strong> Всё хорошо, запросы проходят. Если ошибок > 50% -> переходим в Open.</li>
+                    <li><strong>Open:</strong> Запросы моментально падают с ошибкой, не доходя до сервиса. Даем сервису "отдохнуть". Таймер на 30 сек.</li>
+                    <li><strong>Half-Open:</strong> Пропускаем 1 тестовый запрос. Если успех -> Closed. Если ошибка -> Open.</li>
+                </ul>
+
+                <h2>Retry & Backoff</h2>
+                <p>Никогда не делайте <code>while True: try_connect()</code>. Это DDOS атака на самого себя.</p>
+                <p>Используйте <strong>Exponential Backoff + Jitter</strong>.</p>
+                <div class="code-block">
+                    <pre><code>wait_time = min(cap, base * 2 ** attempt) + random_jitter</code></pre>
+                </div>
+                <ul>
+                    <li>1 попытка: ждать 1с + 0.1с</li>
+                    <li>2 попытка: ждать 2с + 0.3с</li>
+                    <li>3 попытка: ждать 4с + 0.2с</li>
+                </ul>
+                <p><em>Jitter</em> нужен, чтобы все 1000 клиентов не пришли на повтор одновременно (Thundering Herd).</p>
+
+                <h2>Bulkhead ("Переборки")</h2>
+                <p>Паттерн из кораблестроения. Если пробило нос корабля, вода не должна затопить корму. В IT: изолируйте пулы ресурсов.</p>
+                <p>Пример: Отдельный Thread Pool для обработки платежей и отдельный для генерации отчетов. Если генерация отчетов зависнет и съест все треды, платежи продолжат ходить.</p>
+
+                <h2>🪨 Подводные камни</h2>
+                <ul>
+                    <li><strong>Retry Storm:</strong> Сервис А ретраит Сервис Б 3 раза. Сервис Б ретраит Сервис В 3 раза. На один запрос к А вы получаете 3*3=9 запросов к В. Нужно ограничивать ретраи глобально или использовать `Budget`.</li>
+                    <li><strong>Timeout Mismatch:</strong> Если у клиента таймаут 1с, а у сервера 5с, то сервер будет 4 секунды работать впустую — клиент уже ушел.</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

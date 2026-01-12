@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16.1 Indexes Deep Dive — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <!-- Navigation structure simplified for this view -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 16: DB Advanced</div>
+                    <a href="part16_indexes.html" class="nav-link active">16.1 Indexes</a>
+                    <a href="part16_isolation.html" class="nav-link">16.2 Transactions</a>
+                    <a href="part16_sharding.html" class="nav-link">16.3 Sharding</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 16</span>
+                    <span>/</span>
+                    <span>16.1 Indexes Deep Dive</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 16.1: Индексы в деталях</h1>
+                <p class="lead">Все знают <code>CREATE INDEX</code>, но мало кто знает, почему Postgres его игнорирует.</p>
+
+                <h2>Типы индексов PostgreSQL</h2>
+                <ul>
+                    <li><strong>B-Tree:</strong> Стандартный. Подходит для `=`, `>`, `<`, `ORDER BY`. Сбалансированное дерево.</li>
+                    <li><strong>Hash:</strong> Только для `=`. Быстрее B-Tree на вставку, но не умеет в диапазоны. До PG 10 был не WAL-logged (терялся при краше), сейчас безопасен.</li>
+                    <li><strong>GIN (Generalized Inverted Index):</strong> Для массивов, JSONB и полнотекстового поиска (tsvector). Работает как "ключ -> список строк".</li>
+                    <li><strong>GiST (Generalized Search Tree):</strong> Для геометрии (PostGIS) и сложных типов.</li>
+                    <li><strong>BRIN (Block Range INdex):</strong> Для огромных таблиц (Time Series), где данные лежат упорядоченно. Занимает копейки места.</li>
+                </ul>
+
+                <h2>🪨 Подводные камни (Pitfalls)</h2>
+                
+                <h3>1. Индекс не используется (Seq Scan)</h3>
+                <p>Вы создали индекс, а <code>EXPLAIN ANALYZE</code> показывает <code>Seq Scan</code>. Почему?</p>
+                <ul>
+                    <li><strong>Селективность (Selectivity):</strong> Если ваш запрос возвращает 50% таблицы (например, <code>WHERE gender = 'male'</code>), Postgres выгоднее прочитать всё подряд, чем скакать по индексу (Random I/O).</li>
+                    <li><strong>Функции на колонке:</strong>
+                        <br>Не работает: <code>WHERE lower(email) = 'alex@test.com'</code> (если индекс по email).
+                        <br>Нужно: Создать функциональный индекс <code>CREATE INDEX ON users (lower(email))</code>.
+                    </li>
+                    <li><strong>Типы данных:</strong> Сравнение <code>text</code> колонки с <code>integer</code> может отключить индекс.</li>
+                </ul>
+
+                <h3>2. NULL и индексы</h3>
+                <p>В старых версиях индексы не хранили NULL. В Postgres хранят, но condition <code>IS NULL</code> не всегда оптимален. Для частых выборок NULL лучше сделать частичный индекс: <code>CREATE INDEX ... WHERE deleted_at IS NULL</code>.</p>
+
+                <h3>3. Write Amplification (HOT Updates)</h3>
+                <p>Каждый лишний индекс замедляет <code>INSERT</code> и <code>UPDATE</code>. Если вы обновляете поле, которое входит в индекс, Postgres приходится обновлять и индексной дерево. Удаляйте неиспользуемые индексы!</p>
+
+                <h2>💡 Лайфхаки (Senior Tricks)</h2>
+
+                <h3>1. Covering Indexes (Index Only Scan)</h3>
+                <p>Если вам нужно только ID и Email, добавьте Email в <code>INCLUDE</code>.</p>
+                <div class="code-block">
+                    <pre><code>CREATE INDEX idx_users_active ON users (status) INCLUDE (email);
+-- SELECT email FROM users WHERE status = 'active';
+-- Postgres достанет email прямо из индекса, не ходя в основную таблицу (Heap).</code></pre>
+                </div>
+
+                <h3>2. Создание без блокировки</h3>
+                <p>На живой базе всегда используйте <code>CONCURRENTLY</code>.</p>
+                <div class="code-block">
+                    <pre><code>CREATE INDEX CONCURRENTLY idx_logs_date ON logs (created_at);</code></pre>
+                </div>
+                <p>Это не заблокирует запись в таблицу, но займет в 2-3 раза больше времени.</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

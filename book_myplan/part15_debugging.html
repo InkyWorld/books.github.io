@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15.1 Debugging — ScaleTrade</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <div class="nav-section-title">Введение</div>
+                    <a href="index.html" class="nav-link">🏠 Главная</a>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">Часть 15: Debugging</div>
+                    <a href="part15_debugging.html" class="nav-link active">15.1 Debugging</a>
+                    <a href="part15_postmortem.html" class="nav-link">15.2 Postmortem</a>
+                    <a href="part15_chaos.html" class="nav-link">15.3 Chaos Eng</a>
+                </div>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header">
+                <div class="breadcrumb">
+                    <a href="index.html">ScaleTrade</a>
+                    <span>/</span>
+                    <span>Часть 15</span>
+                    <span>/</span>
+                    <span>15.1 Debugging</span>
+                </div>
+            </header>
+
+            <div class="page-content">
+                <h1>Модуль 15.1: Отладка распределенных систем</h1>
+                <p class="lead">В монолите вы смотрите stacktrace. В микросервисах вы смотрите в бездну, и бездна смотрит в вас.</p>
+
+                <h2>Distributed Tracing</h2>
+                <p>Когда запрос проходит через 5 микросервисов, логи на каждом из них бесполезны по отдельности. Вам нужен <strong>Trace ID</strong>.</p>
+                <div class="code-block">
+                    <pre><code># Nginx генерирует X-Request-ID
+add_header X-Request-ID $request_id;</code></pre>
+                </div>
+                <p>Каждый сервис должен принимать этот ID из заголовка и передавать его дальше при вызове следующего сервиса. И писать его в каждый лог.</p>
+
+                <h2>Инструменты наблюдаемости (Observability)</h2>
+                <ul>
+                    <li><strong>OpenTelemetry:</strong> Стандарт сбора метрик, логов и трейсов.</li>
+                    <li><strong>Jaeger / Zipkin:</strong> Визуализация трейсов. Показывает Waterfall-диаграмму запроса: 20мс в Auth Service -> 50мс в DB -> 100мс в Payment Service.</li>
+                    <li><strong>ELK Stack (Elasticsearch, Logstash, Kibana):</strong> Централизованный сбор логов.</li>
+                    <li><strong>Grafana + Prometheus:</strong> Метрики (RPS, Error Rate, Latency).</li>
+                </ul>
+
+                <h2>Стратегии отладки</h2>
+
+                <h3>1. Binary Search (git bisect)</h3>
+                <p>Если баг воспроизводится стабильно, но непонятно, когда появился — используйте <code>git bisect</code>, чтобы найти коммит-виновник.</p>
+
+                <h3>2. Rubber Duck Debugging</h3>
+                <p>Объясните проблему резиновой уточке (или коллеге). В 50% случаев вы найдете решение, пока формулируете вопрос.</p>
+
+                <h3>3. Divide and Conquer</h3>
+                <p>Локализуйте проблему. Это сеть? Это база? Это код? Отключайте компоненты по одному, заменяя их заглушками (Mock), пока ошибка не исчезнет.</p>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
