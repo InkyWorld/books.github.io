@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Глава 9: Практические Проекты - Clean Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
+        p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
+        
+        .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
+        .sidebar-title { color: #f8fafc; }
+        .sidebar-subtitle { color: #60a5fa; }
+        .nav-section { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem 1rem 0.5rem; }
+        .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
+
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+        .code-comment { color: #94a3b8; font-style: italic; }
+        .code-keyword { color: #c084fc; font-weight: bold; } 
+        .code-class { color: #fbbf24; font-weight: bold; }   
+        .code-func { color: #60a5fa; font-weight: bold; }    
+        .code-str { color: #a3e635; }                        
+        .code-dec { color: #f472b6; } 
+
+        .card { background: white; border-radius: 1rem; padding: 2.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem; border: 1px solid #e2e8f0; }
+        
+        .step-number { display: inline-flex; justify-content: center; align-items: center; width: 2rem; height: 2rem; border-radius: 9999px; background: #2563eb; color: white; font-weight: bold; margin-right: 0.75rem; }
+        .step-header { display: flex; align-items: center; margin-bottom: 1.5rem; }
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar hidden md:block">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
+            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+        </div>
+        <nav class="py-4">
+            <div class="px-4 mb-4">
+                <div class="flex gap-2 text-xs font-bold text-slate-400">
+                    <a href="#" class="hover:text-white transition">RU</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="#" class="hover:text-white transition">EN</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="#" class="hover:text-white transition">dUA</a>
+                </div>
+            </div>
+
+            <div class="nav-section">Основы</div>
+            <a href="index.html" class="nav-link ">📘 Введение</a>
+            
+            <div class="nav-section">Слои архитектуры</div>
+            <a href="domain.html" class="nav-link ">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link ">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link ">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link ">🌐 Presentation Layer</a>
+            
+            <div class="nav-section">Принципы и паттерны</div>
+            <a href="solid.html" class="nav-link ">📐 SOLID принципы</a>
+            <a href="invariants.html" class="nav-link ">🛡️ Инварианты</a>
+            <a href="dependency.html" class="nav-link ">💉 Dependency Injection</a>
+            <a href="cqrs_es.html" class="nav-link ">⚡ CQRS и ES</a>
+            
+            <div class="nav-section">Security & Production</div>
+            <a href="security.html" class="nav-link ">🔐 Auth & Permissions</a>
+            <a href="concurrency.html" class="nav-link ">🛑 Concurrency & Migrations</a>
+            <a href="background_tasks.html" class="nav-link ">⏳ Background Tasks</a>
+            <a href="error_handling.html" class="nav-link ">🚫 Error Handling</a>
+            <a href="config_logging.html" class="nav-link ">⚙️ Config & Observability</a>
+
+            <div class="nav-section">DDD Patterns</div>
+            <a href="bounded_context.html" class="nav-link ">🌍 Bounded Contexts</a>
+            <a href="modular_monolith.html" class="nav-link ">🏗️ Modular Monolith</a>
+            <a href="aggregates.html" class="nav-link ">📦 Aggregates</a>
+            <a href="value_objects.html" class="nav-link ">💎 Value Objects</a>
+            <a href="repository_uow.html" class="nav-link ">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link ">📋 Specification</a>
+
+            <div class="nav-section">EDA & Dist. Systems</div>
+            <a href="domain_events.html" class="nav-link ">📣 Domain Events</a>
+            <a href="saga.html" class="nav-link ">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link ">📮 Outbox Pattern</a>
+
+            <div class="nav-section">Frameworks & Практика</div>
+            <a href="frameworks_django.html" class="nav-link ">🐍 Django & Others</a>
+            <a href="advanced_techniques.html" class="nav-link ">🚀 Advanced Tech</a>
+            <a href="deployment.html" class="nav-link ">🚀 Deployment & Protection</a>
+            <a href="testing.html" class="nav-link ">🧪 Тестирование</a>
+            <a href="projects.html" class="nav-link active">🚀 Мини-проекты</a>
+            <a href="antipatterns.html" class="nav-link ">⚠️ Антипаттерны</a>
+        </nav>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
+        
+        <header id="intro" class="mb-12 pb-6 border-b border-gray-200">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Practice</span>
+                <span class="text-gray-400 text-sm font-mono">Full Stack Flow</span>
+            </div>
+            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Практика: Система Платежей</h1>
+            <p class="text-xl text-gray-500 mt-4 font-light">
+                Соберем полноценную фичу "Оплата Заказа" от начала до конца, пройдя через все слои архитектуры.
+            </p>
+        </header>
+
+        <!-- OVERVIEW -->
+        <section class="card bg-gray-50 border-gray-200">
+            <h2 class="text-2xl font-bold mb-4">Задача</h2>
+            <p>Реализовать процесс оплаты заказа.</p>
+            <ul class="list-disc pl-6 mb-4 text-sm font-semibold text-gray-700">
+                <li>Если заказ уже оплачен — ошибка.</li>
+                <li>Если сумма оплаты не совпадает — ошибка.</li>
+                <li>Если всё ок — меняем статус заказа и записываем транзакцию.</li>
+                <li>В конце отправляем чек на Email.</li>
+            </ul>
+        </section>
+
+        <!-- STEP 1: DOMAIN -->
+        <section class="mb-16">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <h2 class="text-2xl font-bold">Domain Layer (Бизнес-логика)</h2>
+            </div>
+            <p>Начинаем с сущностей. Никаких баз данных и JSON. Только классы и правила.</p>
+
+<pre><code class="language-python"><span class="code-comment"># domain/entities.py</span>
+<span class="code-keyword">from</span> dataclasses <span class="code-keyword">import</span> dataclass, field
+<span class="code-keyword">import</span> uuid
+<span class="code-keyword">from</span> datetime <span class="code-keyword">import</span> datetime
+<span class="code-keyword">from</span> .value_objects <span class="code-keyword">import</span> Money
+
+<span class="code-comment"># Exceptions</span>
+<span class="code-keyword">class</span> <span class="code-class">OrderAlreadyPaid</span>(Exception): <span class="code-keyword">pass</span>
+<span class="code-keyword">class</span> <span class="code-class">InvalidPaymentAmount</span>(Exception): <span class="code-keyword">pass</span>
+
+
+<span class="code-keyword">class</span> <span class="code-class">Order</span>:
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, id: uuid.UUID, total: Money):
+        self.id = id
+        self.total = total
+        self.is_paid = <span class="code-keyword">False</span>
+        self.paid_at = <span class="code-keyword">None</span>
+
+    <span class="code-keyword">def</span> <span class="code-func">pay</span>(self, payment_amount: Money):
+        <span class="code-str">"""Главный метод бизнес-логики"""</span>
+        
+        <span class="code-comment"># 1. Проверяем инварианты</span>
+        <span class="code-keyword">if</span> self.is_paid:
+            <span class="code-keyword">raise</span> OrderAlreadyPaid(<span class="code-str">"Заказ уже оплачен"</span>)
+        
+        <span class="code-comment"># Сравнение Value Objects работает из коробки (если реализованы __eq__ и currency check)</span>
+        <span class="code-keyword">if</span> payment_amount != self.total:
+            <span class="code-keyword">raise</span> InvalidPaymentAmount(<span class="code-str">f"Ожидалась сумма {self.total}, получено {payment_amount}"</span>)
+
+        <span class="code-comment"># 2. Меняем состояние</span>
+        self.is_paid = <span class="code-keyword">True</span>
+        self.paid_at = datetime.utcnow()
+</code></pre>
+        </section>
+
+        <!-- STEP 2: APPLICATION -->
+        <section class="mb-16">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <h2 class="text-2xl font-bold">Application Layer (Сценарий)</h2>
+            </div>
+            <p>Пишем Use Case. Нам нужны интерфейсы для доступа к данным.</p>
+
+<pre><code class="language-python"><span class="code-comment"># application/ports.py</span>
+<span class="code-keyword">from</span> abc <span class="code-keyword">import</span> ABC, abstractmethod
+<span class="code-keyword">from</span> domain.entities <span class="code-keyword">import</span> Order
+
+<span class="code-keyword">class</span> <span class="code-class">OrderRepository</span>(ABC):
+    <span class="code-dec">@abstractmethod</span>
+    <span class="code-keyword">def</span> <span class="code-func">get</span>(self, id: uuid.UUID) -> Order: ...
+    
+    <span class="code-dec">@abstractmethod</span>
+    <span class="code-keyword">def</span> <span class="code-func">save</span>(self, order: Order): ...
+
+<span class="code-keyword">class</span> <span class="code-class">EmailService</span>(ABC):
+    <span class="code-dec">@abstractmethod</span>
+    <span class="code-keyword">def</span> <span class="code-func">send_receipt</span>(self, order_id: uuid.UUID): ...
+</code></pre>
+
+<pre><code class="language-python"><span class="code-comment"># application/use_cases.py</span>
+<span class="code-keyword">from</span> dataclasses <span class="code-keyword">import</span> dataclass
+<span class="code-keyword">from</span> decimal <span class="code-keyword">import</span> Decimal
+<span class="code-keyword">from</span> .ports <span class="code-keyword">import</span> OrderRepository, EmailService
+<span class="code-keyword">from</span> domain.value_objects <span class="code-keyword">import</span> Money
+
+<span class="code-dec">@dataclass</span>
+<span class="code-keyword">class</span> <span class="code-class">PayOrderCommand</span>:
+    order_id: uuid.UUID
+    amount: Decimal
+    currency: str
+
+<span class="code-keyword">class</span> <span class="code-class">PayOrderUseCase</span>:
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, repo: OrderRepository, email_service: EmailService):
+        self.repo = repo
+        self.email = email_service
+
+    <span class="code-keyword">def</span> <span class="code-func">execute</span>(self, cmd: PayOrderCommand):
+        <span class="code-comment"># 1. Загружаем</span>
+        order = self.repo.get(cmd.order_id)
+        <span class="code-keyword">if</span> <span class="code-keyword">not</span> order:
+            <span class="code-keyword">raise</span> Exception(<span class="code-str">"Order not found"</span>) <span class="code-comment"># Лучше свой OrderNotFound</span>
+
+        <span class="code-comment"># 2. Выполняем доменное действие</span>
+        payment_amount = Money(cmd.amount, cmd.currency)
+        order.pay(payment_amount)
+
+        <span class="code-comment"># 3. Сохраняем</span>
+        self.repo.save(order)
+
+        <span class="code-comment"># 4. Сайд-эффекты (можно вынести в Event Handler)</span>
+        self.email.send_receipt(order.id)
+</code></pre>
+        </section>
+
+        <!-- STEP 3: INFRASTRUCTURE -->
+        <section class="mb-16">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <h2 class="text-2xl font-bold">Infrastructure Layer (База данных)</h2>
+            </div>
+            <p>Реализуем репозиторий через SQL Alchemy.</p>
+
+<pre><code class="language-python"><span class="code-comment"># infrastructure/db.py</span>
+<span class="code-keyword">from</span> sqlalchemy.orm <span class="code-keyword">import</span> Session
+<span class="code-keyword">from</span> domain.entities <span class="code-keyword">import</span> Order
+<span class="code-keyword">from</span> application.ports <span class="code-keyword">import</span> OrderRepository
+
+<span class="code-keyword">class</span> <span class="code-class">SqlOrderRepository</span>(OrderRepository):
+    <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, session: Session):
+        self.session = session
+
+    <span class="code-keyword">def</span> <span class="code-func">get</span>(self, id: uuid.UUID) -> Order:
+        <span class="code-comment"># Model -> Entity mapping</span>
+        row = self.session.query(OrderModel).filter_by(id=str(id)).first()
+        <span class="code-keyword">if</span> <span class="code-keyword">not</span> row:
+            <span class="code-keyword">return</span> <span class="code-keyword">None</span>
+        
+        <span class="code-comment"># Восстанавливаем Entity</span>
+        order = Order(uuid.UUID(row.id), Money(row.amount, row.currency))
+        order.is_paid = row.is_paid <span class="code-comment"># Важно! Восстанавливаем состояние</span>
+        <span class="code-keyword">return</span> order
+
+    <span class="code-keyword">def</span> <span class="code-func">save</span>(self, order: Order):
+        <span class="code-comment"># Entity -> Model mapping</span>
+        row = OrderModel(
+            id=str(order.id),
+            amount=order.total.amount,
+            currency=order.total.currency,
+            is_paid=order.is_paid
+        )
+        self.session.merge(row)
+        self.session.commit()
+</code></pre>
+        </section>
+
+        <!-- STEP 4: PRESENTATION -->
+        <section class="mb-16">
+            <div class="step-header">
+                <div class="step-number">4</div>
+                <h2 class="text-2xl font-bold">Presentation Layer (API)</h2>
+            </div>
+            <p>Подключаем FastAPI.</p>
+
+<pre><code class="language-python"><span class="code-comment"># presentation/api.py</span>
+<span class="code-keyword">from</span> fastapi <span class="code-keyword">import</span> APIRouter, Depends
+<span class="code-keyword">from</span> pydantic <span class="code-keyword">import</span> BaseModel
+
+<span class="code-keyword">class</span> <span class="code-class">PaymentRequest</span>(BaseModel):
+    amount: float
+    currency: str
+
+<span class="code-dec">@router.post</span>(<span class="code-str">"/orders/{order_id}/pay"</span>)
+<span class="code-keyword">def</span> <span class="code-func">pay_order_endpoint</span>(
+    order_id: uuid.UUID,
+    request: PaymentRequest,
+    <span class="code-comment"># Внедрение зависимостей</span>
+    use_case: PayOrderUseCase = Depends(get_pay_order_use_case)
+):
+    <span class="code-keyword">try</span>:
+        cmd = PayOrderCommand(order_id, Decimal(request.amount), request.currency)
+        use_case.execute(cmd)
+        <span class="code-keyword">return</span> {<span class="code-str">"status"</span>: <span class="code-str">"success"</span>}
+    <span class="code-keyword">except</span> OrderAlreadyPaid:
+        <span class="code-keyword">raise</span> HTTPException(409, <span class="code-str">"Already paid"</span>)
+    <span class="code-keyword">except</span> InvalidPaymentAmount:
+        <span class="code-keyword">raise</span> HTTPException(400, <span class="code-str">"Wrong amount"</span>)
+</code></pre>
+        </section>
+
+    
+        <!-- NAVIGATION FOOTER -->
+        
+        <!-- NAVIGATION FOOTER -->
+        
+        <!-- NAVIGATION FOOTER -->
+        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="testing.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Назад</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Testing</span></a><a href="antipatterns.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далее</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Antipatterns &rarr;</span></a></div></div>
+    </main>
+</body>
+</html>
