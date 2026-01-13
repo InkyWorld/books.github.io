@@ -19,44 +19,119 @@
                 </a>
             </div>
             <nav class="sidebar-nav">
-                <div class="nav-section">
-                    <div class="nav-section-title">Введение</div>
-                    <a href="index.html" class="nav-link"><span class="nav-link-icon">🏠</span>Главная</a>
-                    <a href="setup.html" class="nav-link"><span class="nav-link-icon">⚙️</span>Настройка проекта</a>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Часть 1: PostgreSQL</div>
-                    <a href="part1_schema.html" class="nav-link"><span class="nav-link-icon">📊</span>1.1 Схема и хранение</a>
-                    <a href="part1_transactions.html" class="nav-link"><span class="nav-link-icon">🔄</span>1.2 Транзакции</a>
-                    <a href="part1_indexes.html" class="nav-link"><span class="nav-link-icon">🔍</span>1.3 Индексы</a>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Часть 2: Архитектура</div>
-                    <a href="part2_litestar.html" class="nav-link"><span class="nav-link-icon">🚀</span>2.1 Litestar + DDD</a>
-                    <a href="part2_dishka.html" class="nav-link"><span class="nav-link-icon">💉</span>2.2 DI с Dishka</a>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Часть 3: Распределённые</div>
-                    <a href="part3_faststream.html" class="nav-link"><span class="nav-link-icon">📨</span>3.1 RabbitMQ + Faststream</a>
-                    <a href="part3_redis.html" class="nav-link"><span class="nav-link-icon">⚡</span>3.2 Redis Patterns</a>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Часть 4: Надёжность</div>
-                    <a href="part4_testing.html" class="nav-link"><span class="nav-link-icon">🧪</span>4.1 Advanced Testing</a>
-                    <a href="part4_resiliency.html" class="nav-link"><span class="nav-link-icon">🛡️</span>4.2 Resiliency</a>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Часть 5: Observability</div>
-                    <a href="part5_logging.html" class="nav-link"><span class="nav-link-icon">📝</span>5.1 Логирование</a>
-                    <a href="part5_clickhouse.html" class="nav-link active"><span class="nav-link-icon">📈</span>5.2 ClickHouse</a>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Часть 6: Production</div>
-                    <a href="part6_migrations.html" class="nav-link"><span class="nav-link-icon">🔀</span>6.1 Zero-Downtime</a>
-                    <a href="part6_quality.html" class="nav-link"><span class="nav-link-icon">✅</span>6.2 Code Quality</a>
-                    <a href="part6_django.html" class="nav-link"><span class="nav-link-icon">🔗</span>6.3 Django Admin</a>
-                </div>
-            </nav>
+    <div class="nav-section">
+        <div class="nav-section-title">Intro</div>
+        <a href="index.html" class="nav-link">🏠 Главная</a>
+        <a href="setup.html" class="nav-link">🛠 Setup</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 0: Fundamentals</div>
+        <a href="part0_internals.html" class="nav-link">0.1 Internals</a>
+        <a href="part0_networking.html" class="nav-link">0.2 Networking</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 1: Postgres</div>
+        <a href="part1_schema.html" class="nav-link">1.1 Schema</a>
+        <a href="part1_indexes.html" class="nav-link">1.2 Indexes</a>
+        <a href="part1_transactions.html" class="nav-link">1.3 Transactions</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 2: Litestar</div>
+        <a href="part2_litestar.html" class="nav-link">2.1 Framework</a>
+        <a href="part2_dishka.html" class="nav-link">2.2 DI (Dishka)</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 3: Brokers</div>
+        <a href="part3_redis.html" class="nav-link">3.1 Redis</a>
+        <a href="part3_faststream.html" class="nav-link">3.2 FastStream</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 4: Quality</div>
+        <a href="part4_testing.html" class="nav-link">4.1 Pytest</a>
+        <a href="part4_resiliency.html" class="nav-link">4.2 Resilience</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 5: Observability</div>
+        <a href="part5_clickhouse.html" class="nav-link active">5.1 Clickhouse</a>
+        <a href="part5_logging.html" class="nav-link">5.2 Structured Logs</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 6: Django</div>
+        <a href="part6_django.html" class="nav-link">6.1 ORM</a>
+        <a href="part6_migrations.html" class="nav-link">6.2 Migrations</a>
+        <a href="part6_quality.html" class="nav-link">6.3 Quality</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 7: Microservices</div>
+        <a href="part7_grpc.html" class="nav-link">7.1 gRPC</a>
+        <a href="part7_graphql.html" class="nav-link">7.2 GraphQL</a>
+        <a href="part7_federation.html" class="nav-link">7.3 Federation</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 8: Async</div>
+        <a href="part8_asyncio.html" class="nav-link">8.1 Asyncio</a>
+        <a href="part8_celery.html" class="nav-link">8.2 Celery</a>
+        <a href="part8_dramatiq.html" class="nav-link">8.3 Dramatiq</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 9: API</div>
+        <a href="part9_restdesign.html" class="nav-link">9.1 REST Design</a>
+        <a href="part9_idempotency.html" class="nav-link">9.2 Idempotency</a>
+        <a href="part9_openapi.html" class="nav-link">9.3 OpenAPI</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 10: Culture</div>
+        <a href="part10_git.html" class="nav-link">10.1 Git</a>
+        <a href="part10_commits.html" class="nav-link">10.2 Commits</a>
+        <a href="part10_codereview.html" class="nav-link">10.3 Post-Review</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 11: Security</div>
+        <a href="part11_oauth.html" class="nav-link">11.1 OAuth2</a>
+        <a href="part11_vault.html" class="nav-link">11.2 Vault</a>
+        <a href="part11_owasp.html" class="nav-link">11.3 OWASP</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 12: Kubernetes</div>
+        <a href="part12_kubernetes.html" class="nav-link">12.1 K8s Basics</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 13: High Load</div>
+        <a href="part13_profiling.html" class="nav-link">13.1 Profiling</a>
+        <a href="part13_caching.html" class="nav-link">13.2 Caching</a>
+        <a href="part13_loadbalancing.html" class="nav-link">13.3 Load Balancing</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 14: ML Ops</div>
+        <a href="part14_mlflow.html" class="nav-link">14.1 MLflow</a>
+        <a href="part14_embeddings.html" class="nav-link">14.2 Embeddings</a>
+        <a href="part14_llm.html" class="nav-link">14.3 LLM</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 15: Debugging</div>
+        <a href="part15_debugging.html" class="nav-link">15.1 Debugging</a>
+        <a href="part15_postmortem.html" class="nav-link">15.2 Postmortem</a>
+        <a href="part15_chaos.html" class="nav-link">15.3 Chaos Eng</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 16: DB Advanced</div>
+        <a href="part16_indexes.html" class="nav-link">16.1 Indexes Deep</a>
+        <a href="part16_isolation.html" class="nav-link">16.2 Isolation</a>
+        <a href="part16_sharding.html" class="nav-link">16.3 Sharding</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 17: System Design</div>
+        <a href="part17_circuit.html" class="nav-link">17.1 Circuit Breaker</a>
+        <a href="part17_ratelimit.html" class="nav-link">17.2 Rate Limit</a>
+        <a href="part17_distlock.html" class="nav-link">17.3 Dist Lock</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 18: Soft Skills</div>
+        <a href="part18_estimation.html" class="nav-link">18.1 Estimation</a>
+        <a href="part18_burnout.html" class="nav-link">18.2 Burnout</a>
+        <a href="part18_interview.html" class="nav-link">18.3 Interview</a>
+    </div>
+</nav>
         </aside>
 
         <main class="main-content">
@@ -105,7 +180,23 @@
                     </tbody>
                 </table>
 
+                <h2>Принципы работы (Deep Dive)</h2>
+                <p>Почему ClickHouse такой быстрый? Секрет не в магии, а в архитектуре хранения данных.</p>
+                
+                <h3>1. Колоночное хранение и сжатие</h3>
+                <p>В традиционных БД (Postgres, MySQL) данные хранятся строками: <code>[User, Date, Amount]</code>. Чтобы посчитать среднюю сумму (Amount), база должна прочитать с диска всю строку, включая ненужные поля (User, Date). Это лишний I/O.</p>
+                <p>ClickHouse хранит каждую колонку в отдельном файле. Запрос <code>sum(Amount)</code> читает <strong>только</strong> файл с колонкой Amount. Плюс, данные одного типа (числа, даты) отлично сжимаются кодеками (LZ4, ZSTD), уменьшая объем данных на диске в 10-100 раз.</p>
+
+                <h3>2. Разреженные индексы (Sparse Index)</h3>
+                <p>В отличие от B-Tree индексов в Postgres, которые хранят указатель на <strong>каждую</strong> строку, ClickHouse использует разреженный индекс. Он хранит значение первичного ключа только для каждой N-й строки (по умолчанию 8192). Это позволяет держать весь индекс в оперативной памяти, мгновенно находя нужные блоки данных (гранулы) для чтения.</p>
+
                 <h2>MergeTree Engine</h2>
+                <p>Это основной движок таблиц в ClickHouse. Он работает по принципу LSM-tree (Log-Structured Merge-tree):</p>
+                <ul>
+                    <li>Новые данные пишутся в новую папку (Part) на диске.</li>
+                    <li>В фоне ClickHouse объединяет (merge) мелкие парты в более крупные.</li>
+                    <li>Данные всегда сортируются по первичному ключу (ORDER BY).</li>
+                </ul>
 
 <pre><code><span class="comment">-- Таблица событий торговли</span>
 <span class="keyword">CREATE TABLE</span> trade_events
@@ -127,7 +218,9 @@
 <span class="keyword">ENGINE</span> = MergeTree()
 <span class="keyword">PARTITION BY</span> toYYYYMM(event_date)
 <span class="keyword">ORDER BY</span> (symbol, event_time, user_id)  <span class="comment">-- Ключ сортировки</span>
-<span class="keyword">TTL</span> event_date + INTERVAL <span class="number">1</span> YEAR  <span class="comment">-- Автоудаление через год</span>
+<span class="keyword">TTL</span> event_dМагия реального времени</h2>
+                <p>В Postgres <code>MATERIALIZED VIEW</code> — это статичный слепок данных, который нужно обновлять вручную командой <code>REFRESH MATERIALIZED VIEW</code>. Это тяжело и долго.</p>
+                <p>В ClickHouse Materialized View — это <strong>триггер на вставку (INSERT)</strong>. Как только блок данных попадает в таблицу-источник, ClickHouse применяет к нему агрегатную функцию и дописывает результат в целевую таблицу. Данные агрегируются инкрементально, на лету. Мы никогда не пересчитываем всю историю заново. Это позволяет строить дашборды, которые обновляются с задержкой в секунды, даже на петабайтах данных.</ppan class="number">1</span> YEAR  <span class="comment">-- Автоудаление через год</span>
 <span class="keyword">SETTINGS</span> index_granularity = <span class="number">8192</span>;
 
 <span class="comment">-- Запрос: топ-10 трейдеров за день</span>
@@ -183,7 +276,9 @@
 <span class="keyword">FROM</span> daily_user_stats
 <span class="keyword">WHERE</span> stat_date >= today() - <span class="number">7</span>
 <span class="keyword">GROUP BY</span> stat_date, user_id
-<span class="keyword">ORDER BY</span> volume <span class="keyword">DESC</span>;</code></pre>
+<span class="keywordПроблема мелких вставок (Async Batch Insert)</h2>
+                <p>ClickHouse оптимизирован ля вставки большими пачками (батчами). Каждый <code>INSERT</code> создает новую папку (Part) на файловой системе. Если делать 1000 инсертов в секунду, создастся 1000 мелких файлов. Фоновый процесс мержа не будет успевать их объединять, и база выдаст ошибку <code>Too many parts</code>.</p>
+                <p>Поэтому в приложении <strong>обязательно</strong> нужен буфер, который накапливает события и пишет их в ClickHouse раз в N секунд или при накоплении N событий.</plass="keyword">DESC</span>;</code></pre>
 
                 <h2>Async Batch Insert из Python</h2>
 

@@ -48,7 +48,7 @@
     <aside class="sidebar hidden md:block">
         <div class="p-6 border-b border-gray-700">
             <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
-            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+            <span class="sidebar-subtitle text-sm">Author: Alex | InkyWorld</span>
         </div>
         
         <nav class="py-4">
@@ -112,20 +112,20 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Value Objects</h1>
-            <p class="text-xl text-gray-600">Small, immutable, but essential building blocks of the domain.</p>
+            <p class="text-xl text-gray-600">Small, immutable, but important domain building blocks.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <p>Unlike an Entity, a Value Object is defined not by its identifier, but by the value of its attributes.</p>
+        <p>Unlike an Entity, a Value Object is defined not by an identity, but by the value of its attributes.</p>
         <p>Examples: <code>Money</code>, <code>Email</code>, <code>Address</code>, <code>Coordinate</code>, <code>DateRange</code>.</p>
 
         <h3 class="font-bold text-lg mt-4">Characteristics:</h3>
         <ul class="list-disc list-inside space-y-2 mb-4">
-            <li><strong>Immutability:</strong> Once created, fields cannot be changed. If you need to change it, create a new object.</li>
+            <li><strong>Immutability:</strong> Once created, fields cannot be changed. If a change is needed, create a new object.</li>
             <li><strong>Structural Equality:</strong> Two Value Objects are equal if their values are equal (5$ == 5$).</li>
-            <li><strong>Self-Validation:</strong> The object cannot exist in an invalid state.</li>
+            <li><strong>Self-Validation:</strong> An object cannot exist in an invalid state.</li>
         </ul>
 
         <pre><code class="language-python">@dataclass(frozen=True)
@@ -147,7 +147,7 @@ class Money:
         </section>
     
         <!-- NAVIGATION FOOTER -->
-        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="aggregates.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Back</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Aggregates</span></a><a href="repository_uow.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Next</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Repository Uow &rarr;</span></a></div></div>
+        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="aggregates.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Back</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Aggregates</span></a><a href="repository_uow.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Next</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Repository & UoW &rarr;</span></a></div></div>
     </main>
 </body>
 </html>

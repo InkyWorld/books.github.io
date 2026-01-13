@@ -3,26 +3,388 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>План книги: Advanced Python Web Development</title>
-    <style>
-        body { font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1, h2, h3 { color: #333; }
-        a { text-decoration: none; color: #007bff; }
-        a:hover { text-decoration: underline; }
-        ul { list-style-type: none; padding: 0; }
-        li { margin-bottom: 10px; }
-    </style>
+    <title>ScaleTrade — Python Backend Course</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Advanced Python Web Development</h1>
-    <p>Учебный план книги.</p>
+    <div class="book-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo">
+                    <div class="logo-icon">📈</div>
+                    <span>ScaleTrade</span>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+    <div class="nav-section">
+        <div class="nav-section-title">Intro</div>
+        <a href="index.html" class="nav-link active">🏠 Главная</a>
+        <a href="setup.html" class="nav-link">🛠 Setup</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 0: Fundamentals</div>
+        <a href="part0_internals.html" class="nav-link">0.1 Internals</a>
+        <a href="part0_networking.html" class="nav-link">0.2 Networking</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 1: Postgres</div>
+        <a href="part1_schema.html" class="nav-link">1.1 Schema</a>
+        <a href="part1_indexes.html" class="nav-link">1.2 Indexes</a>
+        <a href="part1_transactions.html" class="nav-link">1.3 Transactions</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 2: Litestar</div>
+        <a href="part2_litestar.html" class="nav-link">2.1 Framework</a>
+        <a href="part2_dishka.html" class="nav-link">2.2 DI (Dishka)</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 3: Brokers</div>
+        <a href="part3_redis.html" class="nav-link">3.1 Redis</a>
+        <a href="part3_faststream.html" class="nav-link">3.2 FastStream</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 4: Quality</div>
+        <a href="part4_testing.html" class="nav-link">4.1 Pytest</a>
+        <a href="part4_resiliency.html" class="nav-link">4.2 Resilience</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 5: Observability</div>
+        <a href="part5_clickhouse.html" class="nav-link">5.1 Clickhouse</a>
+        <a href="part5_logging.html" class="nav-link">5.2 Structured Logs</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 6: Django</div>
+        <a href="part6_django.html" class="nav-link">6.1 ORM</a>
+        <a href="part6_migrations.html" class="nav-link">6.2 Migrations</a>
+        <a href="part6_quality.html" class="nav-link">6.3 Quality</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 7: Microservices</div>
+        <a href="part7_graphql.html" class="nav-link">7.2 GraphQL</a>
+        <a href="part7_federation.html" class="nav-link">7.3 Federation</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 8: Async</div>
+        <a href="part8_asyncio.html" class="nav-link">8.1 Asyncio</a>
+        <a href="part8_celery.html" class="nav-link">8.2 Celery</a>
+        <a href="part8_dramatiq.html" class="nav-link">8.3 Dramatiq</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 9: API</div>
+        <a href="part9_restdesign.html" class="nav-link">9.1 REST Design</a>
+        <a href="part9_idempotency.html" class="nav-link">9.2 Idempotency</a>
+        <a href="part9_openapi.html" class="nav-link">9.3 OpenAPI</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 10: Culture</div>
+        <a href="part10_git.html" class="nav-link">10.1 Git</a>
+        <a href="part10_commits.html" class="nav-link">10.2 Commits</a>
+        <a href="part10_codereview.html" class="nav-link">10.3 Post-Review</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 11: Security</div>
+        <a href="part11_oauth.html" class="nav-link">11.1 OAuth2</a>
+        <a href="part11_vault.html" class="nav-link">11.2 Vault</a>
+        <a href="part11_owasp.html" class="nav-link">11.3 OWASP</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 12: Kubernetes</div>
+        <a href="part12_kubernetes.html" class="nav-link">12.1 K8s Basics</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 13: High Load</div>
+        <a href="part13_profiling.html" class="nav-link">13.1 Profiling</a>
+        <a href="part13_caching.html" class="nav-link">13.2 Caching</a>
+        <a href="part13_loadbalancing.html" class="nav-link">13.3 Load Balancing</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 14: ML Ops</div>
+        <a href="part14_mlflow.html" class="nav-link">14.1 MLflow</a>
+        <a href="part14_embeddings.html" class="nav-link">14.2 Embeddings</a>
+        <a href="part14_llm.html" class="nav-link">14.3 LLM</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 15: Debugging</div>
+        <a href="part15_debugging.html" class="nav-link">15.1 Debugging</a>
+        <a href="part15_postmortem.html" class="nav-link">15.2 Postmortem</a>
+        <a href="part15_chaos.html" class="nav-link">15.3 Chaos Eng</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 16: DB Advanced</div>
+        <a href="part16_indexes.html" class="nav-link">16.1 Indexes Deep</a>
+        <a href="part16_isolation.html" class="nav-link">16.2 Isolation</a>
+        <a href="part16_sharding.html" class="nav-link">16.3 Sharding</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 17: System Design</div>
+        <a href="part17_circuit.html" class="nav-link">17.1 Circuit Breaker</a>
+        <a href="part17_ratelimit.html" class="nav-link">17.2 Rate Limit</a>
+        <a href="part17_distlock.html" class="nav-link">17.3 Dist Lock</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 18: Soft Skills</div>
+        <a href="part18_estimation.html" class="nav-link">18.1 Estimation</a>
+        <a href="part18_burnout.html" class="nav-link">18.2 Burnout</a>
+        <a href="part18_interview.html" class="nav-link">18.3 Interview</a>
+    </div>
+</nav>
+        </aside>
 
-    <h2>Содержание</h2>
-    <ul>
-        <li><a href="part6_migrations.html">Часть 6: Migrations & Zero-Downtime Deployment</a></li>
-        <li><a href="part7_security.html">Часть 7: Security & Auth</a></li>
-        <li><a href="part8_quality.html">Часть 8: Code Quality & CI/CD</a></li>
-    </ul>
+        <main class="main-content">
+            <div class="page-content">
+                <div class="hero">
+                    <h1>🚀 ScaleTrade</h1>
+                    <p class="lead">Complete Roadmap: From Junior to Senior Python Engineer.</p>
+                </div>
 
+                <div class="info-box tip">
+                    <div class="info-box-title">Обновление V2</div>
+                    <p>Курс дополнен разделами "Pitfalls" (Подводные камни) и "Lifehacks" (Сениорские трюки) в каждом модуле.</p>
+                </div>
+
+                <div class="module-grid">
+                    <a href="setup.html" class="module-card" style="border-left: 4px solid var(--primary);">
+                        <div class="module-number">▶</div>
+                        <h3>Start Here: Setup</h3>
+                        <p>Настройка окружения (Docker, Poetry, VS Code) перед началом.</p>
+                    </a>
+                </div>
+
+                <h2>📚 Полная программа курса</h2>
+
+                <!-- PART 0 -->
+                <h3>🧱 Часть 0: Fundamentals</h3>
+                <div class="module-grid">
+                    <a href="part0_internals.html" class="module-card">
+                        <div class="module-number">0.1</div>
+                        <h3>Internals</h3>
+                        <p>GIL, Memory, GC</p>
+                    </a>
+                    <a href="part0_networking.html" class="module-card">
+                        <div class="module-number">0.2</div>
+                        <h3>Networking</h3>
+                        <p>TCP/IP, HTTP, Linux</p>
+                    </a>
+                </div>
+
+                <!-- PART 1 -->
+                <h3>🐘 Часть 1: PostgreSQL Basics</h3>
+                <div class="module-grid">
+                     <a href="part1_schema.html" class="module-card"><div class="module-number">1.1</div><h3>Schema Design</h3></a>
+                     <a href="part1_indexes.html" class="module-card"><div class="module-number">1.2</div><h3>Indexes Intro</h3></a>
+                     <a href="part1_transactions.html" class="module-card"><div class="module-number">1.3</div><h3>Transactions</h3></a>
+                </div>
+
+                <!-- PART 2 -->
+                <h3>⚡ Часть 2: Modern Frameworks</h3>
+                <div class="module-grid">
+                     <a href="part2_litestar.html" class="module-card"><div class="module-number">2.1</div><h3>Litestar</h3></a>
+                     <a href="part2_dishka.html" class="module-card"><div class="module-number">2.2</div><h3>DI (Dishka)</h3></a>
+                </div>
+
+                <!-- PART 3 -->
+                <h3>📫 Часть 3: Message Brokers</h3>
+                <div class="module-grid">
+                     <a href="part3_redis.html" class="module-card"><div class="module-number">3.1</div><h3>Redis</h3></a>
+                     <a href="part3_faststream.html" class="module-card"><div class="module-number">3.2</div><h3>FastStream</h3></a>
+                </div>
+
+                <!-- PART 4 -->
+                <h3>✅ Часть 4: QA & Reliability</h3>
+                <div class="module-grid">
+                     <a href="part4_testing.html" class="module-card"><div class="module-number">4.1</div><h3>Pytest</h3></a>
+                     <a href="part4_resiliency.html" class="module-card"><div class="module-number">4.2</div><h3>Resilience</h3></a>
+                </div>
+
+                <!-- PART 5 -->
+                <h3>📊 Часть 5: Observability & Analytics</h3>
+                <div class="module-grid">
+                     <a href="part5_clickhouse.html" class="module-card"><div class="module-number">5.1</div><h3>Clickhouse</h3></a>
+                     <a href="part5_logging.html" class="module-card"><div class="module-number">5.2</div><h3>Structured Logging</h3></a>
+                </div>
+
+                <!-- PART 6 -->
+                <h3>🐍 Часть 6: Django Ecosystem</h3>
+                <div class="module-grid">
+                     <a href="part6_django.html" class="module-card"><div class="module-number">6.1</div><h3>Django ORM</h3></a>
+                     <a href="part6_migrations.html" class="module-card"><div class="module-number">6.2</div><h3>Migrations</h3></a>
+                     <a href="part6_quality.html" class="module-card"><div class="module-number">6.3</div><h3>Code Quality</h3></a>
+                </div>
+
+                <!-- PART 7 -->
+                <h3>🔗 Часть 7: Microservices Communication</h3>
+                <div class="module-grid">
+                     <a href="part7_grpc.html" class="module-card"><div class="module-number">7.1</div><h3>gRPC</h3></a>
+                     <a href="part7_graphql.html" class="module-card"><div class="module-number">7.2</div><h3>GraphQL</h3></a>
+                     <a href="part7_federation.html" class="module-card"><div class="module-number">7.3</div><h3>Apollo Federation</h3></a>
+                </div>
+
+                <!-- PART 8 -->
+                <h3>⚙️ Часть 8: Async Tasks</h3>
+                <div class="module-grid">
+                     <a href="part8_asyncio.html" class="module-card"><div class="module-number">8.1</div><h3>Asyncio</h3></a>
+                     <a href="part8_celery.html" class="module-card"><div class="module-number">8.2</div><h3>Celery</h3></a>
+                     <a href="part8_dramatiq.html" class="module-card"><div class="module-number">8.3</div><h3>Dramatiq</h3></a>
+                </div>
+
+                <!-- PART 9 -->
+                <h3>📐 Часть 9: API Architecture</h3>
+                <div class="module-grid">
+                     <a href="part9_restdesign.html" class="module-card"><div class="module-number">9.1</div><h3>REST Design</h3></a>
+                     <a href="part9_idempotency.html" class="module-card"><div class="module-number">9.2</div><h3>Idempotency</h3></a>
+                     <a href="part9_openapi.html" class="module-card"><div class="module-number">9.3</div><h3>OpenAPI</h3></a>
+                </div>
+
+                <!-- PART 10 -->
+                <h3>🤝 Часть 10: Engineering Culture</h3>
+                <div class="module-grid">
+                     <a href="part10_git.html" class="module-card"><div class="module-number">10.1</div><h3>Git Strategy</h3></a>
+                     <a href="part10_commits.html" class="module-card"><div class="module-number">10.2</div><h3>Commits</h3></a>
+                     <a href="part10_codereview.html" class="module-card"><div class="module-number">10.3</div><h3>Code Review</h3></a>
+                </div>
+
+                <!-- PART 11 -->
+                <h3>🔒 Часть 11: Security</h3>
+                <div class="module-grid">
+                    <a href="part11_oauth.html" class="module-card">
+                        <div class="module-number">11.1</div>
+                        <h3>OAuth2 & JWT</h3>
+                    </a>
+                    <a href="part11_vault.html" class="module-card">
+                        <div class="module-number">11.2</div>
+                        <h3>Secrets</h3>
+                    </a>
+                    <a href="part11_owasp.html" class="module-card">
+                        <div class="module-number">11.3</div>
+                        <h3>OWASP</h3>
+                    </a>
+                </div>
+
+                <!-- PART 12 -->
+                <h3>🚢 Часть 12: Kubernetes & GitOps</h3>
+                <div class="module-grid">
+                    <a href="part12_kubernetes.html" class="module-card">
+                        <div class="module-number">12.1</div>
+                        <h3>K8s Basics</h3>
+                         <p>Pods, Services, Deployments, Pitfalls</p>
+                    </a>
+                </div>
+
+                <!-- PART 13 -->
+                <h3>🚀 Часть 13: High Load</h3>
+                <div class="module-grid">
+                    <a href="part13_profiling.html" class="module-card">
+                        <div class="module-number">13.1</div>
+                        <h3>Profiling</h3>
+                    </a>
+                    <a href="part13_caching.html" class="module-card">
+                        <div class="module-number">13.2</div>
+                        <h3>Caching</h3>
+                    </a>
+                    <a href="part13_loadbalancing.html" class="module-card">
+                        <div class="module-number">13.3</div>
+                        <h3>Load Balancing</h3>
+                    </a>
+                </div>
+
+                <!-- PART 14 -->
+                <h3>🤖 Часть 14: ML Ops</h3>
+                <div class="module-grid">
+                    <a href="part14_mlflow.html" class="module-card">
+                        <div class="module-number">14.1</div>
+                        <h3>MLflow</h3>
+                    </a>
+                    <a href="part14_embeddings.html" class="module-card">
+                        <div class="module-number">14.2</div>
+                        <h3>Embeddings</h3>
+                    </a>
+                    <a href="part14_llm.html" class="module-card">
+                        <div class="module-number">14.3</div>
+                        <h3>LLM & RAG</h3>
+                    </a>
+                </div>
+
+                <!-- PART 15 -->
+                <h3>🐞 Часть 15: SRE & Debugging</h3>
+                <div class="module-grid">
+                    <a href="part15_debugging.html" class="module-card">
+                        <div class="module-number">15.1</div>
+                        <h3>Debugging</h3>
+                    </a>
+                    <a href="part15_postmortem.html" class="module-card">
+                        <div class="module-number">15.2</div>
+                        <h3>Postmortems</h3>
+                    </a>
+                    <a href="part15_chaos.html" class="module-card">
+                        <div class="module-number">15.3</div>
+                        <h3>Chaos Eng</h3>
+                    </a>
+                </div>
+
+                <!-- PART 16 (NEW) -->
+                <h3>💾 Часть 16: Databases Advanced</h3>
+                <div class="module-grid">
+                    <a href="part16_indexes.html" class="module-card">
+                        <div class="module-number">16.1</div>
+                        <h3>Indexes Deep Dive</h3>
+                        <p>B-Tree, Hash, GIN</p>
+                    </a>
+                    <a href="part16_isolation.html" class="module-card">
+                        <div class="module-number">16.2</div>
+                        <h3>Isolation Levels</h3>
+                        <p>MVCC, Phantom Read</p>
+                    </a>
+                    <a href="part16_sharding.html" class="module-card">
+                        <div class="module-number">16.3</div>
+                        <h3>Sharding</h3>
+                        <p>Citus, Partitioning</p>
+                    </a>
+                </div>
+
+                <!-- PART 17 (NEW) -->
+                <h3>🏗 Часть 17: System Design</h3>
+                <div class="module-grid">
+                    <a href="part17_circuit.html" class="module-card">
+                        <div class="module-number">17.1</div>
+                        <h3>Resilience</h3>
+                        <p>Circuit Breaker</p>
+                    </a>
+                    <a href="part17_ratelimit.html" class="module-card">
+                        <div class="module-number">17.2</div>
+                        <h3>Rate Limiting</h3>
+                        <p>Leaky Bucket</p>
+                    </a>
+                    <a href="part17_distlock.html" class="module-card">
+                        <div class="module-number">17.3</div>
+                        <h3>Distributed Locks</h3>
+                        <p>Redlock</p>
+                    </a>
+                </div>
+
+                <!-- PART 18 (NEW) -->
+                <h3>🧠 Часть 18: Soft Skills</h3>
+                <div class="module-grid">
+                    <a href="part18_estimation.html" class="module-card">
+                        <div class="module-number">18.1</div>
+                        <h3>Estimations</h3>
+                        <p>Сроки и оценки</p>
+                    </a>
+                    <a href="part18_burnout.html" class="module-card">
+                        <div class="module-number">18.2</div>
+                        <h3>Burnout</h3>
+                        <p>Выгорание</p>
+                    </a>
+                    <a href="part18_interview.html" class="module-card">
+                        <div class="module-number">18.3</div>
+                        <h3>Interviewing</h3>
+                    </a>
+                </div>
+
+            </div>
+        </main>
+    </div>
 </body>
 </html>

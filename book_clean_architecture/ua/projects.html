@@ -26,7 +26,7 @@
     <aside class="sidebar hidden md:block">
         <div class="p-6 border-b border-gray-700">
             <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
-            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+            <span class="sidebar-subtitle text-sm">Author: Alex | InkyWorld</span>
         </div>
         <nav class="py-4">
             <div class="px-4 mb-4">
@@ -767,6 +767,155 @@ vip_discount_spec = (
 )
 
 new_customer_spec = FirstOrderSpec() | CustomerLevelSpec('NEW')</code></pre>
+        </section>
+
+        <!-- PROJECT 6: Event Sourcing & CQRS -->
+        <section class="card mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-3xl">📜</span>
+                <h2 class="text-2xl font-bold">Проєкт 6: Event Sourcing & Audit</h2>
+            </div>
+            <div class="mb-4">
+                <span class="pattern-tag bg-indigo-100 text-indigo-800">CQRS</span>
+                <span class="pattern-tag bg-pink-100 text-pink-800">Event Sourcing</span>
+                <span class="pattern-tag bg-gray-100 text-gray-800">Snapshot</span>
+            </div>
+            <p>Система аудиту та банкінгу, де стан відновлюється з історії подій (Event Store).</p>
+            
+            <div class="grid md:grid-cols-2 gap-6 my-6">
+                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                    <h4 class="font-bold text-yellow-800 mb-2">⚠️ Підводні камені</h4>
+                    <ul class="list-disc pl-4 text-sm space-y-1">
+                        <li><strong>Еволюція схеми:</strong> Старі події складно змінювати. Якщо поле перейменовано, потрібна міграція або upcasting.</li>
+                        <li><strong>Об'єм даних:</strong> Відновлення з 1 млн подій займає вічність.</li>
+                        <li><strong>Eventual Consistency:</strong> Користувач не бачить свої зміни одразу. Звичайний SELECT не знайде щойно створений запис.</li>
+                    </ul>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <h4 class="font-bold text-green-800 mb-2">💡 Лайфхаки</h4>
+                    <ul class="list-disc pl-4 text-sm space-y-1">
+                        <li><strong>Snapshots:</strong> Робіть знімок агрегату кожні 100 подій, щоб не читати все з нуля.</li>
+                        <li><strong>Projections:</strong> Зберігайте read-моделі у швидкій NoSQL базі (Redis/Elastic) для миттєвого пошуку.</li>
+                        <li><strong>Upcasting:</strong> Замість міграції БД, перетворюйте старі події в нові "на льоту" при читанні в коді.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">⚡ CQRS + Event Sourcing</h3>
+<pre><code class="language-python"># domain/aggregates.py
+class BankAccount(AggregateRoot):
+    def __init__(self, id: str):
+        super().__init__(id)
+        self.balance = Decimal(0)
+    
+    # Command Side (Write Model)
+    def deposit(self, amount: Decimal):
+        if amount <= 0: raise ValueError("Amount must be positive")
+        self.apply(FundsDeposited(self.id, amount)) # Створюємо та застосовуємо подію
+
+    def withdraw(self, amount: Decimal):
+        if self.balance < amount: raise ValueError("Insufficient funds")
+        self.apply(FundsWithdrawn(self.id, amount))
+
+    # Event Handler Side (відновлення стану)
+    def when(self, event: DomainEvent):
+        if isinstance(event, FundsDeposited):
+            self.balance += event.amount
+        elif isinstance(event, FundsWithdrawn):
+            self.balance -= event.amount
+
+# application/projections.py (Read Model)
+class AccountBalanceProjection:
+    def on_funds_deposited(self, event: FundsDeposited):
+        # Оновлюємо денормалізовану таблицю для швидкого читання
+        db.execute("UPDATE accounts SET balance = balance + ? WHERE id = ?", event.amount, event.id)</code></pre>
+        </section>
+
+        <!-- PROJECT 7: Distributed System -->
+        <section class="card mb-8">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-3xl">📡</span>
+                <h2 class="text-2xl font-bold">Проєкт 7: High-Load Microservices</h2>
+            </div>
+            <div class="mb-4">
+                <span class="pattern-tag bg-blue-100 text-blue-800">Transactional Outbox</span>
+                <span class="pattern-tag bg-orange-100 text-orange-800">Saga</span>
+                <span class="pattern-tag bg-teal-100 text-teal-800">Competing Consumers</span>
+            </div>
+            <p>Розподілена обробка замовлень з гарантованою доставкою та компенсацією помилок.</p>
+
+            <div class="grid md:grid-cols-2 gap-6 my-6">
+                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                    <h4 class="font-bold text-yellow-800 mb-2">⚠️ Підводні камені</h4>
+                    <ul class="list-disc pl-4 text-sm space-y-1">
+                        <li><strong>Дублікати повідомлень:</strong> Мережа ненадійна, брокер (Kafka/Rabbit) може доставити повідомлення двічі. Додаток впаде, якщо не захищений.</li>
+                        <li><strong>Zombie Sagas:</strong> Сага зависла через помилку в оркестраторі, і гроші клієнта залишилися "замороженими".</li>
+                        <li><strong>Race Conditions:</strong> Competing consumers можуть обробити "Order Updated" раніше, ніж "Order Created".</li>
+                    </ul>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <h4 class="font-bold text-green-800 mb-2">💡 Лайфхаки</h4>
+                    <ul class="list-disc pl-4 text-sm space-y-1">
+                        <li><strong>Idempotency Keys:</strong> Завжди зберігайте ID оброблених повідомлень в таблиці `processed_messages`, щоб ігнорувати дублі (Inbox Pattern).</li>
+                        <li><strong>Debezium:</strong> Використовуйте CDC (Change Data Capture) для реалізації Outbox, читаючи лог транзакцій БД (WAL) — це надійніше тригерів.</li>
+                        <li><strong>Tracing:</strong> Обов'язково передавайте `correlation_id` та `trace_id` у всіх заголовках повідомлень.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">📮 Transactional Outbox Pattern</h3>
+<pre><code class="language-python"># infrastructure/uow.py
+class UnitOfWork:
+    def commit(self):
+        # 1. Зберігаємо бізнес-зміни (Order)
+        self.session.add(order)
+        # 2. Зберігаємо подію в таблицю OUTBOX в тій самій ACID транзакції!
+        self.session.add(OutboxMessage(
+            topic="orders",
+            payload=order.to_json(),
+            status="PENDING"
+        ))
+        # 3. Фізичний комміт в БД
+        self.session.commit()
+        # Якщо тут зникне світло, то і Order, і Outbox не збережуться -> Узгодженість!
+
+# background/relay.py
+class OutboxRelay:
+    """Фоновий процес (або Debezium), що перекладає з БД в Kafka"""
+    def run(self):
+        messages = db.query(OutboxMessage).filter_by(status="PENDING").all()
+        for msg in messages:
+            try:
+                # Відправляємо в брокер
+                broker.publish(msg.topic, msg.payload)
+                # Помічаємо відправленим
+                msg.status = "PUBLISHED"
+                db.commit()
+            except BrokerError:
+                continue # Retry later</code></pre>
+
+            <h3 class="text-lg font-bold mt-6 mb-3">🔄 Saga Pattern (Orchestration)</h3>
+<pre><code class="language-python"># domain/sagas.py
+class CreateOrderSaga:
+    def __init__(self, orchestrator):
+        self.orchestrator = orchestrator
+
+    async def start(self, order_data):
+        # Крок 1: Створити замовлення
+        order_id = await self.orchestrator.send_command("orders_service", "create_order", order_data)
+        
+        try:
+            # Крок 2: Зарезервувати оплату
+            payment_id = await self.orchestrator.send_command("payments", "reserve_funds", {"order_id": order_id})
+            
+            # Крок 3: Зарезервувати товар на складі
+            await self.orchestrator.send_command("warehouse", "reserve_items", {"order_id": order_id})
+            
+        except Exception as e:
+            # Компенсація (Rollback) у зворотному порядку
+            await self.orchestrator.send_command("payments", "refund", {"order_id": order_id})
+            await self.orchestrator.send_command("orders", "cancel", {"order_id": order_id})
+            raise SagaFailed("Order creation failed, rolling back...")</code></pre>
         </section>
 
         <!-- Summary Table -->

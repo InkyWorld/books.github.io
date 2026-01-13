@@ -48,7 +48,7 @@
     <aside class="sidebar hidden md:block">
         <div class="p-6 border-b border-gray-700">
             <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
-            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+            <span class="sidebar-subtitle text-sm">Author: Alex | InkyWorld</span>
         </div>
         
         <nav class="py-4">
@@ -103,7 +103,7 @@
             <a href="deployment.html" class="nav-link ">🚀 Deployment & Protection</a>
             <a href="testing.html" class="nav-link ">🧪 Testing</a>
             <a href="projects.html" class="nav-link ">🚀 Mini-projects</a>
-            <a href="antipatterns.html" class="nav-link ">⚠️ Antipatterns</a>
+            <a href="antipatterns.html" class="nav-link ">⚠️ Anti-patterns</a>
         </nav>
 
     </aside>
@@ -112,16 +112,16 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Domain Events</h1>
-            <p class="text-xl text-gray-600">Side effects and decoupling in clean architecture.</p>
+            <p class="text-xl text-gray-600">Side effects and decoupling in Clean Architecture.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <p>A Domain Event is a record of something significant that <strong>happened</strong> in the business domain. It is a key tool for building Event-Driven systems and decoupling logic.</p>
+        <p>A Domain Event is a record of something significant that <strong>happened</strong> in the business domain. It is the primary tool for building Event-Driven systems and decoupling logic.</p>
 
         <h3 class="font-bold text-lg mt-4">Why?</h3>
-        <p>Instead of the <code>Order.pay()</code> method calling <code>EmailService.send()</code>, it simply generates an <code>OrderPaid</code> event. An event handler will send the email. The domain remains clean and independent of infrastructure.</p>
+        <p>Instead of <code>Order.pay()</code> calling <code>EmailService.send()</code>, it simply raises an <code>OrderPaid</code> event. The event handler will send the email. The domain remains clean and independent of infrastructure.</p>
 
         <pre><code class="language-python"># 1. Event
 @dataclass(frozen=True)
@@ -130,7 +130,7 @@ class CustomerRegistered:
     email: str
     registered_at: datetime
 
-# 2. Publication (usually in UoW after commit)
+# 2. Publishing (usually in UoW after commit)
 message_bus.publish(events)
 </code></pre>
         
@@ -138,7 +138,7 @@ message_bus.publish(events)
         </section>
     
         <!-- NAVIGATION FOOTER -->
-        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="specification.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Previous</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Specification</span></a><a href="saga.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Next</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Saga &rarr;</span></a></div></div>
+        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="specification.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Back</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Specification</span></a><a href="saga.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Next</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Saga &rarr;</span></a></div></div>
     </main>
 </body>
 </html>

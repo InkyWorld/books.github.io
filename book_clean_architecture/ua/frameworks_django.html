@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Specification Pattern - Clean Architecture</title>
+    <title>Clean Architecture in Django - Clean Architecture</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
@@ -54,28 +54,28 @@
         <nav class="py-4">
             <div class="px-4 mb-4">
                 <div class="flex gap-2 text-xs font-bold text-slate-400">
-                    <a href="../ru/specification.html" class="hover:text-white transition">RU</a>
+                    <a href="../ru/frameworks_django.html" class="hover:text-white transition">RU</a>
                     <span class="text-slate-600">|</span>
-                    <a href="specification.html" class="text-blue-400 font-bold">EN</a>
+                    <a href="../en/frameworks_django.html" class="hover:text-white transition">EN</a>
                     <span class="text-slate-600">|</span>
-                    <a href="../ua/specification.html" class="hover:text-white transition">UA</a>
+                    <a href="frameworks_django.html" class="text-blue-400 font-bold">UA</a>
                 </div>
             </div>
 
-            <div class="nav-section">Basics</div>
-            <a href="index.html" class="nav-link ">📘 Introduction</a>
+            <div class="nav-section">Основи</div>
+            <a href="index.html" class="nav-link ">📘 Вступ</a>
             
-            <div class="nav-section">Architecture Layers</div>
+            <div class="nav-section">Шари архітектури</div>
             <a href="domain.html" class="nav-link ">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link ">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link ">🔧 Infrastructure Layer</a>
             <a href="presentation.html" class="nav-link ">🌐 Presentation Layer</a>
             
-            <div class="nav-section">Principles & Patterns</div>
-            <a href="solid.html" class="nav-link ">📐 SOLID Principles</a>
-            <a href="invariants.html" class="nav-link ">🛡️ Invariants</a>
+            <div class="nav-section">Принципи та патерни</div>
+            <a href="solid.html" class="nav-link ">📐 SOLID принципи</a>
+            <a href="invariants.html" class="nav-link ">🛡️ Інваріанти</a>
             <a href="dependency.html" class="nav-link ">💉 Dependency Injection</a>
-            <a href="cqrs_es.html" class="nav-link ">⚡ CQRS & ES</a>
+            <a href="cqrs_es.html" class="nav-link ">⚡ CQRS та ES</a>
             
             <div class="nav-section">Security & Production</div>
             <a href="security.html" class="nav-link ">🔐 Auth & Permissions</a>
@@ -90,57 +90,72 @@
             <a href="aggregates.html" class="nav-link ">📦 Aggregates</a>
             <a href="value_objects.html" class="nav-link ">💎 Value Objects</a>
             <a href="repository_uow.html" class="nav-link ">🗄️ Repository & UoW</a>
-            <a href="specification.html" class="nav-link active">📋 Specification</a>
+            <a href="specification.html" class="nav-link ">📋 Specification</a>
 
             <div class="nav-section">EDA & Dist. Systems</div>
             <a href="domain_events.html" class="nav-link ">📣 Domain Events</a>
             <a href="saga.html" class="nav-link ">🔄 Saga Pattern</a>
             <a href="outbox.html" class="nav-link ">📮 Outbox Pattern</a>
 
-            <div class="nav-section">Frameworks & Practice</div>
-            <a href="frameworks_django.html" class="nav-link ">🐍 Django & Others</a>
+            <div class="nav-section">Frameworks & Практика</div>
+            <a href="frameworks_django.html" class="nav-link active">🐍 Django & Others</a>
             <a href="advanced_techniques.html" class="nav-link ">🚀 Advanced Tech</a>
             <a href="deployment.html" class="nav-link ">🚀 Deployment & Protection</a>
-            <a href="testing.html" class="nav-link ">🧪 Testing</a>
-            <a href="projects.html" class="nav-link ">🚀 Mini-projects</a>
-            <a href="antipatterns.html" class="nav-link ">⚠️ Anti-patterns</a>
+            <a href="testing.html" class="nav-link ">🧪 Тестування</a>
+            <a href="projects.html" class="nav-link ">🚀 Міні-проєкти</a>
+            <a href="antipatterns.html" class="nav-link ">⚠️ Антипатерни</a>
         </nav>
 
     </aside>
 
     <!-- CONTENT -->
-    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
+    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Specification Pattern</h1>
-            <p class="text-xl text-gray-600">Encapsulating complex business rules for validation and selection.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Clean Architecture та Django</h1>
+            <p class="text-xl text-gray-600">Як подружити 'Fat Models' з чистою архітектурою.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <p>The Specification pattern allows you to extract an object verification rule into a separate class. This is useful when the rule is complex and reusable.</p>
+        <p>Django — це фреймворк із сильною думкою (Opinionated). Його ORM (Active Record) змішує логіку та дані. Це суперечить Clean Architecture, де Entities повинні бути чистими.</p>
 
-        <h3 class="font-bold text-lg mt-4">Use Cases:</h3>
+        <h3 class="font-bold text-lg mt-6">Підхід 1: Pragmatic (Прагматичний)</h3>
+        <p>Використовуйте Django Models як Entities, але <strong>не пишіть логіку у Views</strong>. Вся логіка у файлі `services.py` (аналог Use Cases).</p>
+        <div class="bg-yellow-50 p-4 rounded text-sm mb-4 border border-yellow-200">
+            Це "Service Layer" поверх Django. Порушення чистоти (залежність від ORM), але швидко та зручно.
+        </div>
+
+        <h3 class="font-bold text-lg mt-6">Підхід 2: Purist (Чистий)</h3>
+        <p>Повне розділення. Django використовується тільки як Web Framework та Infrastructure.</p>
+        
         <ul class="list-disc list-inside space-y-2 mb-4">
-            <li><strong>Validation:</strong> Does the object satisfy the criteria?</li>
-            <li><strong>Selection (Query):</strong> Find all objects that satisfy the criteria.</li>
-            <li><strong>Construction:</strong> Creating a new object based on requirements.</li>
+            <li><strong>Domain:</strong> Чисті Python dataclasses. Ніякого `models.Model`.</li>
+            <li><strong>Infrastructure:</strong> Django Models використовуються <strong>тільки</strong> всередині реалізації Репозиторію. Репозиторій мапить Django Model -> Domain Entity і назад.</li>
         </ul>
 
-        <pre><code class="language-python">class OverdueInvoiceSpecification:
-    def is_satisfied_by(self, invoice: Invoice) -> bool:
-        return (
-            invoice.status == 'UNPAID' and 
-            invoice.due_date < datetime.now() and
-            invoice.amount > 1000
-        )
+        <pre><code class="language-python"># domain/entities.py
+@dataclass
+class User:
+    id: UUID
+    username: str
+
+# infrastructure/django_repo.py
+class DjangoUserRepository(UserRepository):
+    def get_by_id(self, id: UUID) -> User:
+        # Django ORM Call
+        orm_user = UserModel.objects.get(id=id)
+        # Mapping to Domain
+        return User(id=orm_user.id, username=orm_user.username)
 </code></pre>
+
+        <p>Це додає багато бойлерплейту (мапінг), але дозволяє повністю відв'язатися від фреймворку.</p>
         
             </div>
         </section>
     
         <!-- NAVIGATION FOOTER -->
-        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="repository_uow.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Back</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Repository Uow</span></a><a href="domain_events.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Next</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Domain Events &rarr;</span></a></div></div>
+        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="outbox.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Назад</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Outbox</span></a><a href="advanced_techniques.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далі</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Advanced Techniques &rarr;</span></a></div></div>
     </main>
 </body>
 </html>

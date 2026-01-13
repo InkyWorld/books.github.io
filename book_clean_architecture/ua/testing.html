@@ -1,16 +1,19 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Глава 8: Тестирование - Clean Architecture</title>
+    <title>Стратегія Тестування - Чиста Архітектура</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script>hljs.highlightAll();</script>
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
         h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
         p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
-        
         .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
         .sidebar-title { color: #f8fafc; }
         .sidebar-subtitle { color: #60a5fa; }
@@ -18,47 +21,15 @@
         .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
         .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
         .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
-
-        pre {
-            font-family: 'JetBrains Mono', monospace;
-            background-color: #1e293b;
-            color: #e2e8f0;
-            padding: 1.5rem;
-            border-radius: 0.75rem;
-            overflow-x: auto;
-            font-size: 0.85rem;
-            line-height: 1.6;
-            border: 1px solid #334155;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            margin: 1.5rem 0;
-        }
-        .code-comment { color: #94a3b8; font-style: italic; }
+        pre { font-family: 'JetBrains Mono', monospace; background-color: #1e293b; color: #e2e8f0; padding: 1.5rem; border-radius: 0.75rem; overflow-x: auto; font-size: 0.85rem; line-height: 1.6; border: 1px solid #334155; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin: 1.5rem 0; }
         .code-keyword { color: #c084fc; font-weight: bold; } 
-        .code-class { color: #fbbf24; font-weight: bold; }   
-        .code-func { color: #60a5fa; font-weight: bold; }    
-        .code-str { color: #a3e635; }                        
-        .code-dec { color: #f472b6; } 
-
-        .card { background: white; border-radius: 1rem; padding: 2.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem; border: 1px solid #e2e8f0; }
-        
-        .test-pyramid { display: flex; flex-direction: column; align-items: center; margin: 2rem 0; }
-        .pyramid-level { padding: 1rem 2rem; text-align: center; font-weight: 700; color: white; }
-        
-        .badge { display: inline-flex; align-items: center; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-right: 0.5rem; }
-        .badge-unit { background-color: #dcfce7; color: #15803d; }
-        .badge-integration { background-color: #fef9c3; color: #854d0e; }
-        .badge-e2e { background-color: #fee2e2; color: #991b1b; }
-        
-        .ascii-art { font-family: 'JetBrains Mono', monospace; white-space: pre; font-size: 0.75rem; background: #fff; padding: 1rem; border: 1px dashed #cbd5e1; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 2rem; color: #475569; }
     </style>
 </head>
 <body class="flex bg-slate-50">
-
-    <!-- SIDEBAR -->
     <aside class="sidebar hidden md:block">
         <div class="p-6 border-b border-gray-700">
             <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
-            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+            <span class="sidebar-subtitle text-sm">Author: Alex | InkyWorld</span>
         </div>
         <nav class="py-4">
             <div class="px-4 mb-4">
@@ -70,731 +41,157 @@
                     <a href="testing.html" class="text-blue-400 font-bold">UA</a>
                 </div>
             </div>
-
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link ">📘 Вступ</a>
-            
+            <a href="index.html" class="nav-link">📘 Вступ</a>
             <div class="nav-section">Шари архітектури</div>
-            <a href="domain.html" class="nav-link ">🎯 Domain Layer</a>
-            <a href="application.html" class="nav-link ">⚙️ Application Layer</a>
-            <a href="infrastructure.html" class="nav-link ">🔧 Infrastructure Layer</a>
-            <a href="presentation.html" class="nav-link ">🌐 Presentation Layer</a>
-            
+            <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link">🌐 Presentation Layer</a>
             <div class="nav-section">Принципи та патерни</div>
-            <a href="solid.html" class="nav-link ">📐 SOLID принципи</a>
-            <a href="invariants.html" class="nav-link ">🛡️ Інваріанти</a>
-            <a href="dependency.html" class="nav-link ">💉 Dependency Injection</a>
-            <a href="cqrs_es.html" class="nav-link ">⚡ CQRS і ES</a>
-            
+            <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
+            <a href="invariants.html" class="nav-link">🛡️ Інваріанти</a>
+            <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
+            <a href="cqrs_es.html" class="nav-link">⚡ CQRS та ES</a>
             <div class="nav-section">Security & Production</div>
-            <a href="security.html" class="nav-link ">🔐 Auth & Permissions</a>
-            <a href="concurrency.html" class="nav-link ">🛑 Concurrency & Migrations</a>
-            <a href="background_tasks.html" class="nav-link ">⏳ Background Tasks</a>
-            <a href="error_handling.html" class="nav-link ">🚫 Error Handling</a>
-            <a href="config_logging.html" class="nav-link ">⚙️ Config & Observability</a>
-
+            <a href="security.html" class="nav-link">🔐 Auth & Permissions</a>
+            <a href="concurrency.html" class="nav-link">🛑 Concurrency & Migrations</a>
+            <a href="background_tasks.html" class="nav-link">⏳ Background Tasks</a>
+            <a href="error_handling.html" class="nav-link">🚫 Error Handling</a>
+            <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
             <div class="nav-section">DDD Patterns</div>
-            <a href="bounded_context.html" class="nav-link ">🌍 Bounded Contexts</a>
-            <a href="modular_monolith.html" class="nav-link ">🏗️ Modular Monolith</a>
-            <a href="aggregates.html" class="nav-link ">📦 Aggregates</a>
-            <a href="value_objects.html" class="nav-link ">💎 Value Objects</a>
-            <a href="repository_uow.html" class="nav-link ">🗄️ Repository & UoW</a>
-            <a href="specification.html" class="nav-link ">📋 Specification</a>
-
+            <a href="bounded_context.html" class="nav-link">🌍 Bounded Contexts</a>
+            <a href="modular_monolith.html" class="nav-link">🏗️ Modular Monolith</a>
+            <a href="aggregates.html" class="nav-link">📦 Aggregates</a>
+            <a href="value_objects.html" class="nav-link">💎 Value Objects</a>
+            <a href="repository_uow.html" class="nav-link">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link">📋 Specification</a>
             <div class="nav-section">EDA & Dist. Systems</div>
-            <a href="domain_events.html" class="nav-link ">📣 Domain Events</a>
-            <a href="saga.html" class="nav-link ">🔄 Saga Pattern</a>
-            <a href="outbox.html" class="nav-link ">📮 Outbox Pattern</a>
-
+            <a href="domain_events.html" class="nav-link">📣 Domain Events</a>
+            <a href="saga.html" class="nav-link">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link">📮 Outbox Pattern</a>
             <div class="nav-section">Frameworks & Практика</div>
-            <a href="frameworks_django.html" class="nav-link ">🐍 Django & Others</a>
-            <a href="advanced_techniques.html" class="nav-link ">🚀 Advanced Tech</a>
-            <a href="deployment.html" class="nav-link ">🚀 Deployment & Protection</a>
+            <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
+            <a href="advanced_techniques.html" class="nav-link">🚀 Advanced Tech</a>
+            <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="testing.html" class="nav-link active">🧪 Тестування</a>
-            <a href="projects.html" class="nav-link ">🚀 Міні-проєкти</a>
-            <a href="antipatterns.html" class="nav-link ">⚠️ Антипатерни</a>
+            <a href="projects.html" class="nav-link">🚀 Міні-проєкти</a>
+            <a href="antipatterns.html" class="nav-link">⚠️ Антипатерни</a>
         </nav>
     </aside>
 
-    <!-- CONTENT -->
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
         
-        <header id="intro" class="mb-12 pb-6 border-b border-gray-200">
+        <header class="mb-12 pb-6 border-b border-gray-200">
             <div class="flex items-center gap-3 mb-2">
-                <span class="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Quality</span>
-                <span class="text-gray-400 text-sm font-mono">pytest / unittest / mock</span>
+                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Quality Assurance</span>
             </div>
-            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Стратегия Тестирования</h1>
-            <p class="text-xl text-gray-500 mt-4 font-light">
-                Как Clean Architecture делает ваш код тестируемым. Разные слои — разные типы тестов.
-            </p>
+            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Стратегія Тестування</h1>
+            <p class="text-xl text-gray-500 mt-4">Піраміда тестування: від швидких Unit-тестів до надійних E2E</p>
         </header>
 
-        <!-- TESTING PYRAMID -->
-        <section class="card">
-            <h2 class="text-2xl font-bold mb-6">Пирамида Тестирования</h2>
-            <p>Clean Architecture идеально ложится на классическую пирамиду тестов.</p>
-
-            <div class="ascii-art">
-                              ┌─────────────────┐
-                              │    E2E Tests    │  ◀── Presentation (API)
-                              │   (медленные)   │      Требуют: запущенный сервер
-                              └────────┬────────┘
-                                       │
-                         ┌─────────────┴─────────────┐
-                         │   Integration Tests       │  ◀── Infrastructure + Application
-                         │  (средняя скорость)       │      Требуют: тестовую БД
-                         └────────────┬──────────────┘
-                                      │
-            ┌─────────────────────────┴─────────────────────────┐
-            │                   Unit Tests                      │  ◀── Domain + Application
-            │                  (БЫСТРЫЕ!)                       │      Требуют: НИЧЕГО
-            │  Это основа. 80% всех тестов должны быть здесь.   │
-            └───────────────────────────────────────────────────┘
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-4 mt-6">
-                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                    <span class="badge badge-unit mb-2">Unit</span>
-                    <h4 class="font-bold text-green-800">Domain Layer</h4>
-                    <p class="text-sm text-green-700">Чистый Python. Без моков. Тестируем Entities и Value Objects.</p>
+        <!-- PYRAMID -->
+        <section class="mb-16">
+            <h2 class="text-2xl font-bold mb-6">Піраміда тестування</h2>
+            <div class="grid md:grid-cols-3 gap-6 text-center">
+                <div class="bg-red-50 p-6 rounded-lg border border-red-100 relative mt-12 shadow-sm">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-red-500 text-white px-3 py-1 rounded text-xs font-bold uppercase">Top (10%)</div>
+                    <h3 class="font-bold text-red-800 mb-2">E2E Tests</h3>
+                    <p class="text-xs text-gray-600">Перевірка всієї системи чорною скринькою.</p>
                 </div>
-                <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                    <span class="badge badge-integration mb-2">Integration</span>
-                    <h4 class="font-bold text-yellow-800">Application + Infra</h4>
-                    <p class="text-sm text-yellow-700">Use Cases с моками репозиториев или реальной тестовой БД.</p>
+                
+                <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-100 md:-mt-6 relative shadow-sm">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-white px-3 py-1 rounded text-xs font-bold uppercase">Middle (20%)</div>
+                    <h3 class="font-bold text-yellow-800 mb-2">Integration</h3>
+                    <p class="text-xs text-gray-600">Перевірка взаємодії з БД та API.</p>
                 </div>
-                <div class="bg-red-50 p-4 rounded-lg border border-red-200">
-                    <span class="badge badge-e2e mb-2">E2E</span>
-                    <h4 class="font-bold text-red-800">Presentation</h4>
-                    <p class="text-sm text-red-700">HTTP-запросы к реальному API. TestClient FastAPI/Django.</p>
+
+                <div class="bg-green-50 p-6 rounded-lg border border-green-100 relative mt-12 shadow-sm">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-3 py-1 rounded text-xs font-bold uppercase">Base (70%)</div>
+                    <h3 class="font-bold text-green-800 mb-2">Unit Tests</h3>
+                    <p class="text-xs text-gray-600">Ізольована перевірка бізнес-логіки.</p>
                 </div>
             </div>
         </section>
 
         <!-- DOMAIN TESTS -->
         <section id="domain-tests" class="mb-16">
-            <h2 class="text-2xl font-bold mb-4">1. Тестирование Domain Layer (Unit Tests)</h2>
-            <p>Это самые простые и быстрые тесты. Домен — чистый Python. Никаких зависимостей, никаких моков. Просто создаем объекты и проверяем их поведение.</p>
+            <h2 class="text-2xl font-bold mb-4">1. Тестування Domain Layer (Unit)</h2>
+            <p class="mb-4 text-gray-600">Тут <strong>ніколи</strong> не повинно бути моків (mocks) інфраструктури, тому що цей шар ні від чого не залежить.</p>
             
-            <h3 class="text-lg font-bold mt-6 mb-2 text-gray-700">1.1 Тестирование Value Objects</h3>
-<pre><code class="language-python"><span class="code-comment"># tests/domain/test_value_objects.py</span>
-<span class="code-keyword">import</span> pytest
-<span class="code-keyword">from</span> domain.value_objects <span class="code-keyword">import</span> Money, Email
-<span class="code-keyword">from</span> domain.exceptions <span class="code-keyword">import</span> NegativeMoneyError, InvalidEmailError
+<pre><code class="language-python"># tests/domain/test_entities.py
+import pytest
+import uuid
+from domain.entities import Order
+from domain.value_objects import Money, Email
 
-
-<span class="code-keyword">class</span> <span class="code-class">TestMoney</span>:
-    <span class="code-str">"""Тесты для Value Object Money"""</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_create_valid_money</span>(self):
-        <span class="code-str">"""Успешное создание денежной суммы"""</span>
-        money = Money(100.50, <span class="code-str">"USD"</span>)
-        
-        <span class="code-keyword">assert</span> money.amount == 100.50
-        <span class="code-keyword">assert</span> money.currency == <span class="code-str">"USD"</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_create_zero_money</span>(self):
-        <span class="code-str">"""Ноль — допустимая сумма"""</span>
-        money = Money(0)
-        <span class="code-keyword">assert</span> money.amount == 0
-
-    <span class="code-keyword">def</span> <span class="code-func">test_negative_money_raises_error</span>(self):
-        <span class="code-str">"""ИНВАРИАНТ: Отрицательная сумма запрещена"""</span>
-        <span class="code-keyword">with</span> pytest.raises(NegativeMoneyError):
-            Money(-50)
-
-    <span class="code-keyword">def</span> <span class="code-func">test_money_addition</span>(self):
-        <span class="code-str">"""Сложение денег одной валюты"""</span>
-        m1 = Money(100, <span class="code-str">"USD"</span>)
-        m2 = Money(50, <span class="code-str">"USD"</span>)
-        
-        result = m1 + m2
-        
-        <span class="code-keyword">assert</span> result.amount == 150
-        <span class="code-keyword">assert</span> result.currency == <span class="code-str">"USD"</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_money_addition_different_currencies_fails</span>(self):
-        <span class="code-str">"""Нельзя складывать разные валюты"""</span>
-        usd = Money(100, <span class="code-str">"USD"</span>)
-        eur = Money(100, <span class="code-str">"EUR"</span>)
-        
-        <span class="code-keyword">with</span> pytest.raises(ValueError):
-            usd + eur
-
-    <span class="code-keyword">def</span> <span class="code-func">test_money_equality</span>(self):
-        <span class="code-str">"""Равенство по значению"""</span>
-        m1 = Money(100, <span class="code-str">"USD"</span>)
-        m2 = Money(100, <span class="code-str">"USD"</span>)
-        
-        <span class="code-keyword">assert</span> m1 == m2  <span class="code-comment"># Разные объекты, но равны!</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_money_immutability</span>(self):
-        <span class="code-str">"""Value Object неизменяем (frozen dataclass)"""</span>
-        money = Money(100)
-        
-        <span class="code-keyword">with</span> pytest.raises(AttributeError):
-            money.amount = 200  <span class="code-comment"># Нельзя изменить!</span>
-
-
-<span class="code-keyword">class</span> <span class="code-class">TestEmail</span>:
-    <span class="code-str">"""Тесты для Value Object Email"""</span>
-
-    <span class="code-dec">@pytest.mark.parametrize</span>(<span class="code-str">"valid_email"</span>, [
-        <span class="code-str">"user@example.com"</span>,
-        <span class="code-str">"test.user@domain.org"</span>,
-        <span class="code-str">"admin@sub.domain.com"</span>,
-    ])
-    <span class="code-keyword">def</span> <span class="code-func">test_valid_emails</span>(self, valid_email):
-        <span class="code-str">"""Валидные email адреса"""</span>
-        email = Email(valid_email)
-        <span class="code-keyword">assert</span> str(email) == valid_email
-
-    <span class="code-dec">@pytest.mark.parametrize</span>(<span class="code-str">"invalid_email"</span>, [
-        <span class="code-str">"not-an-email"</span>,
-        <span class="code-str">"@missing-local.com"</span>,
-        <span class="code-str">"missing-at-sign.com"</span>,
-        <span class="code-str">""</span>,
-        <span class="code-str">"spaces in@email.com"</span>,
-    ])
-    <span class="code-keyword">def</span> <span class="code-func">test_invalid_emails_raise_error</span>(self, invalid_email):
-        <span class="code-str">"""Невалидные email выбрасывают ошибку"""</span>
-        <span class="code-keyword">with</span> pytest.raises(InvalidEmailError):
-            Email(invalid_email)
-</code></pre>
-
-            <h3 class="text-lg font-bold mt-8 mb-2 text-gray-700">1.2 Тестирование Entities</h3>
-<pre><code class="language-python"><span class="code-comment"># tests/domain/test_entities.py</span>
-<span class="code-keyword">import</span> pytest
-<span class="code-keyword">import</span> uuid
-<span class="code-keyword">from</span> domain.entities <span class="code-keyword">import</span> Order
-<span class="code-keyword">from</span> domain.value_objects <span class="code-keyword">import</span> Money, Email
-<span class="code-keyword">from</span> domain.exceptions <span class="code-keyword">import</span> OrderAlreadyPaidError, OrderEmptyError
-<span class="code-keyword">from</span> domain.events <span class="code-keyword">import</span> OrderPaid
-
-
-<span class="code-keyword">class</span> <span class="code-class">TestOrder</span>:
-    <span class="code-str">"""Тесты для Entity Order"""</span>
-
-    <span class="code-dec">@pytest.fixture</span>
-    <span class="code-keyword">def</span> <span class="code-func">order</span>(self):
-        <span class="code-str">"""Фикстура: создает пустой заказ для каждого теста"""</span>
-        <span class="code-keyword">return</span> Order(
-            order_id=uuid.uuid4(),
-            customer=Email(<span class="code-str">"test@example.com"</span>)
-        )
-
-    <span class="code-dec">@pytest.fixture</span>
-    <span class="code-keyword">def</span> <span class="code-func">order_with_items</span>(self, order):
-        <span class="code-str">"""Фикстура: заказ с товарами"""</span>
-        order.add_item(<span class="code-str">"Book"</span>, Money(29.99))
-        order.add_item(<span class="code-str">"Pen"</span>, Money(5.00))
-        <span class="code-keyword">return</span> order
-
-    <span class="code-comment"># ═══════════════════════════════════════════════</span>
-    <span class="code-comment"># Тесты добавления товаров</span>
-    <span class="code-comment"># ═══════════════════════════════════════════════</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_add_item_to_order</span>(self, order):
-        <span class="code-str">"""Добавление товара в заказ"""</span>
-        order.add_item(<span class="code-str">"Python Book"</span>, Money(49.99))
-        
-        <span class="code-keyword">assert</span> len(order.items) == 1
-        <span class="code-keyword">assert</span> order.items[0][<span class="code-str">"name"</span>] == <span class="code-str">"Python Book"</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_total_price_calculation</span>(self, order_with_items):
-        <span class="code-str">"""Расчет общей суммы"""</span>
-        total = order_with_items.total_price
-        
-        <span class="code-keyword">assert</span> total.amount == 34.99  <span class="code-comment"># 29.99 + 5.00</span>
-        <span class="code-keyword">assert</span> total.currency == <span class="code-str">"USD"</span>
-
-    <span class="code-comment"># ═══════════════════════════════════════════════</span>
-    <span class="code-comment"># Тесты оплаты (ИНВАРИАНТЫ)</span>
-    <span class="code-comment"># ═══════════════════════════════════════════════</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_pay_order_success</span>(self, order_with_items):
-        <span class="code-str">"""Успешная оплата заказа"""</span>
-        order_with_items.pay()
-        
-        <span class="code-keyword">assert</span> order_with_items.is_paid == <span class="code-keyword">True</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_pay_empty_order_fails</span>(self, order):
-        <span class="code-str">"""ИНВАРИАНТ: Нельзя оплатить пустой заказ"""</span>
-        <span class="code-keyword">with</span> pytest.raises(OrderEmptyError):
-            order.pay()
-
-    <span class="code-keyword">def</span> <span class="code-func">test_pay_twice_fails</span>(self, order_with_items):
-        <span class="code-str">"""ИНВАРИАНТ: Нельзя оплатить дважды"""</span>
-        order_with_items.pay()
-        
-        <span class="code-keyword">with</span> pytest.raises(OrderAlreadyPaidError):
-            order_with_items.pay()
-
-    <span class="code-keyword">def</span> <span class="code-func">test_cannot_add_item_after_payment</span>(self, order_with_items):
-        <span class="code-str">"""ИНВАРИАНТ: Нельзя менять оплаченный заказ"""</span>
-        order_with_items.pay()
-        
-        <span class="code-keyword">with</span> pytest.raises(OrderAlreadyPaidError):
-            order_with_items.add_item(<span class="code-str">"New Item"</span>, Money(10))
-
-    <span class="code-comment"># ═══════════════════════════════════════════════</span>
-    <span class="code-comment"># Тесты Domain Events</span>
-    <span class="code-comment"># ═══════════════════════════════════════════════</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_order_paid_event_generated</span>(self, order_with_items):
-        <span class="code-str">"""При оплате генерируется событие OrderPaid"""</span>
-        order_with_items.pay()
-        
-        events = order_with_items.collect_events()
-        
-        <span class="code-keyword">assert</span> len(events) == 1
-        <span class="code-keyword">assert</span> isinstance(events[0], OrderPaid)
-        <span class="code-keyword">assert</span> events[0].order_id == order_with_items.id
-
-    <span class="code-keyword">def</span> <span class="code-func">test_events_cleared_after_collection</span>(self, order_with_items):
-        <span class="code-str">"""События очищаются после сбора"""</span>
-        order_with_items.pay()
-        order_with_items.collect_events()
-        
-        <span class="code-keyword">assert</span> len(order_with_items.collect_events()) == 0
+def test_total_price_calculation():
+    """Розрахунок загальної суми"""
+    order = Order(uuid.uuid4(), Email("test@example.com"))
+    order.add_item("Python Book", Money(29.99))
+    order.add_item("Pen", Money(5.00))
+    
+    total = order.total_price
+    assert total.amount == 34.99
+    assert total.currency == "USD"
 </code></pre>
         </section>
 
         <!-- APPLICATION TESTS -->
-        <section id="app-tests" class="card">
-            <h2 class="text-2xl font-bold mb-6">2. Тестирование Application Layer (Use Cases)</h2>
-            <p>Здесь мы тестируем Use Cases. Они зависят от интерфейсов (Repositories, Services), которые мы <strong>мокаем</strong>.</p>
-            <p class="text-sm bg-blue-50 p-3 rounded border border-blue-200"><strong>Мок (Mock)</strong> — это поддельная реализация интерфейса. Она позволяет тестировать логику без реальной БД или email-сервера.</p>
+        <section id="app-tests" class="mb-16">
+            <h2 class="text-2xl font-bold mb-4">2. Тестування Application Layer (Use Cases)</h2>
+            <p class="mb-4 text-gray-600">Тут ми тестуємо Use Cases. Вони залежать від інтерфейсів (Repositories, Services), які ми <strong>мокаємо</strong>.</p>
 
-<pre><code class="language-python"><span class="code-comment"># tests/application/test_use_cases.py</span>
-<span class="code-keyword">import</span> pytest
-<span class="code-keyword">from</span> unittest.mock <span class="code-keyword">import</span> Mock, MagicMock
-<span class="code-keyword">import</span> uuid
+<pre><code class="language-python"># tests/application/test_use_cases.py
+import pytest
+from unittest.mock import Mock
+from application.use_cases import CreateOrderUseCase
 
-<span class="code-keyword">from</span> application.use_cases <span class="code-keyword">import</span> CreateOrderUseCase, PayOrderUseCase
-<span class="code-keyword">from</span> application.dto <span class="code-keyword">import</span> CreateOrderCommand
-<span class="code-keyword">from</span> application.interfaces <span class="code-keyword">import</span> OrderRepository, EmailService, UnitOfWork
-<span class="code-keyword">from</span> domain.entities <span class="code-keyword">import</span> Order
-<span class="code-keyword">from</span> domain.exceptions <span class="code-keyword">import</span> OrderNotFoundError
+def test_create_order_success():
+    # Arrange
+    mock_uow = Mock()
+    mock_email = Mock()
+    use_case = CreateOrderUseCase(mock_uow, mock_email)
+    
+    # Act
+    use_case.execute(customer_email="user@example.com", items=[...])
 
-
-<span class="code-keyword">class</span> <span class="code-class">TestCreateOrderUseCase</span>:
-    <span class="code-str">"""Тесты для CreateOrderUseCase"""</span>
-
-    <span class="code-dec">@pytest.fixture</span>
-    <span class="code-keyword">def</span> <span class="code-func">mock_uow</span>(self):
-        <span class="code-str">"""Мок Unit of Work с репозиторием"""</span>
-        uow = Mock(spec=UnitOfWork)
-        uow.orders = Mock(spec=OrderRepository)
-        uow.__enter__ = Mock(return_value=uow)
-        uow.__exit__ = Mock(return_value=<span class="code-keyword">False</span>)
-        <span class="code-keyword">return</span> uow
-
-    <span class="code-dec">@pytest.fixture</span>
-    <span class="code-keyword">def</span> <span class="code-func">mock_email_service</span>(self):
-        <span class="code-str">"""Мок email сервиса"""</span>
-        <span class="code-keyword">return</span> Mock(spec=EmailService)
-
-    <span class="code-dec">@pytest.fixture</span>
-    <span class="code-keyword">def</span> <span class="code-func">use_case</span>(self, mock_uow, mock_email_service):
-        <span class="code-str">"""Создаем Use Case с моками"""</span>
-        <span class="code-keyword">return</span> CreateOrderUseCase(
-            uow=mock_uow,
-            email_service=mock_email_service
-        )
-
-    <span class="code-keyword">def</span> <span class="code-func">test_create_order_success</span>(self, use_case, mock_uow, mock_email_service):
-        <span class="code-str">"""Успешное создание заказа"""</span>
-        <span class="code-comment"># Arrange: готовим входные данные</span>
-        command = CreateOrderCommand(
-            customer_email=<span class="code-str">"user@example.com"</span>,
-            items=[{<span class="code-str">"name"</span>: <span class="code-str">"Book"</span>, <span class="code-str">"price"</span>: 29.99}]
-        )
-
-        <span class="code-comment"># Act: выполняем</span>
-        result = use_case.execute(command)
-
-        <span class="code-comment"># Assert: проверяем результат</span>
-        <span class="code-keyword">assert</span> result.order_id <span class="code-keyword">is not</span> <span class="code-keyword">None</span>
-        <span class="code-keyword">assert</span> result.customer_email == <span class="code-str">"user@example.com"</span>
-        <span class="code-keyword">assert</span> result.total_amount == 29.99
-        <span class="code-keyword">assert</span> result.status == <span class="code-str">"created"</span>
-
-        <span class="code-comment"># Assert: проверяем, что репозиторий был вызван</span>
-        mock_uow.orders.save.assert_called_once()
-
-        <span class="code-comment"># Assert: проверяем, что email был отправлен</span>
-        mock_email_service.send_order_confirmation.assert_called_once_with(
-            email=<span class="code-str">"user@example.com"</span>,
-            order_id=result.order_id
-        )
-
-    <span class="code-keyword">def</span> <span class="code-func">test_create_order_invalid_email_fails</span>(self, use_case):
-        <span class="code-str">"""Невалидный email приводит к ошибке"""</span>
-        command = CreateOrderCommand(
-            customer_email=<span class="code-str">"not-an-email"</span>,  <span class="code-comment"># Невалидный!</span>
-            items=[{<span class="code-str">"name"</span>: <span class="code-str">"Book"</span>, <span class="code-str">"price"</span>: 29.99}]
-        )
-
-        <span class="code-keyword">with</span> pytest.raises(InvalidEmailError):
-            use_case.execute(command)
-
-    <span class="code-keyword">def</span> <span class="code-func">test_transaction_rollback_on_error</span>(self, mock_uow, mock_email_service):
-        <span class="code-str">"""Транзакция откатывается при ошибке"""</span>
-        <span class="code-comment"># Arrange: email сервис выбрасывает ошибку</span>
-        mock_email_service.send_order_confirmation.side_effect = Exception(<span class="code-str">"SMTP Error"</span>)
-        
-        use_case = CreateOrderUseCase(
-            uow=mock_uow,
-            email_service=mock_email_service
-        )
-
-        command = CreateOrderCommand(
-            customer_email=<span class="code-str">"user@example.com"</span>,
-            items=[{<span class="code-str">"name"</span>: <span class="code-str">"Book"</span>, <span class="code-str">"price"</span>: 29.99}]
-        )
-
-        <span class="code-comment"># Act & Assert</span>
-        <span class="code-keyword">with</span> pytest.raises(Exception):
-            use_case.execute(command)
-
-        <span class="code-comment"># Проверяем, что __exit__ был вызван (значит, транзакция завершена)</span>
-        mock_uow.__exit__.assert_called()
-
-
-<span class="code-keyword">class</span> <span class="code-class">TestPayOrderUseCase</span>:
-    <span class="code-str">"""Тесты для PayOrderUseCase"""</span>
-
-    <span class="code-dec">@pytest.fixture</span>
-    <span class="code-keyword">def</span> <span class="code-func">existing_order</span>(self):
-        <span class="code-str">"""Существующий заказ с товарами"""</span>
-        order = Order(uuid.uuid4(), Email(<span class="code-str">"test@example.com"</span>))
-        order.add_item(<span class="code-str">"Book"</span>, Money(50))
-        <span class="code-keyword">return</span> order
-
-    <span class="code-keyword">def</span> <span class="code-func">test_pay_existing_order</span>(self, existing_order):
-        <span class="code-str">"""Оплата существующего заказа"""</span>
-        <span class="code-comment"># Arrange: мокаем репозиторий, который вернет наш заказ</span>
-        mock_uow = Mock()
-        mock_uow.orders.get_by_id.return_value = existing_order
-        mock_uow.__enter__ = Mock(return_value=mock_uow)
-        mock_uow.__exit__ = Mock(return_value=<span class="code-keyword">False</span>)
-
-        use_case = PayOrderUseCase(uow=mock_uow)
-
-        <span class="code-comment"># Act</span>
-        result = use_case.execute(existing_order.id)
-
-        <span class="code-comment"># Assert</span>
-        <span class="code-keyword">assert</span> result.status == <span class="code-str">"paid"</span>
-        <span class="code-keyword">assert</span> existing_order.is_paid == <span class="code-keyword">True</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_pay_nonexistent_order_fails</span>(self):
-        <span class="code-str">"""Оплата несуществующего заказа"""</span>
-        mock_uow = Mock()
-        mock_uow.orders.get_by_id.return_value = <span class="code-keyword">None</span>  <span class="code-comment"># Не найден!</span>
-        mock_uow.__enter__ = Mock(return_value=mock_uow)
-        mock_uow.__exit__ = Mock(return_value=<span class="code-keyword">False</span>)
-
-        use_case = PayOrderUseCase(uow=mock_uow)
-
-        <span class="code-keyword">with</span> pytest.raises(OrderNotFoundError):
-            use_case.execute(uuid.uuid4())
+    # Assert
+    mock_uow.orders.save.assert_called_once()
+    mock_email.send.assert_called_once()
 </code></pre>
         </section>
 
         <!-- INFRASTRUCTURE TESTS -->
         <section id="infra-tests" class="mb-16">
-            <h2 class="text-2xl font-bold mb-4">3. Тестирование Infrastructure Layer (Integration)</h2>
-            <p>Здесь мы тестируем реальные реализации: SQLAlchemy Repository, Email Adapter и т.д. Нужна тестовая БД.</p>
+            <h2 class="text-2xl font-bold mb-4">3. Тестування Infrastructure (Integration)</h2>
+            <p class="mb-4 text-gray-600">Тестуємо реальні адаптери з реальною тестовою БД (наприклад, SQLite in-memory або Docker-контейнер з Postgres).</p>
 
-<pre><code class="language-python"><span class="code-comment"># tests/infrastructure/test_repositories.py</span>
-<span class="code-keyword">import</span> pytest
-<span class="code-keyword">import</span> uuid
-<span class="code-keyword">from</span> sqlalchemy <span class="code-keyword">import</span> create_engine
-<span class="code-keyword">from</span> sqlalchemy.orm <span class="code-keyword">import</span> sessionmaker
-
-<span class="code-keyword">from</span> infrastructure.db.models <span class="code-keyword">import</span> Base
-<span class="code-keyword">from</span> infrastructure.repositories <span class="code-keyword">import</span> SqlAlchemyOrderRepository
-<span class="code-keyword">from</span> domain.entities <span class="code-keyword">import</span> Order
-<span class="code-keyword">from</span> domain.value_objects <span class="code-keyword">import</span> Email, Money
-
-
-<span class="code-comment"># Используем SQLite in-memory для скорости</span>
-TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
-
-
-<span class="code-dec">@pytest.fixture</span>(scope=<span class="code-str">"function"</span>)
-<span class="code-keyword">def</span> <span class="code-func">session</span>():
-    <span class="code-str">"""Создает чистую БД для каждого теста"""</span>
-    engine = create_engine(TEST_DATABASE_URL)
-    Base.metadata.create_all(engine)
+<pre><code class="language-python"># tests/infrastructure/test_repo.py
+def test_save_and_retrieve_order(session):
+    repo = SqlAlchemyOrderRepository(session)
+    order = Order(...)
     
-    Session = sessionmaker(bind=engine)
-    session = Session()
+    repo.save(order)
+    session.commit()
     
-    <span class="code-keyword">yield</span> session
-    
-    session.close()
-    Base.metadata.drop_all(engine)
-
-
-<span class="code-dec">@pytest.fixture</span>
-<span class="code-keyword">def</span> <span class="code-func">repository</span>(session):
-    <span class="code-str">"""Репозиторий с тестовой сессией"""</span>
-    <span class="code-keyword">return</span> SqlAlchemyOrderRepository(session)
-
-
-<span class="code-keyword">class</span> <span class="code-class">TestSqlAlchemyOrderRepository</span>:
-    <span class="code-str">"""Интеграционные тесты репозитория"""</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_save_and_retrieve_order</span>(self, repository, session):
-        <span class="code-str">"""Сохранение и получение заказа"""</span>
-        <span class="code-comment"># Arrange</span>
-        order_id = uuid.uuid4()
-        order = Order(order_id, Email(<span class="code-str">"test@example.com"</span>))
-        order.add_item(<span class="code-str">"Book"</span>, Money(29.99))
-        order.add_item(<span class="code-str">"Pen"</span>, Money(5.00))
-
-        <span class="code-comment"># Act: сохраняем</span>
-        repository.save(order)
-        session.commit()
-
-        <span class="code-comment"># Act: загружаем</span>
-        loaded = repository.get_by_id(order_id)
-
-        <span class="code-comment"># Assert</span>
-        <span class="code-keyword">assert</span> loaded <span class="code-keyword">is not</span> <span class="code-keyword">None</span>
-        <span class="code-keyword">assert</span> loaded.id == order_id
-        <span class="code-keyword">assert</span> str(loaded.customer) == <span class="code-str">"test@example.com"</span>
-        <span class="code-keyword">assert</span> len(loaded.items) == 2
-        <span class="code-keyword">assert</span> loaded.total_price.amount == 34.99
-
-    <span class="code-keyword">def</span> <span class="code-func">test_get_nonexistent_order_returns_none</span>(self, repository):
-        <span class="code-str">"""Несуществующий заказ возвращает None"""</span>
-        result = repository.get_by_id(uuid.uuid4())
-        <span class="code-keyword">assert</span> result <span class="code-keyword">is</span> <span class="code-keyword">None</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_update_existing_order</span>(self, repository, session):
-        <span class="code-str">"""Обновление существующего заказа"""</span>
-        order_id = uuid.uuid4()
-        order = Order(order_id, Email(<span class="code-str">"test@example.com"</span>))
-        order.add_item(<span class="code-str">"Book"</span>, Money(29.99))
-        
-        repository.save(order)
-        session.commit()
-
-        <span class="code-comment"># Загружаем, изменяем, сохраняем</span>
-        loaded = repository.get_by_id(order_id)
-        loaded.add_item(<span class="code-str">"Pen"</span>, Money(5.00))
-        repository.save(loaded)
-        session.commit()
-
-        <span class="code-comment"># Проверяем</span>
-        reloaded = repository.get_by_id(order_id)
-        <span class="code-keyword">assert</span> len(reloaded.items) == 2
-
-    <span class="code-keyword">def</span> <span class="code-func">test_order_state_persisted</span>(self, repository, session):
-        <span class="code-str">"""Состояние заказа сохраняется (оплачен/не оплачен)"""</span>
-        order_id = uuid.uuid4()
-        order = Order(order_id, Email(<span class="code-str">"test@example.com"</span>))
-        order.add_item(<span class="code-str">"Book"</span>, Money(29.99))
-        order.pay()
-
-        repository.save(order)
-        session.commit()
-
-        loaded = repository.get_by_id(order_id)
-        <span class="code-keyword">assert</span> loaded.is_paid == <span class="code-keyword">True</span>
+    saved = repo.get(order.id)
+    assert saved.id == order.id
 </code></pre>
         </section>
 
-        <!-- E2E TESTS -->
-        <section id="e2e-tests" class="card bg-gray-50 border-gray-200">
-            <h2 class="text-2xl font-bold mb-4">4. E2E тесты (Presentation Layer)</h2>
-            <p>Проверяем API целиком. Используем TestClient от FastAPI (или Django TestCase).</p>
-
-<pre><code class="language-python"><span class="code-comment"># tests/e2e/test_api.py</span>
-<span class="code-keyword">import</span> pytest
-<span class="code-keyword">from</span> fastapi.testclient <span class="code-keyword">import</span> TestClient
-<span class="code-keyword">from</span> sqlalchemy <span class="code-keyword">import</span> create_engine
-<span class="code-keyword">from</span> sqlalchemy.orm <span class="code-keyword">import</span> sessionmaker
-
-<span class="code-keyword">from</span> main <span class="code-keyword">import</span> create_app
-<span class="code-keyword">from</span> infrastructure.db.models <span class="code-keyword">import</span> Base
-<span class="code-keyword">from</span> presentation.dependencies <span class="code-keyword">import</span> get_session
-
-
-<span class="code-comment"># Переопределяем зависимость БД на тестовую</span>
-TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
-
-
-<span class="code-dec">@pytest.fixture</span>(scope=<span class="code-str">"module"</span>)
-<span class="code-keyword">def</span> <span class="code-func">test_app</span>():
-    <span class="code-str">"""Создает тестовое приложение с in-memory БД"""</span>
-    engine = create_engine(TEST_DATABASE_URL, connect_args={<span class="code-str">"check_same_thread"</span>: <span class="code-keyword">False</span>})
-    TestSession = sessionmaker(bind=engine)
-    
-    Base.metadata.create_all(engine)
-
-    <span class="code-keyword">def</span> <span class="code-func">override_get_session</span>():
-        session = TestSession()
-        <span class="code-keyword">try</span>:
-            <span class="code-keyword">yield</span> session
-        <span class="code-keyword">finally</span>:
-            session.close()
-
-    app = create_app()
-    app.dependency_overrides[get_session] = override_get_session
-    
-    <span class="code-keyword">yield</span> TestClient(app)
-    
-    Base.metadata.drop_all(engine)
-
-
-<span class="code-keyword">class</span> <span class="code-class">TestOrdersAPI</span>:
-    <span class="code-str">"""E2E тесты API заказов"""</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_create_order_success</span>(self, test_app):
-        <span class="code-str">"""POST /api/v1/orders - успешное создание"""</span>
-        response = test_app.post(
-            <span class="code-str">"/api/v1/orders"</span>,
-            json={
-                <span class="code-str">"customer_email"</span>: <span class="code-str">"user@example.com"</span>,
-                <span class="code-str">"items"</span>: [
-                    {<span class="code-str">"name"</span>: <span class="code-str">"Python Book"</span>, <span class="code-str">"price"</span>: 49.99, <span class="code-str">"quantity"</span>: 1}
-                ]
-            }
-        )
-        
-        <span class="code-keyword">assert</span> response.status_code == 201
-        data = response.json()
-        <span class="code-keyword">assert</span> <span class="code-str">"id"</span> <span class="code-keyword">in</span> data
-        <span class="code-keyword">assert</span> data[<span class="code-str">"customer_email"</span>] == <span class="code-str">"user@example.com"</span>
-        <span class="code-keyword">assert</span> data[<span class="code-str">"total_amount"</span>] == 49.99
-        <span class="code-keyword">assert</span> data[<span class="code-str">"status"</span>] == <span class="code-str">"created"</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_create_order_invalid_email</span>(self, test_app):
-        <span class="code-str">"""POST /api/v1/orders - невалидный email возвращает 400"""</span>
-        response = test_app.post(
-            <span class="code-str">"/api/v1/orders"</span>,
-            json={
-                <span class="code-str">"customer_email"</span>: <span class="code-str">"not-an-email"</span>,
-                <span class="code-str">"items"</span>: [{<span class="code-str">"name"</span>: <span class="code-str">"Book"</span>, <span class="code-str">"price"</span>: 10}]
-            }
-        )
-        
-        <span class="code-keyword">assert</span> response.status_code == 400
-        <span class="code-keyword">assert</span> <span class="code-str">"error"</span> <span class="code-keyword">in</span> response.json()
-
-    <span class="code-keyword">def</span> <span class="code-func">test_create_order_empty_items</span>(self, test_app):
-        <span class="code-str">"""POST /api/v1/orders - пустой список товаров"""</span>
-        response = test_app.post(
-            <span class="code-str">"/api/v1/orders"</span>,
-            json={
-                <span class="code-str">"customer_email"</span>: <span class="code-str">"user@example.com"</span>,
-                <span class="code-str">"items"</span>: []
-            }
-        )
-        
-        <span class="code-keyword">assert</span> response.status_code == 422  <span class="code-comment"># Validation Error</span>
-
-    <span class="code-keyword">def</span> <span class="code-func">test_get_order_not_found</span>(self, test_app):
-        <span class="code-str">"""GET /api/v1/orders/{id} - несуществующий заказ"""</span>
-        fake_id = <span class="code-str">"00000000-0000-0000-0000-000000000000"</span>
-        response = test_app.get(<span class="code-str">f"/api/v1/orders/{fake_id}"</span>)
-        
-        <span class="code-keyword">assert</span> response.status_code == 404
-
-    <span class="code-keyword">def</span> <span class="code-func">test_full_order_flow</span>(self, test_app):
-        <span class="code-str">"""Полный цикл: создание → получение → оплата"""</span>
-        <span class="code-comment"># 1. Создаем заказ</span>
-        create_response = test_app.post(
-            <span class="code-str">"/api/v1/orders"</span>,
-            json={
-                <span class="code-str">"customer_email"</span>: <span class="code-str">"flow@example.com"</span>,
-                <span class="code-str">"items"</span>: [{<span class="code-str">"name"</span>: <span class="code-str">"Book"</span>, <span class="code-str">"price"</span>: 100}]
-            }
-        )
-        <span class="code-keyword">assert</span> create_response.status_code == 201
-        order_id = create_response.json()[<span class="code-str">"id"</span>]
-
-        <span class="code-comment"># 2. Получаем заказ</span>
-        get_response = test_app.get(<span class="code-str">f"/api/v1/orders/{order_id}"</span>)
-        <span class="code-keyword">assert</span> get_response.status_code == 200
-        <span class="code-keyword">assert</span> get_response.json()[<span class="code-str">"status"</span>] == <span class="code-str">"created"</span>
-
-        <span class="code-comment"># 3. Оплачиваем</span>
-        pay_response = test_app.post(<span class="code-str">f"/api/v1/orders/{order_id}/pay"</span>)
-        <span class="code-keyword">assert</span> pay_response.status_code == 200
-        <span class="code-keyword">assert</span> pay_response.json()[<span class="code-str">"status"</span>] == <span class="code-str">"paid"</span>
-
-        <span class="code-comment"># 4. Повторная оплата должна вернуть ошибку</span>
-        pay_again = test_app.post(<span class="code-str">f"/api/v1/orders/{order_id}/pay"</span>)
-        <span class="code-keyword">assert</span> pay_again.status_code == 409  <span class="code-comment"># Conflict</span>
-</code></pre>
-        </section>
-
-        <!-- TIPS -->
-        <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-4">5. Советы по тестированию</h2>
-            
-            <div class="grid md:grid-cols-2 gap-6">
-                <div class="bg-green-50 p-6 rounded-lg border border-green-200">
-                    <h3 class="font-bold text-green-800 mb-3">✅ Хорошие практики</h3>
-                    <ul class="space-y-2 text-sm text-green-700">
-                        <li>• Один тест — одна проверка (Arrange-Act-Assert)</li>
-                        <li>• Используйте фикстуры для повторяющегося кода</li>
-                        <li>• Давайте тестам говорящие имена</li>
-                        <li>• Тестируйте граничные случаи и ошибки</li>
-                        <li>• Используйте `pytest.mark.parametrize` для множества входных данных</li>
-                        <li>• Запускайте unit-тесты на каждый коммит</li>
-                    </ul>
-                </div>
-                
-                <div class="bg-red-50 p-6 rounded-lg border border-red-200">
-                    <h3 class="font-bold text-red-800 mb-3">❌ Антипаттерны</h3>
-                    <ul class="space-y-2 text-sm text-red-700">
-                        <li>• Тесты зависят друг от друга (порядок важен)</li>
-                        <li>• Тесты медленные (БД в unit-тестах)</li>
-                        <li>• Слишком много моков (тест не проверяет реальное поведение)</li>
-                        <li>• Тесты дублируют логику (копипаст из продакшн-кода)</li>
-                        <li>• Нет assertion (тест просто "не падает")</li>
-                        <li>• Тестирование приватных методов</li>
-                    </ul>
-                </div>
+        <div class="mt-12 pt-8 border-t border-gray-200">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <a href="deployment.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right">
+                    <span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Назад</span>
+                    <span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Deployment</span>
+                </a>
+                <a href="projects.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left">
+                    <span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далі</span>
+                    <span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Міні-проєкти &rarr;</span>
+                </a>
             </div>
-        </section>
-
-        <!-- NAVIGATION -->
-        <div class="flex justify-between mt-12 pt-8 border-t border-gray-200">
-            <a href="dependency.html" class="group flex items-center gap-4 text-gray-600 hover:text-gray-900 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:-translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-                <div>
-                    <div class="text-xs text-gray-400 uppercase font-bold">Назад</div>
-                    <div class="font-bold">Dependency Injection</div>
-                </div>
-            </a>
-            <a href="projects.html" class="group flex items-center gap-4 bg-blue-600 text-white px-6 py-4 rounded-lg hover:bg-blue-700 transition">
-                <div class="text-right">
-                    <div class="text-xs text-blue-200 uppercase font-bold">Далее</div>
-                    <div class="font-bold">Мини-проекты</div>
-                </div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover:translate-x-1 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-            </a>
         </div>
-    
-        <!-- NAVIGATION FOOTER -->
-        
-        <!-- NAVIGATION FOOTER -->
-        
-        <!-- NAVIGATION FOOTER -->
-        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="deployment.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Назад</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Protect & Deploy</span></a><a href="projects.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далее</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Projects &rarr;</span></a></div></div>
     </main>
 </body>
 </html>

@@ -48,7 +48,7 @@
     <aside class="sidebar hidden md:block">
         <div class="p-6 border-b border-gray-700">
             <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
-            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+            <span class="sidebar-subtitle text-sm">Author: Alex | InkyWorld</span>
         </div>
         
         <nav class="py-4">
@@ -118,13 +118,13 @@
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <p>Патерн Специфікація (Specification) дозволяє виділити правило перевірки (верифікації) об'єкта в окремий клас. Це корисно, коли правило є складним і використовується багаторазово.</p>
+        <p>Патерн Специфікація дозволяє виділити правило перевірки (верифікації) об'єкта в окремий клас. Це корисно, коли правило складне і часто використовується повторно.</p>
 
         <h3 class="font-bold text-lg mt-4">Варіанти використання:</h3>
         <ul class="list-disc list-inside space-y-2 mb-4">
             <li><strong>Валідація:</strong> Чи задовольняє об'єкт критеріям?</li>
-            <li><strong>Вибірка (Query):</strong> Знайти всі об'єкти, що задовольняють критерії.</li>
-            <li><strong>Побудова:</strong> Створення нового об'єкта згідно з вимогами.</li>
+            <li><strong>Вибірка (Query):</strong> Знайти всі об'єкти, що задовольняють критеріям.</li>
+            <li><strong>Побудова:</strong> Створення нового об'єкта за вимогами.</li>
         </ul>
 
         <pre><code class="language-python">class OverdueInvoiceSpecification:

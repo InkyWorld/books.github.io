@@ -48,7 +48,7 @@
     <aside class="sidebar hidden md:block">
         <div class="p-6 border-b border-gray-700">
             <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
-            <span class="sidebar-subtitle text-sm">Python Junior Guide</span>
+            <span class="sidebar-subtitle text-sm">Author: Alex | InkyWorld</span>
         </div>
         
         <nav class="py-4">
@@ -75,7 +75,7 @@
             <a href="solid.html" class="nav-link ">📐 SOLID принципи</a>
             <a href="invariants.html" class="nav-link ">🛡️ Інваріанти</a>
             <a href="dependency.html" class="nav-link ">💉 Dependency Injection</a>
-            <a href="cqrs_es.html" class="nav-link ">⚡ CQRS і ES</a>
+            <a href="cqrs_es.html" class="nav-link ">⚡ CQRS та ES</a>
             
             <div class="nav-section">Security & Production</div>
             <a href="security.html" class="nav-link ">🔐 Auth & Permissions</a>
@@ -111,27 +111,27 @@
     <!-- CONTENT -->
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Продвинутые Техники</h1>
-            <p class="text-xl text-gray-600">Маппинг, фильтрация и нюансы работы с асинхронностью.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Просунуті Техніки</h1>
+            <p class="text-xl text-gray-600">Мапінг, фільтрація та нюанси роботи з асинхронністю.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
-        <p>Когда вы переходите от теории к практике, вы сталкиваетесь с рутиной: бесконечные преобразования данных, сложные фильтры и подводные камни асинхронности. В этой главе мы разберем продвинутые техники выживания.</p>
+        <p>Коли ви переходите від теорії до практики, ви стикаєтеся з рутиною: нескінченні перетворення даних, складні фільтри та підводні камені асинхронності. У цьому розділі ми розберемо просунуті техніки виживання.</p>
 
         <!-- 1. DTO EXPLOSION -->
-        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">1. Проблема "Взрыва DTO" (DTO Explosion)</h2>
-        <p>Архитектура требует разделения DTO для каждого слоя. На практике для одной сущности <code>User</code> приходится создавать:</p>
+        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">1. Проблема "Вибуху DTO" (DTO Explosion)</h2>
+        <p>Архітектура вимагає розділення DTO для кожного шару. На практиці для однієї сутності <code>User</code> доводиться створювати:</p>
         <ul class="list-disc ml-6 space-y-2">
             <li><code>CreateUserRequest</code> (Presentation, Pydantic)</li>
             <li><code>CreateUserDTO</code> (Application, Dataclass)</li>
             <li><code>UserEntity</code> (Domain)</li>
             <li><code>UserResponse</code> (Presentation, Pydantic)</li>
         </ul>
-        <p class="mt-4">Это утомляет и демотивирует. Рассмотрим прагматичный подход.</p>
+        <p class="mt-4">Це втомлює і демотивує. Розглянемо прагматичний підхід.</p>
 
         <h3 class="font-bold text-lg mt-6 mb-2">Duck Typing & Protocols</h3>
-        <p>Если Application слой не должен зависеть от Pydantic, это не значит, что мы не можем передавать Pydantic объекты, если они ведут себя как нужно. Используйте <strong>Protocols</strong>.</p>
+        <p>Якщо Application шар не повинен залежати від Pydantic, це не означає, що ми не можемо передавати Pydantic об'єкти, якщо вони поводяться як потрібно. Використовуйте <strong>Protocols</strong>.</p>
 
         <pre><code class="language-python"># application/protocols.py
 from typing import Protocol
@@ -142,7 +142,7 @@ class UserInput(Protocol):
 
 # application/use_cases.py
 def register_user(data: UserInput):
-    # Use Case ничего не знает о Pydantic, но работает с ним
+    # Use Case нічого не знає про Pydantic, але працює з ним
     print(data.username) 
 
 # presentation/api.py
@@ -150,25 +150,25 @@ class CreateUserRequest(BaseModel): # Pydantic model
     username: str
     email: EmailStr
 
-# Работает благодаря "Утиной типизации"
+# Працює завдяки "Качиній типізації"
 register_user(CreateUserRequest(username="alex", email="a@b.com"))
 </code></pre>
 
         <h3 class="font-bold text-lg mt-6 mb-2">Automapping (Pragmatic)</h3>
-        <p>Для простых CRUD операций можно использовать <code>model_validate</code> или вспомогательные методы, чтобы не писать маппинг каждой очереди полей вручную.</p>
-        <pre><code class="language-python"># Если поля совпадают 1-в-1
+        <p>Для простих CRUD операцій можна використовувати <code>model_validate</code> або допоміжні методи, щоб не писати мапінг кожної черги полів вручну.</p>
+        <pre><code class="language-python"># Якщо поля збігаються 1-в-1
 def to_domain(dto: CreateUserRequest) -> User:
-    # Опасно для сложной логики, но OK для простых CRUD
+    # Небезпечно для складної логіки, але OK для простих CRUD
     return User(**dto.model_dump()) 
 </code></pre>
 
 
         <!-- 2. PAGINATION & FILTERING -->
-        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. Пагинация и Фильтрация</h2>
-        <p>Не передавайте параметры пагинации аргументами функции. Это нарушает Open-Closed Principle (при добавлении сортировки придется менять сигнатуру).</p>
+        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. Пагінація та Фільтрація</h2>
+        <p>Не передавайте параметри пагінації аргументами функції. Це порушує Open-Closed Principle (при додаванні сортування доведеться змінювати сигнатуру).</p>
 
         <h3 class="font-bold text-lg mt-6 mb-2">Generic Page[T]</h3>
-        <p>Используйте Generic DTO для всех списочных ответов.</p>
+        <p>Використовуйте Generic DTO для всіх спискових відповідей.</p>
         <pre><code class="language-python">from typing import TypeVar, Generic, List
 from dataclasses import dataclass
 
@@ -190,7 +190,7 @@ class Page(Generic[T]):
     pages: int
 </code></pre>
 
-        <h3 class="font-bold text-lg mt-6 mb-2">Repository Implementation</h3>
+        <h3 class="font-bold text-lg mt-6 mb-2">Реалізація Репозиторію</h3>
         <pre><code class="language-python"># infrastructure/repo.py
 async def search(self, filters: OrderFilter, pagination: PaginationParams) -> Page[Order]:
     query = select(OrderModel)
@@ -211,7 +211,7 @@ async def search(self, filters: OrderFilter, pagination: PaginationParams) -> Pa
     
     return Page(
         items=[self._mapper.to_domain(m) for m in models],
-        total=100, # placeholder
+        total=100, # заглушка
         page=pagination.page,
         size=pagination.limit,
         pages=5
@@ -220,13 +220,13 @@ async def search(self, filters: OrderFilter, pagination: PaginationParams) -> Pa
 
 
         <!-- 3. ASYNC TRAP -->
-        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">3. Асинхронные ловушки (The Async Trap)</h2>
+        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">3. Асинхронні пастки (The Async Trap)</h2>
         <div class="bg-red-50 p-4 rounded border border-red-200 mb-4">
-            <h4 class="font-bold text-red-800">⚠️ Lazy Loading не работает</h4>
-            <p class="text-sm">Попытка обратиться к <code>order.items</code> в async коде без предварительной загрузки вызовет <code>MissingGreenlet</code>. Используйте <strong>Selectinload</strong>.</p>
+            <h4 class="font-bold text-red-800">⚠️ Lazy Loading не працює</h4>
+            <p class="text-sm">Спроба звернутися до <code>order.items</code> в async коді без попереднього завантаження викличе <code>MissingGreenlet</code>. Використовуйте <strong>Selectinload</strong>.</p>
         </div>
 
-        <pre><code class="language-python"># Правильная загрузка связей в Async
+        <pre><code class="language-python"># Правильне завантаження зв'язків в Async
 stmt = (
     select(OrderModel)
     .options(selectinload(OrderModel.items)) # <--- Eager Loading
@@ -235,7 +235,7 @@ stmt = (
 </code></pre>
 
         <h3 class="font-bold text-lg mt-6 mb-2">Async Context Manager UoW</h3>
-        <p>Вот как правильно реализовать <code>async with uow:</code>. Обратите внимание на <code>rollback</code> в случае исключения.</p>
+        <p>Ось як правильно реалізувати <code>async with uow:</code>. Зверніть увагу на <code>rollback</code> у разі виключення.</p>
         <pre><code class="language-python">class AsyncUoW:
     def __init__(self, session_factory):
         self.session_factory = session_factory
@@ -247,15 +247,15 @@ stmt = (
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         try:
             if exc_type:
-                await self.session.rollback() # Ошибка -> откат
+                await self.session.rollback() # Помилка -> відкат
             else:
-                await self.session.commit()   # Успех -> коммит
+                await self.session.commit()   # Успіх -> коміт
         finally:
-            await self.session.close()        # Всегда закрываем
+            await self.session.close()        # Завжди закриваємо
 </code></pre>
 </div>
         </section>
-    <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="frameworks_django.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Назад</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Frameworks Django</span></a><a href="deployment.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далее</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Protect & Deploy &rarr;</span></a></div></div>
+    <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="frameworks_django.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Назад</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Frameworks Django</span></a><a href="deployment.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далі</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Deployment & Protection &rarr;</span></a></div></div>
     </main>
 </body>
 </html>

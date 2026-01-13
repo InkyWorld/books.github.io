@@ -19,29 +19,119 @@
                 </a>
             </div>
             <nav class="sidebar-nav">
-                <div class="nav-section">
-                    <div class="nav-section-title">Введение</div>
-                    <a href="index.html" class="nav-link">🏠 Главная</a>
-                </div>
-                <!-- ... Navigation will be updated later or kept simple for now ... -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Часть 0: Core</div>
-                    <a href="part0_internals.html" class="nav-link active">0.1 Python Internals</a>
-                    <a href="part0_networking.html" class="nav-link">0.2 Networking & Linux</a>
-                </div>
-                <div class="nav-section">
-                    <div class="nav-section-title">Часть 9: API</div>
-                    <a href="part9_restdesign.html" class="nav-link">9.1 REST Design</a>
-                    <a href="part9_idempotency.html" class="nav-link">9.2 Idempotency</a>
-                    <a href="part9_openapi.html" class="nav-link">9.3 OpenAPI</a>
-                </div>
-                 <div class="nav-section">
-                    <div class="nav-section-title">Часть 10: Git & Culture</div>
-                    <a href="part10_git.html" class="nav-link">10.1 Git Advanced</a>
-                    <a href="part10_commits.html" class="nav-link">10.2 Semantic Commits</a>
-                    <a href="part10_codereview.html" class="nav-link">10.3 Code Review</a>
-                </div>
-            </nav>
+    <div class="nav-section">
+        <div class="nav-section-title">Intro</div>
+        <a href="index.html" class="nav-link">🏠 Главная</a>
+        <a href="setup.html" class="nav-link">🛠 Setup</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 0: Fundamentals</div>
+        <a href="part0_internals.html" class="nav-link active">0.1 Internals</a>
+        <a href="part0_networking.html" class="nav-link">0.2 Networking</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 1: Postgres</div>
+        <a href="part1_schema.html" class="nav-link">1.1 Schema</a>
+        <a href="part1_indexes.html" class="nav-link">1.2 Indexes</a>
+        <a href="part1_transactions.html" class="nav-link">1.3 Transactions</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 2: Litestar</div>
+        <a href="part2_litestar.html" class="nav-link">2.1 Framework</a>
+        <a href="part2_dishka.html" class="nav-link">2.2 DI (Dishka)</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 3: Brokers</div>
+        <a href="part3_redis.html" class="nav-link">3.1 Redis</a>
+        <a href="part3_faststream.html" class="nav-link">3.2 FastStream</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 4: Quality</div>
+        <a href="part4_testing.html" class="nav-link">4.1 Pytest</a>
+        <a href="part4_resiliency.html" class="nav-link">4.2 Resilience</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 5: Observability</div>
+        <a href="part5_clickhouse.html" class="nav-link">5.1 Clickhouse</a>
+        <a href="part5_logging.html" class="nav-link">5.2 Structured Logs</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 6: Django</div>
+        <a href="part6_django.html" class="nav-link">6.1 ORM</a>
+        <a href="part6_migrations.html" class="nav-link">6.2 Migrations</a>
+        <a href="part6_quality.html" class="nav-link">6.3 Quality</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 7: Microservices</div>
+        <a href="part7_grpc.html" class="nav-link">7.1 gRPC</a>
+        <a href="part7_graphql.html" class="nav-link">7.2 GraphQL</a>
+        <a href="part7_federation.html" class="nav-link">7.3 Federation</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 8: Async</div>
+        <a href="part8_asyncio.html" class="nav-link">8.1 Asyncio</a>
+        <a href="part8_celery.html" class="nav-link">8.2 Celery</a>
+        <a href="part8_dramatiq.html" class="nav-link">8.3 Dramatiq</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 9: API</div>
+        <a href="part9_restdesign.html" class="nav-link">9.1 REST Design</a>
+        <a href="part9_idempotency.html" class="nav-link">9.2 Idempotency</a>
+        <a href="part9_openapi.html" class="nav-link">9.3 OpenAPI</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 10: Culture</div>
+        <a href="part10_git.html" class="nav-link">10.1 Git</a>
+        <a href="part10_commits.html" class="nav-link">10.2 Commits</a>
+        <a href="part10_codereview.html" class="nav-link">10.3 Post-Review</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 11: Security</div>
+        <a href="part11_oauth.html" class="nav-link">11.1 OAuth2</a>
+        <a href="part11_vault.html" class="nav-link">11.2 Vault</a>
+        <a href="part11_owasp.html" class="nav-link">11.3 OWASP</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 12: Kubernetes</div>
+        <a href="part12_kubernetes.html" class="nav-link">12.1 K8s Basics</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 13: High Load</div>
+        <a href="part13_profiling.html" class="nav-link">13.1 Profiling</a>
+        <a href="part13_caching.html" class="nav-link">13.2 Caching</a>
+        <a href="part13_loadbalancing.html" class="nav-link">13.3 Load Balancing</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 14: ML Ops</div>
+        <a href="part14_mlflow.html" class="nav-link">14.1 MLflow</a>
+        <a href="part14_embeddings.html" class="nav-link">14.2 Embeddings</a>
+        <a href="part14_llm.html" class="nav-link">14.3 LLM</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 15: Debugging</div>
+        <a href="part15_debugging.html" class="nav-link">15.1 Debugging</a>
+        <a href="part15_postmortem.html" class="nav-link">15.2 Postmortem</a>
+        <a href="part15_chaos.html" class="nav-link">15.3 Chaos Eng</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 16: DB Advanced</div>
+        <a href="part16_indexes.html" class="nav-link">16.1 Indexes Deep</a>
+        <a href="part16_isolation.html" class="nav-link">16.2 Isolation</a>
+        <a href="part16_sharding.html" class="nav-link">16.3 Sharding</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 17: System Design</div>
+        <a href="part17_circuit.html" class="nav-link">17.1 Circuit Breaker</a>
+        <a href="part17_ratelimit.html" class="nav-link">17.2 Rate Limit</a>
+        <a href="part17_distlock.html" class="nav-link">17.3 Dist Lock</a>
+    </div>
+    <div class="nav-section">
+        <div class="nav-section-title">Part 18: Soft Skills</div>
+        <a href="part18_estimation.html" class="nav-link">18.1 Estimation</a>
+        <a href="part18_burnout.html" class="nav-link">18.2 Burnout</a>
+        <a href="part18_interview.html" class="nav-link">18.3 Interview</a>
+    </div>
+</nav>
         </aside>
 
         <main class="main-content">
@@ -58,46 +148,117 @@
             <div class="page-content">
                 <h1>Модуль 0.1: Python Internals</h1>
                 <p class="lead">Чтобы писать эффективный код, нужно понимать, как он выполняется. 
-                Разбираемся с GIL, Garbage Collector и управлением памятью.</p>
+                Разбираемся с CPython, GIL, Garbage Collector и управлением памятью.</p>
 
-                <h2>1. Global Interpreter Lock (GIL)</h2>
-                <p>GIL — это мьютекс, который защищает доступ к объектам Python, предотвращая возможность одновременного выполнения нескольких потоков байт-кода Python.</p>
-
-                <div class="info-box danger">
-                    <div class="info-box-title">Миф</div>
-                    <p>Многие считают, что из-за GIL многопоточность в Python бесполезна. Это не так. GIL мешает только CPU-bound задачам.</p>
+                <h2>1. CPython Execution Model</h2>
+                <p>Python — интерпретируемый язык, но не совсем. Ваш код (<code>.py</code>) сначала компилируется в <strong>байт-код</strong> (<code>.pyc</code>), а затем этот байт-код исполняется виртуальной машиной (VM) CPython.</p>
+                
+                <div class="card">
+                    <h4>🛠️ Этапы выполнения:</h4>
+                    <ol>
+                        <li><strong>Lexing & Parsing:</strong> Исходный код превращается в AST (Abstract Syntax Tree). Синтаксические ошибки ловятся тут.</li>
+                        <li><strong>Compilation:</strong> AST превращается в Bytecode. Это набор инструкций для стековой машины (LOAD_FAST, BINARY_ADD).</li>
+                        <li><strong>Interpretation:</strong> Виртуальная машина (PVM) читает байт-код инструкция за инструкцией.</li>
+                    </ol>
                 </div>
 
-                <h3>Когда GIL не мешает? (I/O Bound)</h3>
-                <p>При операциях ввода-вывода (сеть, диск) GIL отпускается.</p>
-                <ul>
-                    <li>Запросы в БД (PostgreSQL, Redis)</li>
-                    <li>HTTP-запросы</li>
-                    <li>Чтение/запись файлов</li>
-                </ul>
+                <p>Посмотреть байт-код можно модулем <code>dis</code>:</p>
+<pre><code class="language-python">import dis
+def add(a, b):
+    return a + b
 
-                <h3>Когда GIL мешает? (CPU Bound)</h3>
-                <p>Тяжелые вычисления на чистом Python.</p>
-                <ul>
-                    <li>Обработка изображений</li>
-                    <li>Сложная математика</li>
-                    <li>Сериализация больших JSON</li>
-                </ul>
-
-                <h2>2. Memory Model & Garbage Collection</h2>
-                <p>В Python всё — объект. Управление памятью основано на двух механизмах:</p>
-                
-                <ol>
-                    <li><strong>Reference Counting (Счётчик ссылок):</strong> Основной механизм. Как только счётчик ссылок на объект становится 0, память освобождается немедленно.</li>
-                    <li><strong>Garbage Collector (GC):</strong> Вспомогательный механизм для обнаружения <em>циклических ссылок</em>.</li>
-                </ol>
-
-<pre><code class="language-python">import sys
-
-a = []
-b = a
-print(sys.getrefcount(a))  # 3 (a, b, и аргумент getrefcount)
+dis.dis(add)
+#  2           0 LOAD_FAST                0 (a)
+#              2 LOAD_FAST                1 (b)
+#              4 BINARY_ADD
+#              6 RETURN_VALUE
 </code></pre>
+                <div class="info-box info">
+                    <p>Этот байт-код кроссплатформенный (обычно), но привязан к версии Python. PVM — это просто гигантский цикл <code>for(;;)</code> с <code>switch(opcode)</code> внутри, написанный на C.</p>
+                </div>
+
+                <h2>2. Global Interpreter Lock (GIL)</h2>
+                <p>GIL — это мьютекс (Lock), защищающий внутренние структуры памяти CPython от race conditions. Из-за системы подсчета ссылок (Reference Counting) одновременное изменение счетчика из разных потоков привело бы к краху.</p>
+                
+                <h3>Почему GIL до сих пор существует?</h3>
+                <p>Удаление GIL (проект No-GIL / PEP 703) делает однопоточный код медленнее (из-за необходимости постоянных блокировок на каждой операции с reference count). CPython оптимизирован для однопоточной производительности. GIL гарантирует, что только один поток Python-кода выполняется в один момент времени внутри одного процесса.</p>
+
+                <h3>Влияние на производительность</h3>
+                <div class="comparison-table">
+                    <div class="comparison-col good">
+                        <h4>🟢 I/O Bound (Сеть/Диск)</h4>
+                        <p><strong>GIL НЕ мешает.</strong> При системных вызовах (socket read, file write) GIL отпускается. Сотни потоков могут эффективно ждать сеть.</p>
+                        <ul>
+                            <li>Web-серверы</li>
+                            <li>Запросы в БД (Postgres, Redis)</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-col bad">
+                        <h4>🔴 CPU Bound (Вычисления)</h4>
+                        <p><strong>GIL мешает.</strong> Потоки дерутся за захват GIL. Многопоточность может работать <em>медленнее</em>, чем 1 поток (из-за накладных расходов на context switch).</p>
+                        <ul>
+                            <li>ML-обучение (в чистом Py)</li>
+                            <li>Обработка изображений</li>
+                            <li>Сериализация JSON</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="info-box tip">
+                    <div class="info-box-title">💡 C-Extensions обходят GIL</div>
+                    <p>Библиотеки, написанные на C/C++ (NumPy, TensorFlow, lxml), могут явно отпускать GIL на время тяжелых вычислений. Поэтому NumPy быстрый даже в тредах.</p>
+                </div>
+
+                <h2>3. Memory Management Deep Dive</h2>
+                <p>Управление памятью в Python состоит из слоев: OS Allocator (malloc) -> PyMalloc -> Python Objects.</p>
+                
+                <h3>Allocation Strategy (Arenas, Pools, Blocks)</h3>
+                <p>Чтобы не дергать медленный системный <code>malloc</code> для каждого int'а, Python захватывает память большими кусками:</p>
+                <ul>
+                    <li><strong>Arena (256KB):</strong> Большой кусок памяти от ОС.</li>
+                    <li><strong>Pool (4KB):</strong> Внутри арены. Делится на блоки фиксированного размера (например, пул для объектов по 32 байта).</li>
+                    <li><strong>Block:</strong> Место под конкретный объект.</li>
+                </ul>
+                <p>Это называется <strong>PyMalloc</strong>. Он работает для объектов < 512 байт. Большие объекты идут напрямую через <code>malloc</code>.</p>
+
+                <h3>Reference Counting (Главный механизм)</h3>
+                <p>Каждый объект хранит счетчик ссылок (<code>ob_refcnt</code>). Когда он равен 0, память освобождается <strong>моментально</strong>.</p>
+                <div class="code-block">
+<pre><code class="language-python">import sys
+a = object()
+print(sys.getrefcount(a))  # 2 (переменная 'a' + аргумент функции)
+del a                      # Счетчик -> 0, память освобождена</code></pre>
+                </div>
+
+                <h3>Cyclic GC (Вспомогательный механизм)</h3>
+                <p>Что если объекты ссылаются друг на друга (A -> B -> A)? Счетчик никогда не станет 0. Для этого существует "Generation Garbage Collector".</p>
+                <ul>
+                    <li><strong>Generations (Поколения):</strong> 0, 1, 2. Новые объекты попадают в Gen 0. Если выживают — переходят в Gen 1.</li>
+                    <li><strong>Thresholds:</strong> Сборка запускается, когда количество аллокаций превышает деаллокации на N (700 по умолчанию).</li>
+                    <li>GC останавливает мир (Stop-the-World) на короткое время.</li>
+                </ul>
+
+                <h2>4. Optimization Techniques</h2>
+                
+                <h3>__slots__ vs __dict__</h3>
+                <p>Обычные объекты хранят атрибуты в <code>__dict__</code> (hash map), что потребляет много памяти. <code>__slots__</code> заставляет Python выделить фиксированный массив памяти (как struct в C), убирая оверхед словаря.</p>
+                <div class="code-block">
+<pre><code class="language-python">class RegularPoint:
+    def __init__(self, x, y):
+        self.x = x  # Хранится в динамическом __dict__
+        self.y = y
+
+class SlotPoint:
+    __slots__ = ('x', 'y')  # Хранится в фиксированном массиве
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+# SlotPoint потребляет в ~3 раза меньше памяти!</code></pre>
+                </div>
+
+                <h3>Mutable vs Immutable (Interning)</h3>
+                <p>Python кэширует (interiniрует) малые целые числа (-5..256) и короткие строки. Это "синглтоны".</p>
+
 
                 <h2>3. Asyncio Event Loop</h2>
                 <p>Asyncio — это кооперативная многозадачность. Основа — Event Loop (цикл событий).</p>
