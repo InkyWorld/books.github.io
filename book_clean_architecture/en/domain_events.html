@@ -128,26 +128,26 @@
     <!-- CONTENT -->
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Domain Events (Доменные события)</h1>
-            <p class="text-xl text-gray-600">Side effects и decoupling в чистой архитектуре.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Domain Events</h1>
+            <p class="text-xl text-gray-600">Side effects and decoupling in clean architecture.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <p>Доменное событие — это запись о чем-то важном, что <strong>случилось</strong> в бизнес-домене. Это главный инструмент для построения Event-Driven систем и развязывания (decoupling) логики.</p>
+        <p>A domain event is a record of something important that <strong>happened</strong> in the business domain. It is the main tool for building Event-Driven systems and decoupling logic.</p>
 
-        <h3 class="font-bold text-lg mt-4">Зачем?</h3>
-        <p>Вместо того, чтобы метод <code>Order.pay()</code> вызывал <code>EmailService.send()</code>, он просто генерирует событие <code>OrderPaid</code>. Обработчик события отправит письмо. Домен остается чистым и не зависит от инфраструктуры.</p>
+        <h3 class="font-bold text-lg mt-4">Why?</h3>
+        <p>Instead of the <code>Order.pay()</code> method calling <code>EmailService.send()</code>, it simply generates an <code>OrderPaid</code> event. The event handler will send the email. The domain remains clean and independent of infrastructure.</p>
 
-        <pre><code class="language-python"># 1. Событие
+        <pre><code class="language-python"># 1. Event
 @dataclass(frozen=True)
 class CustomerRegistered:
     customer_id: UUID
     email: str
     registered_at: datetime
 
-# 2. Публикация (обычно в UoW после commit)
+# 2. Publishing (usually in UoW after commit)
 message_bus.publish(events)
 </code></pre>
         

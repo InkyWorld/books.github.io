@@ -129,23 +129,23 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Saga Pattern</h1>
-            <p class="text-xl text-gray-600">Распределенные транзакции в мире микросервисов.</p>
+            <p class="text-xl text-gray-600">Distributed transactions in the microservices world.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <p>В микросервисной архитектуре нет ACID транзакций, охватывающих несколько сервисов. Saga — это механизм поддержания консистентности данных.</p>
+        <p>In microservice architecture, there are no ACID transactions spanning multiple services. A Saga is a mechanism for maintaining data consistency.</p>
         
-        <p>Сага — это последовательность локальных транзакций. Каждая локальная транзакция обновляет базу данных и публикует событие (или сообщение), инициирующее следующую транзакцию.</p>
+        <p>A Saga is a sequence of local transactions. Each local transaction updates the database and publishes an event (or message) that triggers the next transaction.</p>
         
-        <h3 class="font-bold text-lg mt-4">Compensating Transactions (Компенсация)</h3>
-        <p>Если на 5-м шаге произошла ошибка, Сага должна выполнить серию компенсирующих транзакций в обратном порядке, чтобы отменить изменения (undo), сделанные предыдущими шагами.</p>
+        <h3 class="font-bold text-lg mt-4">Compensating Transactions</h3>
+        <p>If an error occurs at step 5, the Saga must execute a series of compensating transactions in reverse order to undo the changes made by the previous steps.</p>
         
-        <p>Два типа координации:</p>
+        <p>Two types of coordination:</p>
         <ul class="list-disc list-inside">
-            <li><strong>Choreography (Хореография):</strong> Сервисы обмениваются событиями без центрального координатора.</li>
-            <li><strong>Orchestration (Оркестрация):</strong> Центральный сервис (Saga Orchestrator) говорит участникам, что делать.</li>
+            <li><strong>Choreography:</strong> Services exchange events without a central coordinator.</li>
+            <li><strong>Orchestration:</strong> A central service (Saga Orchestrator) tells participants what to do.</li>
         </ul>
         
             </div>

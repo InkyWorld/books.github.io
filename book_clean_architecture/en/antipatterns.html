@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Глава 10: Antipatterns - Clean Architecture</title>
+    <title>Chapter 10: Antipatterns - Clean Architecture</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
     <style>
@@ -132,20 +132,20 @@
                 <span class="bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Danger Zone</span>
                 <span class="text-red-500 text-sm font-mono">Common Mistakes</span>
             </div>
-            <h1 class="text-4xl font-extrabold text-red-900 leading-tight">Главные Antipatterns</h1>
+            <h1 class="text-4xl font-extrabold text-red-900 leading-tight">Main Antipatterns</h1>
             <p class="text-xl text-red-700 mt-4 font-light">
-                Как НЕ надо писать код. Ошибки, которые убивают проекты через год.
+                How NOT to write code. Mistakes that kill projects in a year.
             </p>
         </header>
 
         <!-- 1. ANEMIC DOMAIN -->
         <section id="anemic">
-            <h2 class="text-3xl font-bold mb-6 text-gray-900">1. Anemic Domain (Анемичная модель)</h2>
-            <p class="mb-4">Самый распространенный грех. Это когда ваши классы `Order`, `User` — это просто контейнеры для данных (getters/setters), а вся логика лежит в Сервисах.</p>
+            <h2 class="text-3xl font-bold mb-6 text-gray-900">1. Anemic Domain (Anemic Model)</h2>
+            <p class="mb-4">The most common sin. This is when your classes `Order`, `User` are just containers for data (getters/setters), and all the logic lies in Services.</p>
             
             <div class="bad-card">
-                <h3 class="text-xl font-bold text-red-600 mb-2">❌ Как это выглядит (ПЛОХО)</h3>
-                <p class="text-sm mb-4">Сущность тупая. Use Case умный и делает микроменеджмент.</p>
+                <h3 class="text-xl font-bold text-red-600 mb-2">❌ How it looks (BAD)</h3>
+                <p class="text-sm mb-4">Entity is dumb. Use Case is smart and does micromanagement.</p>
 <pre><code class="language-python"><span class="code-comment"># domain/entities.py</span>
 <span class="code-class">class</span> Order:
     self.items = []
@@ -155,37 +155,37 @@
 <span class="code-comment"># application/services.py</span>
 <span class="code-keyword">def</span> <span class="code-func">add_item_service</span>(order, item):
     order.items.append(item)
-    order.total += item.price <span class="code-comment"># Логика снаружи!</span>
-    if order.total > 1000:    <span class="code-comment"># Логика снаружи!</span>
+    order.total += item.price <span class="code-comment"># Logic outside!</span>
+    if order.total > 1000:    <span class="code-comment"># Logic outside!</span>
         order.status = "vip"
 </code></pre>
             </div>
 
             <div class="fix-card">
-                <h3 class="text-xl font-bold text-green-700 mb-2">✅ Как исправить (Rich Model)</h3>
-                <p class="text-sm mb-4">Перенесите поведение в данные. "Скажи, не спрашивай" (Tell, Don't Ask).</p>
+                <h3 class="text-xl font-bold text-green-700 mb-2">✅ How to fix (Rich Model)</h3>
+                <p class="text-sm mb-4">Move behavior into data. "Tell, don't ask" principle.</p>
 <pre><code class="language-python"><span class="code-comment"># domain/entities.py</span>
 <span class="code-class">class</span> Order:
     <span class="code-keyword">def</span> <span class="code-func">add_item</span>(self, item):
         self.items.append(item)
-        self._recalculate_total() <span class="code-comment"># Сущность сама знает, как считать</span>
-        self._check_vip_status()  <span class="code-comment"># Сущность сама обновляет статус</span>
+        self._recalculate_total() <span class="code-comment"># Entity knows how to calculate</span>
+        self._check_vip_status()  <span class="code-comment"># Entity updates status itself</span>
 </code></pre>
             </div>
         </section>
 
         <!-- 2. GOD REPOSITORY -->
         <section id="god-repo" class="mt-16">
-            <h2 class="text-3xl font-bold mb-6 text-gray-900">2. God Repository (Божественный Репозиторий)</h2>
-            <p class="mb-4">Когда репозиторий начинает делать всё: отправлять почту, считать аналитику, форматировать даты.</p>
+            <h2 class="text-3xl font-bold mb-6 text-gray-900">2. God Repository (Divine Repository)</h2>
+            <p class="mb-4">When a repository starts doing everything: sending emails, calculating analytics, formatting dates.</p>
 
             <div class="bad-card">
-                <h3 class="text-xl font-bold text-red-600 mb-2">❌ Ошибка</h3>
+                <h3 class="text-xl font-bold text-red-600 mb-2">❌ Mistake</h3>
 <pre><code class="language-python"><span class="code-class">class</span> UserRepository:
     <span class="code-keyword">def</span> <span class="code-func">get_by_id</span>(self, id): ...
     <span class="code-keyword">def</span> <span class="code-func">save</span>(self, user): ...
     
-    <span class="code-comment"># ЛИШНЕЕ:</span>
+    <span class="code-comment"># EXTRA:</span>
     <span class="code-keyword">def</span> <span class="code-func">validate_password</span>(self, password): ...
     <span class="code-keyword">def</span> <span class="code-func">send_welcome_email</span>(self, user): ...
     <span class="code-keyword">def</span> <span class="code-func">calculate_daily_report</span>(self): ...
@@ -195,23 +195,23 @@
 
         <!-- 3. LEAKING INFRA -->
         <section id="leaking" class="mt-16">
-            <h2 class="text-3xl font-bold mb-6 text-gray-900">3. Leaking Infrastructure (Протекающая Инфраструктура)</h2>
-            <p class="mb-4">Когда типы данных из БД или Веба проникают в бизнес-логику.</p>
+            <h2 class="text-3xl font-bold mb-6 text-gray-900">3. Leaking Infrastructure (Leaking Infrastructure)</h2>
+            <p class="mb-4">When data types from the database or web leak into business logic.</p>
 
             <div class="bad-card">
-                <h3 class="text-xl font-bold text-red-600 mb-2">❌ IUse Case зависит от Request</h3>
+                <h3 class="text-xl font-bold text-red-600 mb-2">❌ Use Case depends on Request</h3>
 <pre><code class="language-python"><span class="code-comment"># application/use_cases.py</span>
-<span class="code-keyword">from</span> flask <span class="code-keyword">import</span> Request <span class="code-comment"># Ужас! Привязка к фреймворку</span>
+<span class="code-keyword">from</span> flask <span class="code-keyword">import</span> Request <span class="code-comment"># Horror! Framework binding</span>
 
 <span class="code-keyword">def</span> <span class="code-func">create_order</span>(request: Request):
-    data = request.json <span class="code-comment"># Тестировать это без Flask невозможно</span>
+    data = request.json <span class="code-comment"># Impossible to test without Flask</span>
 </code></pre>
             </div>
             
             <div class="bad-card">
-                <h3 class="text-xl font-bold text-red-600 mb-2">❌ Domain зависит от ORM</h3>
+                <h3 class="text-xl font-bold text-red-600 mb-2">❌ Domain depends on ORM</h3>
 <pre><code class="language-python"><span class="code-comment"># domain/entities.py</span>
-<span class="code-keyword">from</span> django.db <span class="code-keyword">import</span> models <span class="code-comment"># Ужас! Привязка к БД</span>
+<span class="code-keyword">from</span> django.db <span class="code-keyword">import</span> models <span class="code-comment"># Horror! Database binding</span>
 
 <span class="code-class">class</span> Order(models.Model):
     ...

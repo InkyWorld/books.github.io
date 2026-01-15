@@ -124,26 +124,26 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Strategic Distillation</h1>
-            <p class="text-xl text-gray-600">Отделение зерен от плевел. Как сфокусироваться на главном.</p>
+            <p class="text-xl text-gray-600">Separating the wheat from the chaff. How to focus on what matters.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
-                <p>Ваши ресурсы ограничены. Вы не можете сделать идеально <strong>ВСЁ</strong>.</p>
-                <p><strong>Distillation (Дистилляция)</strong> — это процесс непрерывного выделения Core Domain (Ядра) из общей массы кода, чтобы сфокусировать на нем внимание.</p>
+                <p>Your resources are limited. You cannot do everything perfectly.</p>
+                <p><strong>Distillation</strong> is the process of continuously extracting the Core Domain from the general mass of code to focus attention on it.</p>
                 
-                <h3 class="font-bold text-lg mt-8 mb-4">Как понять, что в Core попал мусор?</h3>
+                <h3 class="font-bold text-lg mt-8 mb-4">How to understand if garbage got into the Core?</h3>
                 <ul class="list-disc pl-5 space-y-2">
-                    <li>Вам сложно читать код ядра из-за обилия утилит?</li>
-                    <li>Вы видите код, который можно увидеть в любом другом проекте (отправка писем, логирование)?</li>
-                    <li>Бизнес-эксперты скучают, когда вы это обсуждаете?</li>
+                    <li>Is it difficult for you to read the core code due to the abundance of utilities?</li>
+                    <li>Do you see code that could be found in any other project (sending emails, logging)?</li>
+                    <li>Do business experts get bored when you discuss this?</li>
                 </ul>
 
-                <h3 class="font-bold text-lg mt-8 mb-4">Методы очистки (Refactoring)</h3>
+                <h3 class="font-bold text-lg mt-8 mb-4">Cleaning Methods (Refactoring)</h3>
                 <ol class="list-decimal pl-5 space-y-3">
-                    <li><strong>Выделите Generic Subdomains:</strong> Если пишете свой шаблонизатор — остановитесь. Возьмите Jinja2. Вынесите это за скобки Core.</li>
-                    <li><strong>Создайте Supporting Subdomains:</strong> Вынесите вспомогательную логику (импорт Excel) в отдельный модуль. Пусть ядро просто вызывает <code>ImportService.run()</code>.</li>
-                    <li><strong>Core Domain Manifesto:</strong> Напишите документ (1-2 страницы), описывающий суть. Что именно мы делаем уникального?</li>
+                    <li><strong>Isolate Generic Subdomains:</strong> If you're writing your own template engine — stop. Use Jinja2. Move it outside the Core.</li>
+                    <li><strong>Create Supporting Subdomains:</strong> Move auxiliary logic (Excel import) into a separate module. Let the core simply call <code>ImportService.run()</code>.</li>
+                    <li><strong>Core Domain Manifesto:</strong> Write a document (1-2 pages) describing the essence. What exactly do we do that is unique?</li>
                 </ol>
 
             </div>

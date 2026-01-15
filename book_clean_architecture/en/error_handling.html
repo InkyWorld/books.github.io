@@ -128,38 +128,38 @@
     <!-- CONTENT -->
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Обработка ошибок</h1>
-            <p class="text-xl text-gray-600">Как превратить Exception в HTTP 400 красиво.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Error Handling</h1>
+            <p class="text-xl text-gray-600">How to beautifully convert Exception to HTTP 400.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <p>Исключения — это часть интерфейса вашего слоя. Важно иметь четкую иерархию.</p>
+        <p>Exceptions are part of your layer's interface. It's important to have a clear hierarchy.</p>
 
-        <h3 class="font-bold text-lg mt-6">1. Иерархия исключений</h3>
+        <h3 class="font-bold text-lg mt-6">1. Exception Hierarchy</h3>
         <pre><code class="language-python">class AppException(Exception):
-    """Базовый класс для всех ошибок приложения"""
+    """Base class for all application errors"""
     pass
 
 class DomainException(AppException):
-    """Ошибки бизнес-логики (недостаточно средств, и т.д.)"""
+    """Business logic errors (insufficient funds, etc.)"""
     pass
 
 class ResourceNotFound(AppException):
-    """Не найдено в репозитории"""
+    """Not found in repository"""
     pass
 </code></pre>
 
-        <h3 class="font-bold text-lg mt-6">2. Централизованная обработка (Exception Handlers)</h3>
-        <p>Домен выбрасывает `DomainError`. Presentation Layer должен перехватить их и превратить в понятные HTTP-ответы. Use Case не должен возвращать `JSONResponse`!</p>
+        <h3 class="font-bold text-lg mt-6">2. Centralized Error Handling (Exception Handlers)</h3>
+        <p>The domain throws `DomainError`. The Presentation Layer should catch them and convert them into understandable HTTP responses. Use Case should not return `JSONResponse`!</p>
 
         <pre><code class="language-python"># presentation/exception_handlers.py
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette import status
 
-# Импортируем ошибки домена
+# Import domain errors
 from domain.exceptions import (
     DomainError,
     InvalidEmailError,
@@ -169,7 +169,7 @@ from domain.exceptions import (
 )
 
 
-# Маппинг: Ошибка домена → HTTP статус + код
+# Mapping: Domain Error → HTTP status + code
 ERROR_MAPPING = {
     InvalidEmailError: (status.HTTP_400_BAD_REQUEST, "INVALID_EMAIL"),
     OrderNotFoundError: (status.HTTP_404_NOT_FOUND, "ORDER_NOT_FOUND"),
@@ -180,10 +180,10 @@ ERROR_MAPPING = {
 
 async def domain_error_handler(request: Request, exc: DomainError):
     """
-    Глобальный обработчик всех ошибок домена.
-    Превращает DomainError в красивый JSON-ответ.
+    Global handler for all domain errors.
+    Converts DomainError to a beautiful JSON response.
     """
-    # Ищем маппинг для конкретного типа ошибки
+    # Find mapping for specific error type
     error_type = type(exc)
     status_code, error_code = ERROR_MAPPING.get(
         error_type, 
@@ -200,17 +200,17 @@ async def domain_error_handler(request: Request, exc: DomainError):
     )
 
 
-# Регистрация в main.py:
+# Registration in main.py:
 # app.add_exception_handler(DomainError, domain_error_handler)
 </code></pre>
 
         <div class="bg-green-50 p-4 rounded border border-green-200 mt-4 text-sm text-green-900">
-            <strong>Преимущество:</strong> Домен остается чистым. Он не знает про HTTP-коды. А мы можем легко менять формат ответов, не трогая бизнес-логику.
+            <strong>Benefit:</strong> The domain remains clean. It doesn't know about HTTP codes. And we can easily change the response format without touching the business logic.
         </div>
 
         <h3 class="font-bold text-lg mt-6">3. Result Pattern (Alternative)</h3>
-        <p>Вместо `raise` можно возвращать результат "Успех или Ошибка" (монада Result). Это популярно в функциональном программировании и Rust.</p>
-        <pre><code class="language-python"># Возвращает Success(Order) или Failure(Error)
+        <p>Instead of `raise` you can return a "Success or Error" result (Result monad). This is popular in functional programming and Rust.</p>
+        <pre><code class="language-python"># Returns Success(Order) or Failure(Error)
 def create_order(...) -> Result[Order, AppError]: 
     if error:
         return Failure(ValueError("Invalid"))

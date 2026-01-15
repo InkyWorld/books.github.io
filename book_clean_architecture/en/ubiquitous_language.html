@@ -124,43 +124,43 @@
     <!-- CONTENT -->
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Ubiquitous Language (Единый Язык)</h1>
-            <p class="text-xl text-gray-600">Фундамент DDD. Язык, на котором говорят и разработчики, и бизнес.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Ubiquitous Language</h1>
+            <p class="text-xl text-gray-600">The foundation of DDD. A language spoken by both developers and business.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Проблема Вавилонской башни</h2>
-                <p>В типичном проекте происходит сломанный телефон:</p>
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">The Babel Tower Problem</h2>
+                <p>In a typical project, a game of telephone occurs:</p>
                 <div class="bg-red-50 p-6 rounded-lg my-6 border border-red-100">
                     <ul class="space-y-4">
-                        <li>🤵 <strong>Бизнес:</strong> "Когда клиент отменяет бронь, мы возвращаем ему деньги и отправляем уведомление."</li>
-                        <li>👨‍💻 <strong>Разработчик (в голове):</strong> "Ага, update table bookings set status=0, insert into refunds, call mailer service."</li>
-                        <li>💻 <strong>Код:</strong> <code>user.disable_booking()</code>, <code>refund_manager.process_void()</code></li>
+                        <li>🤵 <strong>Business:</strong> "When a customer cancels a booking, we refund their money and send a notification."</li>
+                        <li>👨‍💻 <strong>Developer (in their head):</strong> "Got it, update table bookings set status=0, insert into refunds, call mailer service."</li>
+                        <li>💻 <strong>Code:</strong> <code>user.disable_booking()</code>, <code>refund_manager.process_void()</code></li>
                     </ul>
                 </div>
-                <p>Термины не совпадают. "Отмена", "Возврат", "Notification" превращаются в "Disable", "ProcessVoid", "Mailer".</p>
+                <p>Terms don't match. "Cancel", "Refund", "Notification" transform into "Disable", "ProcessVoid", "Mailer".</p>
 
                 <div class="bg-green-50 border-l-4 border-green-500 p-6 my-8">
-                    <h3 class="font-bold text-green-800 text-lg mb-2">Решение: Ubiquitous Language</h3>
-                    <p>Программист и Эксперт должны говорить на одном языке. Если эксперт говорит "Policy", в коде должен быть класс <code>Policy</code>. Если он говорит "Issue", в коде должно быть <code>issue()</code>.</p>
+                    <h3 class="font-bold text-green-800 text-lg mb-2">Solution: Ubiquitous Language</h3>
+                    <p>A programmer and an expert should speak the same language. If an expert says "Policy", there should be a <code>Policy</code> class in the code. If they say "Issue", there should be an <code>issue()</code> method.</p>
                 </div>
 
-                <h3 class="font-bold text-lg mt-8 mb-4">Как это выглядит в коде?</h3>
-                <pre><code class="language-python"># ❌ ПЛОХО: Технический язык
+                <h3 class="font-bold text-lg mt-8 mb-4">How Does It Look in Code?</h3>
+                <pre><code class="language-python"># ❌ BAD: Technical language
 if user.status == 1:
     user.send_email("template_12")
 
-# ✅ ХОРОШО: Язык бизнеса (Ubiquitous Language)
+# ✅ GOOD: Business language (Ubiquitous Language)
 if customer.is_active():
     customer.notify_about_new_policy()
 </code></pre>
                 
-                <h3 class="font-bold text-lg mt-8 mb-4">Правила</h3>
+                <h3 class="font-bold text-lg mt-8 mb-4">Rules</h3>
                 <ul class="list-disc list-inside space-y-2">
-                    <li>Используйте термины в названиях классов, методов, модулей.</li>
-                    <li>Меняйте код, если меняется понимание бизнеса.</li>
-                    <li>Язык действителен только внутри одного <strong>Bounded Context</strong>.</li>
+                    <li>Use the terms in class names, method names, and module names.</li>
+                    <li>Change the code if the business understanding changes.</li>
+                    <li>The language is valid only within one <strong>Bounded Context</strong>.</li>
                 </ul>
             </div>
         </section>

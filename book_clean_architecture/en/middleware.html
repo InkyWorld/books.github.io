@@ -132,45 +132,45 @@
                 <span class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Infrastructure / Presentation</span>
                 <span class="text-gray-400 text-sm font-mono">FastAPI Middleware / Django Middleware</span>
             </div>
-            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Middleware (Промежуточное ПО)</h1>
+            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Middleware</h1>
             <p class="text-xl text-gray-500 mt-4 font-light">
-                Невидимые стражи вашего приложения. Код, который "обнимает" каждый запрос.
+                Invisible guardians of your application. Code that "embraces" every request.
             </p>
         </header>
 
         <!-- CONCEPT -->
         <section class="card">
-            <h2 class="text-2xl font-bold mb-6">Как это работает? (Onion Model)</h2>
-            <p>Представьте Middleware как слои луковицы вокруг вашего приложения. Запрос должен пройти сквозь все слои, чтобы добраться до ядра (Роутер -> Контроллер -> Use Case). Ответ пролетает обратно сквозь те же слои.</p>
+            <h2 class="text-2xl font-bold mb-6">How It Works (Onion Model)</h2>
+            <p>Imagine Middleware as layers of an onion around your application. A request must pass through all layers to reach the core (Router → Controller → Use Case). The response flies back through the same layers.</p>
             
             <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-100 mb-6 font-mono text-sm leading-relaxed">
                 <span class="text-gray-400">Request ➡</span> [ Middleware 1 ] ➡ [ Middleware 2 ] ➡ <strong class="text-indigo-700">[ ROUTER / APP ]</strong><br>
                 <span class="text-gray-400">Response ⬅</span> [ Middleware 1 ] ⬅ [ Middleware 2 ] ⬅ <strong class="text-indigo-700">[ RESULT ]</strong>
             </div>
 
-            <h3 class="font-bold text-lg mb-4">Для чего использовать? (Cross-Cutting Concerns)</h3>
+            <h3 class="font-bold text-lg mb-4">What's It Used For? (Cross-Cutting Concerns)</h3>
             <div class="grid md:grid-cols-2 gap-6">
                 <ul class="space-y-2 list-disc list-inside text-gray-700">
-                    <li><strong>Authentication:</strong> Кто этот пользователь? (JWT, Session)</li>
-                    <li><strong>Context Management:</strong> ID запроса, сессия БД, user_id.</li>
-                    <li><strong>Logging:</strong> Запись всех входящих запросов и ошибок.</li>
-                    <li><strong>CORS:</strong> Разрешение доступа с фронтенда.</li>
+                    <li><strong>Authentication:</strong> Who is this user? (JWT, Session)</li>
+                    <li><strong>Context Management:</strong> Request ID, DB session, user_id.</li>
+                    <li><strong>Logging:</strong> Recording all incoming requests and errors.</li>
+                    <li><strong>CORS:</strong> Allowing access from the frontend.</li>
                 </ul>
                 <ul class="space-y-2 list-disc list-inside text-gray-700">
-                    <li><strong>GZIP / Compression:</strong> Сжатие ответов.</li>
-                    <li><strong>Rate Limiting:</strong> Защита от спама (N запросов в минуту).</li>
-                    <li><strong>Error Handling:</strong> Глобальный перехват исключений (500 Server Error).</li>
+                    <li><strong>GZIP / Compression:</strong> Compressing responses.</li>
+                    <li><strong>Rate Limiting:</strong> Protection from spam (N requests per minute).</li>
+                    <li><strong>Error Handling:</strong> Global exception handling (500 Server Error).</li>
                 </ul>
             </div>
         </section>
 
         <!-- IMPLEMENTATION -->
         <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-6">Примеры реализации</h2>
+            <h2 class="text-2xl font-bold mb-6">Implementation Examples</h2>
 
             <div class="mb-8">
-                <h3 class="text-xl font-bold mb-3 text-indigo-600">1. Логирование и Тайминг</h3>
-                <p>Классический пример: замерить, сколько времени обрабатывался запрос.</p>
+                <h3 class="text-xl font-bold mb-3 text-indigo-600">1. Logging and Timing</h3>
+                <p>Classic example: measure how long a request takes to process.</p>
                 <pre><code class="language-python">import time
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi import Request
@@ -179,13 +179,13 @@ class TimingMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         start_time = time.time()
         
-        # 🟢 ДО обработки запроса
+        # 🟢 BEFORE processing the request
         print(f"Start: {request.method} {request.url}")
         
-        # Передача управления дальше по цепочке
+        # Passing control further down the chain
         response = await call_next(request)
         
-        # 🔴 ПОСЛЕ обработки
+        # 🔴 AFTER processing
         process_time = time.time() - start_time
         response.headers["X-Process-Time"] = str(process_time)
         print(f"Done in {process_time:.4f}s")
@@ -195,30 +195,30 @@ class TimingMiddleware(BaseHTTPMiddleware):
             </div>
 
             <div class="mb-8">
-                <h3 class="text-xl font-bold mb-3 text-indigo-600">2. Управление Context'ом (Correlation ID)</h3>
-                <p>Чтобы отслеживать логи одного и того же запроса, полезно присвоить ему уникальный ID (Request ID) и прокинуть его в контекст.</p>
+                <h3 class="text-xl font-bold mb-3 text-indigo-600">2. Context Management (Correlation ID)</h3>
+                <p>To track logs of the same request, it's useful to assign it a unique ID (Request ID) and pass it to the context.</p>
                 <pre><code class="language-python">import uuid
 from contextvars import ContextVar
 
-# Глобальная переменная для Request ID
+# Global variable for Request ID
 request_id_ctx: ContextVar[str] = ContextVar("request_id", default=None)
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Генерируем ID
+        # Generate ID
         req_id = str(uuid.uuid4())
         
-        # Устанавливаем в ContextVar
+        # Set in ContextVar
         token = request_id_ctx.set(req_id)
         
         try:
-            # Выполняем запрос
+            # Execute request
             response = await call_next(request)
-            # Возвращаем клиенту, чтобы он мог сообщить этот ID в техподдержку
+            # Return to client so they can provide this ID to support
             response.headers["X-Request-ID"] = req_id
             return response
         finally:
-            # Очищаем контекст (важно для asyncio!)
+            # Clear context (important for asyncio!)
             request_id_ctx.reset(token)
 </code></pre>
             </div>
@@ -226,24 +226,24 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 
         <!-- WARNINGS -->
         <section class="card bg-red-50 border-red-200">
-            <h2 class="text-2xl font-bold text-red-900 mb-4">⛔ Опасности Middleware</h2>
+            <h2 class="text-2xl font-bold text-red-900 mb-4">⛔ Middleware Dangers</h2>
             <ul class="space-y-4 text-red-800">
                 <li class="flex gap-3">
                     <span class="text-2xl">🐢</span>
                     <div>
-                        <strong>Влияние на производительность:</strong> Middleware выполняется для <em>каждого</em> запроса. Если вы добавите сюда запросы к БД или тяжелые вычисления, тормозить будет ВСЁ.
+                        <strong>Performance Impact:</strong> Middleware runs for <em>every</em> request. If you add database queries or heavy computations here, <em>everything</em> slows down.
                     </div>
                 </li>
                 <li class="flex gap-3">
                     <span class="text-2xl">🙈</span>
                     <div>
-                        <strong>Скрытие логики:</strong> Не прячьте бизнес-логику в Middleware. Магическое изменение данных запроса может свести с ума других разработчиков.
+                        <strong>Hidden Logic:</strong> Don't hide business logic in Middleware. Magic changes to request data can drive other developers crazy.
                     </div>
                 </li>
                 <li class="flex gap-3">
                     <span class="text-2xl">🕸️</span>
                     <div>
-                        <strong>Порядок имеет значение:</strong> Middleware выполняются по порядку. Если <code>AuthMiddleware</code> стоит после <code>BusinessMiddleware</code>, бизнес-логика выполняется для неавторизованных пользователей!
+                        <strong>Order Matters:</strong> Middleware is executed in order. If <code>AuthMiddleware</code> comes after <code>BusinessMiddleware</code>, business logic runs for unauthorized users!
                     </div>
                 </li>
             </ul>

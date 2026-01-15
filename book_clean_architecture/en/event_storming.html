@@ -131,43 +131,43 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Event Storming</h1>
-            <p class="text-xl text-gray-600">Как за один день собрать знания, которые собирались месяцами.</p>
+            <p class="text-xl text-gray-600">How to gather in one day the knowledge that was collected over months.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
-                <p><strong>Event Storming</strong> — это формат воркшопа, изобретенный Альберто Брандолини. Эксперты бизнеса и разработчики собираются возле огромной стены с стикерами.</p>
-                <p>Главное правило: говорим о том, что <strong>случилось</strong> (События), а не о таблицах и классах.</p>
+                <p><strong>Event Storming</strong> is a workshop format invented by Alberto Brandolini. Business experts and developers gather around a huge wall with sticky notes.</p>
+                <p>The main rule: we talk about what <strong>happened</strong> (Events), not about tables and classes.</p>
 
-                <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-6">Легенда Стикеров</h2>
+                <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-6">Sticky Note Legend</h2>
                 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
                     <div class="flex flex-col gap-2">
                         <div class="sticky-note sticky-orange">Domain Event</div>
-                        <p class="text-xs text-center text-gray-500">Оранжевый<br>Событие (Past Tense)<br>"Счет оплачен"</p>
+                        <p class="text-xs text-center text-gray-500">Orange<br>Event (Past Tense)<br>"Invoice Paid"</p>
                     </div>
                     
                     <div class="flex flex-col gap-2">
                         <div class="sticky-note sticky-blue">Command</div>
-                        <p class="text-xs text-center text-gray-500">Синий<br>Действие (Intent)<br>"Оплатить счет"</p>
+                        <p class="text-xs text-center text-gray-500">Blue<br>Action (Intent)<br>"Pay Invoice"</p>
                     </div>
 
                     <div class="flex flex-col gap-2">
                         <div class="sticky-note sticky-purple">Policy</div>
-                        <p class="text-xs text-center text-gray-500">Фиолетовый<br>Правило (Whenever...)<br>"Если просрочка > 3 дней"</p>
+                        <p class="text-xs text-center text-gray-500">Purple<br>Rule (Whenever...)<br>"If overdue > 3 days"</p>
                     </div>
 
                     <div class="flex flex-col gap-2">
                         <div class="sticky-note sticky-yellow">Aggregate</div>
-                        <p class="text-xs text-center text-gray-500">Желтый<br>Объект<br>"Заказ"</p>
+                        <p class="text-xs text-center text-gray-500">Yellow<br>Entity<br>"Order"</p>
                     </div>
                 </div>
 
-                <h3 class="font-bold text-lg mb-2">Зачем это нужно?</h3>
+                <h3 class="font-bold text-lg mb-2">Why is this needed?</h3>
                 <ul class="list-disc pl-5 mb-4">
-                    <li>Чтобы найти <strong>Bounded Contexts</strong>: там, где меняется язык или поток событий разрывается.</li>
-                    <li>Чтобы найти <strong>Aggregates</strong>: желтые стикеры появляются естественно, когда мы группируем команды.</li>
-                    <li>Чтобы увидеть "слепые зоны" бизнеса, о которых никто не знал.</li>
+                    <li>To find <strong>Bounded Contexts</strong>: where the language changes or the flow of events breaks.</li>
+                    <li>To find <strong>Aggregates</strong>: yellow stickers appear naturally when we group commands.</li>
+                    <li>To see the "blind spots" of the business that no one knew about.</li>
                 </ul>
 
             </div>

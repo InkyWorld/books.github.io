@@ -105,32 +105,32 @@
 
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Policies (Политики)</h1>
-            <p class="text-xl text-gray-600">Паттерн Strategy в DDD. Инкапсуляция сложных, меняющихся правил.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Policies (Strategy Pattern)</h1>
+            <p class="text-xl text-gray-600">Strategy pattern in DDD. Encapsulation of complex, changing rules.</p>
         </header>
 
         <section class="mb-12">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Зачем это нужно?</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Why Do We Need This?</h2>
             <div class="prose max-w-none text-gray-700">
                 <p>
-                    Иногда бизнес-логика становится слишком сложной, чтобы хранить её внутри Сущности (`Entity`). 
-                    Или, что чаще, правила меняются чаще, чем структура самой сущности.
+                    Sometimes business logic becomes too complex to keep it inside an Entity. 
+                    Or, more often, rules change more frequently than the structure of the entity itself.
                 </p>
                 <p>
-                    Например, расчет стоимости заказа (`Order.calculate_total`). Скидки могут зависеть от:
-                    праздников, статуса VIP, дня недели, истории покупок. Если запихнуть все эти `if` в класс `Order`, он превратится в монстра.
+                    For example, calculating order total (`Order.calculate_total`). Discounts can depend on:
+                    holidays, VIP status, day of the week, purchase history. If you stuff all these `if` statements into the `Order` class, it will become a monster.
                 </p>
                 <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4">
-                    <strong>Решение:</strong> вынесите алгоритм в отдельный класс-функцию — <strong>Policy</strong>. В ООП это известно как паттерн <em>Strategy</em>.
+                    <strong>Solution:</strong> extract the algorithm into a separate class-function — <strong>Policy</strong>. In OOP this is known as the <em>Strategy</em> pattern.
                 </div>
             </div>
         </section>
 
         <section class="mb-12">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Пример: Расчет скидок</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Example: Calculating Discounts</h2>
             
             <div class="mb-6">
-                <h3 class="font-bold text-lg mb-2">1. Интерфейс Политики (Protocol)</h3>
+                <h3 class="font-bold text-lg mb-2">1. Policy Interface (Protocol)</h3>
                 <pre><code class="language-python">from typing import Protocol, List
 
 class PricingPolicy(Protocol):
@@ -139,10 +139,10 @@ class PricingPolicy(Protocol):
             </div>
 
             <div class="mb-6">
-                <h3 class="font-bold text-lg mb-2">2. Конкретные реализации</h3>
+                <h3 class="font-bold text-lg mb-2">2. Concrete Implementations</h3>
                 <pre><code class="language-python">class BlackFridayPolicy:
     def calculate_discount(self, order_items, user) -> Money:
-        # Сложная логика для черной пятницы
+        # Complex logic for Black Friday
         return sum(item.price for item in order_items) * 0.50
 
 class StandardVipPolicy:
@@ -153,12 +153,12 @@ class StandardVipPolicy:
             </div>
 
             <div class="mb-6">
-                <h3 class="font-bold text-lg mb-2">3. Использование в Сущности или Сервисе</h3>
+                <h3 class="font-bold text-lg mb-2">3. Usage in an Entity or Service</h3>
                 <pre><code class="language-python">@dataclass
 class Order:
     items: List[Item]
     
-    # Мы передаем Политику как аргумент метода (Method Injection)
+    # We pass the Policy as a method argument (Method Injection)
     def calculate_final_price(self, user: User, policy: PricingPolicy):
         base_price = sum(i.price for i in self.items)
         discount = policy.calculate_discount(self.items, user)

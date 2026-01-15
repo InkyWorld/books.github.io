@@ -129,14 +129,14 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Repository & Unit of Work</h1>
-            <p class="text-xl text-gray-600">Абстракция над базой данных и управление транзакциями.</p>
+            <p class="text-xl text-gray-600">Abstraction over database and transaction management.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">Repository (Репозиторий)</h2>
-        <p>Репозиторий создает иллюзию, что все объекты вашего домена хранятся в коллекции в памяти (Collection-oriented). Он скрывает детали работы с базой данных (SQL, ORM).</p>
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">Repository</h2>
+        <p>A repository creates the illusion that all domain objects are stored in an in-memory collection (Collection-oriented). It hides the details of working with the database (SQL, ORM).</p>
         
         <pre><code class="language-python">class AbstractRepository(ABC):
     @abstractmethod
@@ -147,7 +147,7 @@
     def get(self, id) -> Aggregate:
         pass
 
-# Реализация на SQLAlchemy
+# Implementation with SQLAlchemy
 class SqlAlchemyRepository(AbstractRepository):
     def __init__(self, session):
         self.session = session
@@ -159,10 +159,10 @@ class SqlAlchemyRepository(AbstractRepository):
         return self.session.query(Order).filter_by(id=order_id).one()
 </code></pre>
 
-        <h2 class="text-2xl font-bold text-gray-800 mb-6 mt-8">Unit of Work (UoW)</h2>
-        <p>Паттерн Unit of Work отслеживает все изменения, сделанные во время бизнес-транзакции, и сохраняет их разом (Atomic Commit). Это решает проблему частичного обновления данных.</p>
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 mt-8">Unit of Work</h2>
+        <p>The Unit of Work pattern tracks all changes made during a business transaction and saves them atomically (Atomic Commit). This solves the problem of partial data updates.</p>
 
-        <pre><code class="language-python"># Использование в Application Layer
+        <pre><code class="language-python"># Using in Application Layer
 def handle_order(cmd):
     with uow: # Start Transaction
         order = uow.orders.get(cmd.order_id)
@@ -170,7 +170,7 @@ def handle_order(cmd):
         uow.commit() # Commit or Rollback on error
 </code></pre>
 
-        <h3 class="font-bold text-lg mb-2 mt-4">Пример реализации Unit of Work</h3>
+        <h3 class="font-bold text-lg mb-2 mt-4">Example of Unit of Work Implementation</h3>
         <pre><code class="language-python">class AbstractUnitOfWork(ABC):
     orders: AbstractRepository
 

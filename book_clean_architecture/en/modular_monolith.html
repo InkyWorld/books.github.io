@@ -128,17 +128,17 @@
     <!-- CONTENT -->
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Модульный Монолит и AsyncIO</h1>
-            <p class="text-xl text-gray-600">Архитектура больших проектов и нюансы асинхронности в Python.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Modular Monolith & AsyncIO</h1>
+            <p class="text-xl text-gray-600">Architecture of large projects and asynchrony nuances in Python.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <p>Когда проект вырастает из 10 таблиц в 100, классическая "Слоеная" структура (все модели в models.py, все юзкейсы в use_cases) превращается в кашу. Вам нужен <strong>Модульный Монолит</strong>.</p>
+        <p>When a project grows from 10 tables to 100, the classic "Layered" structure (all models in models.py, all use cases in use_cases) turns into a mess. You need a <strong>Modular Monolith</strong>.</p>
         
-        <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-6">1. Вертикальная нарезка (Vertical Slicing)</h2>
-        <p class="mb-4">Вместо технического разделения (Слои), мы делим код по бизнес-фичам (Модули).</p>
+        <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-6">1. Vertical Slicing</h2>
+        <p class="mb-4">Instead of technical separation (Layers), we divide code by business features (Modules).</p>
 
         <div class="grid md:grid-cols-2 gap-8 mb-6">
             <div class="bg-red-50 p-4 rounded border border-red-200">
@@ -148,7 +148,7 @@
                     <li>/application (CreateOrder, Pay...)</li>
                     <li>/infrastructure (UserRepo, OrderRepo...)</li>
                 </ul>
-                <p class="text-xs text-red-600 mt-2">Чтобы добавить фичу, нужно прыгать по 5 папкам.</p>
+                <p class="text-xs text-red-600 mt-2">To add a feature, you need to jump across 5 folders.</p>
             </div>
             <div class="bg-green-50 p-4 rounded border border-green-200">
                 <h3 class="font-bold text-green-800 mb-2">✅ Vertical (Modular)</h3>
@@ -157,37 +157,37 @@
                     <li>/modules/orders (domain, app, infra)</li>
                     <li>/modules/billing (domain, app, infra)</li>
                 </ul>
-                <p class="text-xs text-green-600 mt-2">Все, что касается оплаты, лежит в billing.</p>
+                <p class="text-xs text-green-600 mt-2">Everything related to payments lies in billing.</p>
             </div>
         </div>
 
-        <h3 class="font-bold text-lg mt-6 mb-2">Структура папок Модуля</h3>
-        <p>Каждый модуль — это "Микросервис внутри монолита". Он имеет свою чистую архитектуру внутри.</p>
+        <h3 class="font-bold text-lg mt-6 mb-2">Module Folder Structure</h3>
+        <p>Each module is a "Microservice inside a monolith". It has its own clean architecture inside.</p>
         <pre><code class="language-bash">src/
 ├── modules/
-│   ├── orders/                # Bounded Context: Заказы
+│   ├── orders/                # Bounded Context: Orders
 │   │   ├── domain/            # Entities: Order, OrderLine
 │   │   ├── application/       # UseCases: CreateOrder
 │   │   ├── infrastructure/    # Persistence: OrderRepo
 │   │   └── presentation/      # API: router.py
 │   │
-│   └── billing/               # Bounded Context: Платежи
+│   └── billing/               # Bounded Context: Payments
 │       ├── domain/
 │       └── ...
-├── shared/                    # Общий код (Kernel)
+├── shared/                    # Common code (Kernel)
 │   ├── domain_event.py
 │   └── uow_interface.py
 └── main.py                    # Composition Root
 </code></pre>
 
-        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. AsyncIO и Чистая Архитектура</h2>
-        <p>Python — это асинхронный мир (FastAPI, asyncpg). Но DDD часто про синхронную чистоту. Как это состыковать?</p>
+        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. AsyncIO & Clean Architecture</h2>
+        <p>Python is an asynchronous world (FastAPI, asyncpg). But DDD is often about synchronous purity. How to reconcile this?</p>
 
-        <h3 class="font-bold text-lg mt-6">Правило: Domain Sync, IO Async</h3>
+        <h3 class="font-bold text-lg mt-6">Rule: Domain Sync, IO Async</h3>
         <ul class="list-disc list-inside space-y-2 mb-4">
-            <li><strong>Domain Layer (Entities):</strong> Чистый CPU-bound код. Должен быть <strong>СИНХРОННЫМ</strong>. Не засоряйте домен `async/await`.</li>
-            <li><strong>Infrastructure (Repos):</strong> Ходит в базу/сеть. Должен быть <strong>АСИНХРОННЫМ</strong>.</li>
-            <li><strong>Application (Use Cases):</strong> Оркестратор. Он <strong>АСИНХРОННЫЙ</strong>, потому что вызывает async репозитории.</li>
+            <li><strong>Domain Layer (Entities):</strong> Pure CPU-bound code. Should be <strong>SYNCHRONOUS</strong>. Don't pollute the domain with `async/await`.</li>
+            <li><strong>Infrastructure (Repos):</strong> Accesses the database/network. Should be <strong>ASYNCHRONOUS</strong>.</li>
+            <li><strong>Application (Use Cases):</strong> Orchestrator. It's <strong>ASYNCHRONOUS</strong> because it calls async repositories.</li>
         </ul>
 
         <pre><code class="language-python"># 1. DOMAIN (SYNC)
@@ -215,7 +215,7 @@ class CreateOrderUseCase:
 </code></pre>
 
         <h3 class="font-bold text-lg mt-6">Async UnitOfWork</h3>
-        <p>Контекстный менеджер тоже должен быть асинхронным (`__aenter__`, `__aexit__`).</p>
+        <p>The context manager should also be asynchronous (`__aenter__`, `__aexit__`).</p>
         <pre><code class="language-python">class AsyncSqlAlchemyUoW:
     def __init__(self, session_factory):
         self.session_factory = session_factory

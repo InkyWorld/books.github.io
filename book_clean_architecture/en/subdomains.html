@@ -123,25 +123,25 @@
     <!-- CONTENT -->
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Subdomains (Поддомены)</h1>
-            <p class="text-xl text-gray-600">Не все части вашей системы одинаково важны. Учитесь расставлять приоритеты.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Subdomains</h1>
+            <p class="text-xl text-gray-600">Not all parts of your system are equally important. Learn to prioritize.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6">Проблема пространства (Problem Space)</h2>
-                <p>Если Bounded Context — это то, <strong>КАК</strong> мы организуем код (Solution Space), то Subdomain — это то, <strong>КАКИЕ</strong> проблемы мы решаем (Problem Space).</p>
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">Problem Space</h2>
+                <p>If a Bounded Context is <strong>HOW</strong> we organize code (Solution Space), then a Subdomain is <strong>WHAT</strong> problems we solve (Problem Space).</p>
                 
                 <div class="grid md:grid-cols-3 gap-6 mt-8">
                     <!-- CORE -->
                     <div class="bg-yellow-50 border border-yellow-200 p-6 rounded-lg text-center">
                         <div class="text-4xl mb-4">👑</div>
                         <h3 class="font-bold text-yellow-900 text-lg mb-2">Core Domain</h3>
-                        <p class="text-sm font-bold uppercase tracking-wider text-yellow-600 mb-4">Разрабатываем сами</p>
+                        <p class="text-sm font-bold uppercase tracking-wider text-yellow-600 mb-4">We develop ourselves</p>
                         <ul class="text-sm text-left list-disc pl-4 space-y-2">
-                            <li>Конкурентное преимущество.</li>
-                            <li>То, ради чего существует бизнес.</li>
-                            <li>Самые сильные разработчики здесь.</li>
+                            <li>Competitive advantage.</li>
+                            <li>Why the business exists.</li>
+                            <li>Our strongest developers are here.</li>
                         </ul>
                     </div>
 
@@ -149,11 +149,11 @@
                     <div class="bg-gray-50 border border-gray-200 p-6 rounded-lg text-center">
                         <div class="text-4xl mb-4">🏗️</div>
                         <h3 class="font-bold text-gray-900 text-lg mb-2">Supporting</h3>
-                        <p class="text-sm font-bold uppercase tracking-wider text-gray-500 mb-4">Аутсорсим или пишем просто</p>
+                        <p class="text-sm font-bold uppercase tracking-wider text-gray-500 mb-4">Outsource or write simply</p>
                         <ul class="text-sm text-left list-disc pl-4 space-y-2">
-                            <li>Необходимо для работы, но не "фишка".</li>
-                            <li>Нет готовых решений на рынке.</li>
-                            <li>CRUD-стиль, Juniors могут справиться.</li>
+                            <li>Necessary to operate, but not a "feature".</li>
+                            <li>No ready-made solutions on the market.</li>
+                            <li>CRUD-style, Juniors can handle it.</li>
                         </ul>
                     </div>
 
@@ -161,20 +161,20 @@
                     <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg text-center">
                         <div class="text-4xl mb-4">📦</div>
                         <h3 class="font-bold text-blue-900 text-lg mb-2">Generic</h3>
-                        <p class="text-sm font-bold uppercase tracking-wider text-blue-500 mb-4">Покупаем / Библиотеки</p>
+                        <p class="text-sm font-bold uppercase tracking-wider text-blue-500 mb-4">Buy / Use libraries</p>
                         <ul class="text-sm text-left list-disc pl-4 space-y-2">
-                            <li>Типовые задачи: Auth, Payments, Logging.</li>
-                            <li>Берем Auth0, Stripe, ELK Stack.</li>
-                            <li>Не пишем велосипеды.</li>
+                            <li>Standard tasks: Auth, Payments, Logging.</li>
+                            <li>Use Auth0, Stripe, ELK Stack.</li>
+                            <li>Don't reinvent the wheel.</li>
                         </ul>
                     </div>
                 </div>
 
-                <h3 class="font-bold text-lg mt-12 mb-4">Пример E-commerce</h3>
+                <h3 class="font-bold text-lg mt-12 mb-4">E-commerce Example</h3>
                 <ul class="space-y-3">
-                    <li><strong>Core:</strong> Алгоритм умных рекомендаций, оптимизация маршрутов доставки (если мы Uber).</li>
-                    <li><strong>Generic:</strong> Бухгалтерия (1C/SAP), Авторизация (Keycloak).</li>
-                    <li><strong>Supporting:</strong> ETL для загрузки каталога товаров (надо написать, но это скучно).</li>
+                    <li><strong>Core:</strong> Smart recommendations algorithm, delivery route optimization (if we're Uber).</li>
+                    <li><strong>Generic:</strong> Accounting (1C/SAP), Authorization (Keycloak).</li>
+                    <li><strong>Supporting:</strong> ETL for product catalog loading (needs to be written, but it's boring).</li>
                 </ul>
 
             </div>

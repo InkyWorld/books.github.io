@@ -101,47 +101,47 @@
 
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Versioning (Версионирование)</h1>
-            <p class="text-xl text-gray-600">Optimistic Locking и разрешение конфликтов при сохранении агрегатов.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Versioning</h1>
+            <p class="text-xl text-gray-600">Optimistic Locking and conflict resolution when saving aggregates.</p>
         </header>
 
         <section class="mb-12">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Проблема конкуренции</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">The Concurrency Problem</h2>
             <div class="prose max-w-none text-gray-700">
                 <p>
-                    Два менеджера, Alice и Bob, открыли один и тот же Заказ одновременно. Alice перевела его в статус "Paid", а Bob, не зная об этом, добавил товар. 
-                    Если Bob сохранит заказ после Alice, он затрет её изменения (т.н. <em>Lost Update Problem</em>).
+                    Two managers, Alice and Bob, opened the same Order simultaneously. Alice changed its status to "Paid", and Bob, unaware of this, added an item. 
+                    If Bob saves the order after Alice, his changes will overwrite hers (known as <em>Lost Update Problem</em>).
                 </p>
                 <div class="bg-red-50 border-l-4 border-red-500 p-4 my-4">
-                     <strong>Опасность:</strong> Мы можем получить оплаченный заказ с новыми неоплаченными товарами, нарушив инвариант согласованности.
+                     <strong>Danger:</strong> We could end up with a paid order that has new unpaid items, violating the consistency invariant.
                 </div>
             </div>
         </section>
 
         <section class="mb-12">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Optimistic Concurrency Control (OCC)</h2>
-            <p class="mb-4">Решение — добавить поле <code>version</code> (int) в Агрегат.</p>
+            <p class="mb-4">Solution — add a <code>version</code> (int) field to the Aggregate.</p>
             <ul class="list-decimal list-inside space-y-2 mb-6">
-                <li>При чтении агрегата мы запоминаем `version_at_load = 5`.</li>
-                <li>При сохранении мы говорим БД: <br><code>UPDATE orders SET ..., version = 6 WHERE id = X AND version = 5</code>.</li>
-                <li>Если за это время кто-то успел изменить версию на 6, наш запрос не обновит ни одной строки.</li>
-                <li>Application Layer ловит это и либо кидает ошибку пользователю, либо перезагружает агрегат и пробует снова (retry).</li>
+                <li>When reading the aggregate, we remember `version_at_load = 5`.</li>
+                <li>When saving, we tell the DB: <br><code>UPDATE orders SET ..., version = 6 WHERE id = X AND version = 5</code>.</li>
+                <li>If someone else managed to change the version to 6 in the meantime, our query won't update any rows.</li>
+                <li>The Application Layer catches this and either throws an error to the user or reloads the aggregate and tries again (retry).</li>
             </ul>
 
-            <h3 class="font-bold text-lg mb-2">Пример реализации</h3>
+            <h3 class="font-bold text-lg mb-2">Implementation Example</h3>
             <pre><code class="language-python">@dataclass
 class Order(AggregateRoot):
     id: str
     items: List[Item]
-    # Техническое поле для OCC
+    # Technical field for OCC
     _version: int = 0
 
     def add_item(self, item):
         self.items.append(item)
-        # Обратите внимание: мы НЕ инкрементируем версию здесь вручную.
-        # Это обязанность Репозитория при сохранении.
+        # Note: we do NOT increment the version here manually.
+        # This is the responsibility of the Repository when saving.
 
-# В Repository (Infrastructure)
+# In Repository (Infrastructure)
 def save(self, order: Order):
     current_version = order._version
     new_version = current_version + 1
@@ -162,11 +162,11 @@ def save(self, order: Order):
         </section>
 
         <section class="mb-12">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">В Event Sourcing</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">In Event Sourcing</h2>
             <p>
-                В Event Sourcing поле <code>ExpectedVersion</code> играет ту же роль. 
-                Когда вы пытаетесь добавить события в поток, вы говорите: "Я ожидаю, что сейчас в потоке 10 событий". 
-                Если там уже 11 (кто-то добавил событие), Event Store отклонит запись.
+                In Event Sourcing, the <code>ExpectedVersion</code> field plays the same role. 
+                When you try to add events to a stream, you say: "I expect there are currently 10 events in the stream". 
+                If there are already 11 (someone added an event), the Event Store will reject the write.
             </p>
         </section>
 

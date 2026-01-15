@@ -129,60 +129,60 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Config & Observability</h1>
-            <p class="text-xl text-gray-600">Structured Logging, Request ID и правильные конфиги.</p>
+            <p class="text-xl text-gray-600">Structured Logging, Request ID, and proper configs.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
 
-    <p>Система без логов — это черный ящик. Система с плохими логами — это мусорка. А хардкод настроек — путь к утечке паролей.</p>
+    <p>A system without logs is a black box. A system with poor logs is a mess. And hardcoded settings are a path to password leaks.</p>
 
     <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">1. Observability: Request ID</h2>
-    <p>Проблема: запрос проходит через слои Controller -> Service -> Repository. Если происходит ошибка на глубине, как понять, какой именно HTTP-запрос её вызвал?</p>
-    <p>Решение: Присвоить каждому запросу уникальный идентификатор (<code>trace_id</code> или <code>request_id</code>) на самом входе и писать его в <strong>каждую</strong> строчку лога.</p>
+    <p>Problem: a request goes through layers Controller -> Service -> Repository. If an error occurs deep in the stack, how do you know which exact HTTP request caused it?</p>
+    <p>Solution: Assign each request a unique identifier (<code>trace_id</code> or <code>request_id</code>) at the entry point and include it in <strong>every</strong> log line.</p>
     
-    <h3 class="font-bold text-lg mt-6 mb-2">Зачем здесь ContextVar?</h3>
-    <p>Чтобы не передавать <code>request_id</code> аргументом в каждую функцию (например, <code>get_user(user_id, request_id)</code>), мы используем <strong>ContextVars</strong>. Это механизм Python для хранения данных, которые доступны глобально, но <em>только в рамках текущего асинхронного таска (запроса)</em>.</p>
+    <h3 class="font-bold text-lg mt-6 mb-2">Why ContextVar here?</h3>
+    <p>To avoid passing <code>request_id</code> as an argument to every function (e.g., <code>get_user(user_id, request_id)</code>), we use <strong>ContextVars</strong>. This is a Python mechanism for storing data that is globally accessible but <em>only within the scope of the current async task (request)</em>.</p>
 
-    <h3 class="font-bold text-lg mt-6 mb-2">Реализация (Context Vars + Structlog)</h3>
+    <h3 class="font-bold text-lg mt-6 mb-2">Implementation (Context Vars + Structlog)</h3>
     <pre><code class="language-python">import uuid
 import structlog
 from contextvars import ContextVar
 from fastapi import Request
 
-# 1. Глобальная контекстная переменная
-# В ней будет лежать ID конкретного запроса
+# 1. Global context variable
+# This will store the ID of a specific request
 request_id_ctx = ContextVar("request_id", default="unknown")
 
-# 2. Процессор для Structlog (или стандартного logging)
-# Эта функция автоматически добавляет request_id ко всем логам
+# 2. Processor for Structlog (or standard logging)
+# This function automatically adds request_id to all logs
 def add_request_id(logger, method_name, event_dict):
     event_dict["request_id"] = request_id_ctx.get()
     return event_dict
 
 # 3. Middleware (FastAPI)
-# Оборачивает каждый запрос
+# Wraps each request
 async def logging_middleware(request: Request, call_next):
-    # Если ID пришел от балансировщика (Nginx), берем его. Иначе генерируем новый.
+    # If ID came from a load balancer (Nginx), use it. Otherwise, generate a new one.
     req_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
     
-    # 🟢 SET: Записываем ID в контекст. 
-    # Теперь любой код внутри этого `await call_next` "видит" этот ID через `request_id_ctx.get()`
+    # 🟢 SET: Write ID to context.
+    # Now any code inside this `await call_next` can "see" this ID through `request_id_ctx.get()`
     token = request_id_ctx.set(req_id) 
     
     try:
         response = await call_next(request)
-        # (Полезно) Возвращаем ID клиенту, чтобы он мог сообщить его поддержке при ошибке
+        # (Useful) Return ID to client so they can report it to support if there's an error
         response.headers["X-Request-ID"] = req_id
         return response
     finally:
-        # 🔴 RESET: Очищаем контекст, чтобы не загрязнять память или другие запросы (хотя для ContextVar это менее критично, чем для thread-local)
+        # 🔴 RESET: Clear context to avoid polluting memory or other requests (though for ContextVar this is less critical than for thread-local)
         request_id_ctx.reset(token)
 </code></pre>
-    <p>Результат: вы просто пишете <code>logger.info("Something happened")</code> в Репозитории, а в логах видите: <code>{"event": "Something happened", "request_id": "abc-123-..."}</code>.</p>
+    <p>Result: you simply write <code>logger.info("Something happened")</code> in the Repository, and in the logs you see: <code>{"event": "Something happened", "request_id": "abc-123-..."}</code>.</p>
 
     <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. Configuration (Pydantic Settings)</h2>
-    <p>Никаких <code>os.getenv('DB_URL')</code> посреди кода! Используйте типизированный конфиг.</p>
+    <p>No <code>os.getenv('DB_URL')</code> in the middle of your code! Use typed config.</p>
 
     <pre><code class="language-python">from pydantic_settings import BaseSettings
 
@@ -194,22 +194,22 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
 
-# Синглтон конфига
+# Config singleton
 settings = Settings()
 </code></pre>
 
-    <h3 class="font-bold text-lg mt-6 mb-2">Кеширование настроек (Performance)</h3>
-    <p>Создание объекта <code>Settings</code> может быть тяжелым (чтение файла <code>.env</code>, парсинг переменных окружения). Если вы используете dependency injection (например, <code>Depends</code> в FastAPI), имеет смысл закешировать результат, чтобы не перечитывать конфиг при каждом запросе.</p>
+    <h3 class="font-bold text-lg mt-6 mb-2">Settings Caching (Performance)</h3>
+    <p>Creating a <code>Settings</code> object can be expensive (reading the <code>.env</code> file, parsing environment variables). If you use dependency injection (e.g., <code>Depends</code> in FastAPI), it makes sense to cache the result to avoid re-reading the config on every request.</p>
 
     <pre><code class="language-python">from functools import lru_cache
 
 @lru_cache
 def get_settings():
-    # Эта функция выполнится только один раз при первом вызове.
-    # В последующие разы будет возвращаться тот же самый объект из памяти.
+    # This function will execute only once on first call.
+    # On subsequent calls, the same object from memory will be returned.
     return Settings()
 
-# Пример использования в FastAPI
+# Example usage in FastAPI
 # from fastapi import Depends
 # 
 # @app.get("/info")

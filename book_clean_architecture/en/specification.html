@@ -129,73 +129,73 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Specification Pattern</h1>
-            <p class="text-xl text-gray-600">Инкапсуляция сложных бизнес-правил валидации и выборки.</p>
+            <p class="text-xl text-gray-600">Encapsulation of complex business rules for validation and selection.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <p>Паттерн <strong>Спецификация (Specification)</strong> — это способ превратить сложное условие <code>if</code> в отдельный именованный класс. Это как "фейс-контроль": у вас есть четкий список критериев, кого пускать.</p>
+        <p>The <strong>Specification</strong> pattern is a way to turn a complex <code>if</code> condition into a separate named class. It's like a "bouncer": you have a clear list of criteria for who gets in.</p>
 
-        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">Проблема и Решение</h2>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">Problem and Solution</h2>
         <div class="grid md:grid-cols-2 gap-6">
             <div class="bg-red-50 p-4 rounded-lg border border-red-100">
-                <h3 class="font-bold text-red-600 mb-2">❌ Без паттерна (Каша из IF)</h3>
-                <p class="text-sm text-gray-600 mb-2">Логика размазана, сложно читать.</p>
-                <pre class="!m-0 !p-3 text-xs"><code class="language-python"># В сервисе аренды
+                <h3 class="font-bold text-red-600 mb-2">❌ Without Pattern (IF Mess)</h3>
+                <p class="text-sm text-gray-600 mb-2">Logic is scattered, hard to read.</p>
+                <pre class="!m-0 !p-3 text-xs"><code class="language-python"># In rental service
 if (user.age >= 21 and 
     user.license_type == 'B' and 
     not user.has_active_loans):
-    print("Можно арендовать")</code></pre>
+    print("Can rent")</code></pre>
             </div>
             <div class="bg-green-50 p-4 rounded-lg border border-green-100">
-                <h3 class="font-bold text-green-600 mb-2">✅ С паттерном (Понятное имя)</h3>
-                <p class="text-sm text-gray-600 mb-2">Правило имеет имя и живет отдельно.</p>
-                <pre class="!m-0 !p-3 text-xs"><code class="language-python"># Читается как человеческий язык
+                <h3 class="font-bold text-green-600 mb-2">✅ With Pattern (Clear Name)</h3>
+                <p class="text-sm text-gray-600 mb-2">Rule has a name and lives separately.</p>
+                <pre class="!m-0 !p-3 text-xs"><code class="language-python"># Reads like human language
 rule = CanRentCar()
 
 if rule.is_satisfied_by(user):
-    print("Можно арендовать")</code></pre>
+    print("Can rent")</code></pre>
             </div>
         </div>
 
-        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">1. Как это работает (Валидация)</h2>
-        <p>Мы создаем класс с одним методом <code>is_satisfied_by</code> (удовлетворяет ли?).</p>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">1. How It Works (Validation)</h2>
+        <p>We create a class with one method <code>is_satisfied_by</code> (is it satisfied?).</p>
         <pre><code class="language-python">class CanRentCarSpecification:
     def is_satisfied_by(self, user: User) -> bool:
-        # Вся сложная логика живет здесь
+        # All complex logic lives here
         has_age = user.age >= 21
         has_license = user.license_type == 'B'
         return has_age and has_license</code></pre>
 
-        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">2. Конструктор правил (Композиция)</h2>
-        <p>Сила паттерна в том, что вы можете комбинировать маленькие правила, как кубики Lego, используя <code>И</code> (AND), <code>ИЛИ</code> (OR), <code>НЕ</code> (NOT).</p>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">2. Rules Constructor (Composition)</h2>
+        <p>The power of the pattern is that you can combine small rules like Lego blocks using <code>AND</code>, <code>OR</code>, <code>NOT</code>.</p>
         <pre><code class="language-python">is_adult = IsAdultSpec()
 has_money = HasMoneySpec()
 
-# Создаем новое правило из двух старых
-# "Взрослый И с деньгами"
+# Create a new rule from two old ones
+# "Adult AND has money"
 can_buy_beer = is_adult & has_money 
 
 if can_buy_beer.is_satisfied_by(bob):
     sell_beer(bob)</code></pre>
 
-        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">3. Поиск (Фильтрация)</h2>
-        <p>Вместо того чтобы писать в Репозитории методы на все случаи жизни:</p>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">3. Search (Filtering)</h2>
+        <p>Instead of writing Repository methods for every case:</p>
         <ul class="list-disc list-inside text-sm text-gray-600 mb-2 ml-4">
             <li>find_users_by_age(21)</li>
             <li>find_users_by_age_and_money(21, 100)</li>
             <li>find_users_active_and_adult(...)</li>
         </ul>
-        <p>Мы делаем один универсальный метод <code>find</code>, который принимает Спецификацию.</p>
+        <p>We make one universal <code>find</code> method that takes a Specification.</p>
         
         <pre><code class="language-python"># Application Layer
-# "Найди мне всех пользователей, которые могут арендовать машину"
+# "Find me all users who can rent a car"
 rule = CanRentCarSpecification()
 users = repository.find(rule)
 </code></pre>
         <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4 text-sm">
-            <strong>На заметку:</strong> Чтобы это работало с базой данных (SQL), внутри репозитория нам нужно перевести Python-код <code>user.age >= 21</code> в SQL <code>WHERE age >= 21</code>. Это самая сложная часть, поэтому часто используют готовые библиотеки.
+            <strong>Note:</strong> For this to work with a database (SQL), we need to convert Python code <code>user.age >= 21</code> into SQL <code>WHERE age >= 21</code> inside the repository. This is the hardest part, so libraries are often used.
         </div>
         
             </div>

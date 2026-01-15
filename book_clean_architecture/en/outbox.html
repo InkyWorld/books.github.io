@@ -129,44 +129,44 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Transactional Outbox Pattern</h1>
-            <p class="text-xl text-gray-600">Гарантированная доставка сообщений.</p>
+            <p class="text-xl text-gray-600">Guaranteed message delivery.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-                <h2 class="text-2xl font-bold mb-4">🧨 Проблема: Dual Write (двойная запись)</h2>
-                <p>Нужно сделать ДВЕ разные вещи:</p>
+                <h2 class="text-2xl font-bold mb-4">🧨 Problem: Dual Write</h2>
+                <p>You need to perform TWO different things:</p>
                 <ol class="list-decimal pl-6 mb-4">
-                    <li>💾 сохранить бизнес-данные в БД</li>
-                    <li>📣 отправить событие в брокер (Kafka / Rabbit)</li>
+                    <li>💾 save business data to the database</li>
+                    <li>📣 send event to the broker (Kafka / Rabbit)</li>
                 </ol>
 
-                <h3 class="text-xl font-bold mb-2">Что может пойти не так</h3>
+                <h3 class="text-xl font-bold mb-2">What can go wrong</h3>
                 
                 <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500 mb-4">
-                    <h4 class="font-bold">Сценарий А</h4>
+                    <h4 class="font-bold">Scenario A</h4>
                     <p>1) INSERT order  ✅<br>
-                    2) SEND event    ❌ (брокер недоступен)</p>
-                    <p class="font-bold text-red-700">➡️ заказ есть, события нет → другие сервисы “не узнали”</p>
+                    2) SEND event    ❌ (broker unavailable)</p>
+                    <p class="font-bold text-red-700">➡️ order exists, event missing → other services "don't know"</p>
                 </div>
 
                 <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500 mb-6">
-                    <h4 class="font-bold">Сценарий B</h4>
+                    <h4 class="font-bold">Scenario B</h4>
                     <p>1) SEND event    ✅<br>
                     2) INSERT order  ❌ (rollback)</p>
-                    <p class="font-bold text-red-700">➡️ событие есть, заказа нет → фантомное событие</p>
+                    <p class="font-bold text-red-700">➡️ event exists, order missing → phantom event</p>
                 </div>
 
-                <p class="text-lg font-bold text-red-600 mb-8">❌ Это логическая коррупция системы</p>
+                <p class="text-lg font-bold text-red-600 mb-8">❌ This is logical system corruption</p>
 
-                <h2 class="text-2xl font-bold mb-4">🧠 Ключевая идея Outbox</h2>
-                <p class="text-xl italic mb-4">База данных = единственный источник истины</p>
-                <p>Если БД зафиксировала факт — он должен когда-нибудь попасть в брокер.</p>
+                <h2 class="text-2xl font-bold mb-4">🧠 Key Idea of Outbox</h2>
+                <p class="text-xl italic mb-4">Database = single source of truth</p>
+                <p>If the database recorded a fact, it must eventually reach the broker.</p>
 
-                <h2 class="text-2xl font-bold mt-8 mb-4">✅ Решение: Transactional Outbox</h2>
+                <h2 class="text-2xl font-bold mt-8 mb-4">✅ Solution: Transactional Outbox</h2>
                 
-                <h3 class="text-xl font-bold mb-2">1️⃣ Пишем событие В БД, а не в брокер</h3>
+                <h3 class="text-xl font-bold mb-2">1️⃣ Write event TO database, not to broker</h3>
                 
                 <pre><code class="language-sql">BEGIN;
 
@@ -190,15 +190,15 @@ INSERT INTO outbox (
 COMMIT;</code></pre>
 
                 <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 my-4">
-                    <p class="font-bold">👉 Инвариант:</p>
+                    <p class="font-bold">👉 Invariant:</p>
                     <ul class="list-disc pl-6">
-                        <li>либо и заказ, и событие вместе</li>
-                        <li>либо ничего</li>
+                        <li>either both order and event together</li>
+                        <li>or nothing</li>
                     </ul>
                 </div>
 
-                <h3 class="text-xl font-bold mt-8 mb-2">2️⃣ Отдельный Relay (Publisher)</h3>
-                <p>Фоновый процесс:</p>
+                <h3 class="text-xl font-bold mt-8 mb-2">2️⃣ Separate Relay (Publisher)</h3>
+                <p>Background process:</p>
 
                 <pre><code class="language-python">while true:
     events = SELECT * FROM outbox WHERE processed = false
@@ -207,28 +207,28 @@ COMMIT;</code></pre>
         mark_as_processed(e)</code></pre>
 
                 <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500 my-4">
-                    <p class="font-bold">📌 Он:</p>
+                    <p class="font-bold">📌 It:</p>
                     <ul class="list-disc pl-6">
-                        <li>может падать</li>
-                        <li>может дублировать</li>
-                        <li>может отставать</li>
+                        <li>can crash</li>
+                        <li>can duplicate</li>
+                        <li>can lag behind</li>
                     </ul>
-                    <p class="mt-2 font-bold">И это НОРМАЛЬНО</p>
+                    <p class="mt-2 font-bold">And this is NORMAL</p>
                 </div>
 
-                <h2 class="text-2xl font-bold mt-8 mb-4">🛡️ Какие гарантии даёт паттерн</h2>
+                <h2 class="text-2xl font-bold mt-8 mb-4">🛡️ What guarantees does the pattern provide</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-green-50 p-4 rounded-lg border border-green-200">
-                        <h4 class="font-bold text-green-800 text-lg mb-2">✅ 1. At-least-once доставка</h4>
-                        <p class="text-green-900">Событие может прийти несколько раз,<br>но НЕ может пропасть.</p>
+                        <h4 class="font-bold text-green-800 text-lg mb-2">✅ 1. At-least-once delivery</h4>
+                        <p class="text-green-900">Event may arrive multiple times,<br>but CANNOT be lost.</p>
                     </div>
                     
                     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <h4 class="font-bold text-gray-800 text-lg mb-2">❌ Не гарантирует</h4>
+                        <h4 class="font-bold text-gray-800 text-lg mb-2">❌ Does not guarantee</h4>
                         <ul class="list-disc pl-6 text-gray-700">
-                            <li>exactly-once (это иллюзия)</li>
-                            <li>порядок между разными агрегатами</li>
+                            <li>exactly-once (this is an illusion)</li>
+                            <li>order between different aggregates</li>
                         </ul>
                     </div>
                 </div>

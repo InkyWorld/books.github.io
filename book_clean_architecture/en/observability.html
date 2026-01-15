@@ -99,37 +99,37 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Distributed Observability</h1>
-            <p class="text-xl text-gray-600">Как узнать, что происходит, когда запрос проходит через 10 сервисов.</p>
+            <p class="text-xl text-gray-600">How to know what's happening when a request goes through 10 services.</p>
         </header>
 
         <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-6">Проблема микросервисов</h2>
-            <p>В монолите вы делали `tail -f /var/log/app.log` и видели всё. В распределенной системе один запрос пользователя может породить цепочку вызовов:</p>
+            <h2 class="text-2xl font-bold mb-6">The Microservices Problem</h2>
+            <p>In a monolith, you would do `tail -f /var/log/app.log` and see everything. In a distributed system, a single user request can trigger a chain of calls:</p>
             <div class="bg-gray-200 p-4 rounded mb-6 font-mono text-sm">
                 Frontend -> API Gateway -> Order Service -> Inventory Service -> Payment Service
             </div>
-            <p>Если `Payment Service` упадет, `Frontend` получит просто "500 Error". Но почему? Где именно? Обычные логи тут бессильны.</p>
+            <p>If `Payment Service` crashes, `Frontend` simply gets "500 Error". But why? Where exactly? Regular logs are powerless here.</p>
 
             <h3 class="text-xl font-bold mt-8 mb-4">1. Correlation ID</h3>
-            <p><strong>Correlation ID</strong> — это уникальный идентификатор (GUID), который генерируется на м входной точке (обычно API Gateway) и передается во <strong>ВСЕ</strong> последующие вызовы (HTTP headers, Message Headers).</p>
+            <p><strong>Correlation ID</strong> is a unique identifier (GUID) generated at the entry point (usually API Gateway) and passed to <strong>ALL</strong> subsequent calls (HTTP headers, Message Headers).</p>
             
             <pre><code class="language-http">POST /api/orders
 X-Correlation-ID: 550e8400-e29b-41d4-a716-446655440000</code></pre>
 
-            <p>Теперь, грепнув логи всех 10 сервисов по этому ID, вы соберете полную картину трагедии.</p>
+            <p>Now, by grepping logs from all 10 services with this ID, you'll get the full picture of the tragedy.</p>
 
             <h3 class="text-xl font-bold mt-8 mb-4">2. Distributed Tracing</h3>
-            <p>Логи — это точки. Трейсинг — это линии между ними. Инструменты вроде <strong>Jaeger, Zipkin, OpenTelemetry</strong> позволяют виуадизировать таймлайн запроса.</p>
+            <p>Logs are dots. Tracing is lines connecting them. Tools like <strong>Jaeger, Zipkin, OpenTelemetry</strong> allow you to visualize the request timeline.</p>
             <ul class="list-disc pl-6 space-y-2 mb-6">
-                <li><strong>Trace:</strong> Весь путь запроса.</li>
-                <li><strong>Span:</strong> Один отрезок пути (например, "Order Service шлет запрос в DB").</li>
+                <li><strong>Trace:</strong> The entire request path.</li>
+                <li><strong>Span:</strong> One segment of the path (e.g., "Order Service sends a request to DB").</li>
             </ul>
             <div class="bg-blue-50 p-4 border-l-4 border-blue-500 text-blue-900 mb-6">
-                Совет: Если вы используете Messaging (Kafka/RabbitMQ), передавайте Trace Context в заголовках сообщений. Иначе цепочка разорвется.
+                Tip: If you use Messaging (Kafka/RabbitMQ), pass the Trace Context in message headers. Otherwise, the chain breaks.
             </div>
 
             <h3 class="text-xl font-bold mt-8 mb-4">3. Structured Logs</h3>
-            <p>Никаких `print(f"User {id} bought {item}")`. Логи должны быть машиночитаемыми (JSON).</p>
+            <p>No `print(f"User {id} bought {item}")`. Logs must be machine-readable (JSON).</p>
             <pre><code class="language-json">{
   "level": "error",
   "timestamp": "2024-01-20T10:00:00Z",
@@ -139,25 +139,25 @@ X-Correlation-ID: 550e8400-e29b-41d4-a716-446655440000</code></pre>
   "user_id": 1234,
   "amount": 99.99
 }</code></pre>
-            <p>Это позволяет делать запросы в Kibana/OpenSearch: `service:payment-service AND amount > 1000`. </p>
+            <p>This allows you to make queries in Kibana/OpenSearch: `service:payment-service AND amount > 1000`. </p>
 
-            <h3 class="text-xl font-bold mt-8 mb-4">4. Ключевые метрики (CQRS & Events)</h3>
-            <p>В асинхронных системах (Kafka/Rabbit) "аптайм сервиса" ничего не значит. Ваши воркеры могут работать, но не успевать разгребать очередь.</p>
+            <h3 class="text-xl font-bold mt-8 mb-4">4. Key Metrics (CQRS & Events)</h3>
+            <p>In async systems (Kafka/Rabbit), "service uptime" doesn't mean anything. Your workers can be running but unable to keep up with the queue.</p>
 
             <div class="grid md:grid-cols-2 gap-6 mt-6">
                 <div class="bg-white p-6 rounded shadow border-l-4 border-amber-500">
                     <h4 class="font-bold text-lg">Consumer Lag</h4>
-                    <p class="text-sm mt-2">Разница между последним сообщением в очереди и тем, что сейчас обрабатывает воркер. <br>Рост лага = система не справляется = данные устаревают.</p>
+                    <p class="text-sm mt-2">The difference between the last message in the queue and what the worker is currently processing. <br>Growing lag = system can't keep up = data becomes stale.</p>
                 </div>
                 
                 <div class="bg-white p-6 rounded shadow border-l-4 border-red-500">
                     <h4 class="font-bold text-lg">DLQ Size (Dead Letter Queue)</h4>
-                    <p class="text-sm mt-2">Счетчик "мертвых" сообщений. Если он > 0, значит, есть баги, которые не дают обработать события даже после ретраев.</p>
+                    <p class="text-sm mt-2">Counter of "dead" messages. If it > 0, there are bugs preventing event processing even after retries.</p>
                 </div>
 
                 <div class="bg-white p-6 rounded shadow border-l-4 border-blue-500">
                     <h4 class="font-bold text-lg">Retry Rates</h4>
-                    <p class="text-sm mt-2">Как часто воркеры падают и перезапускают обработку? Высокий рейт может убить базу данных (Retry Storm).</p>
+                    <p class="text-sm mt-2">How often do workers crash and restart processing? High rates can kill the database (Retry Storm).</p>
                 </div>
             </div>
 
@@ -166,7 +166,7 @@ X-Correlation-ID: 550e8400-e29b-41d4-a716-446655440000</code></pre>
         <div class="mt-12 pt-8 border-t border-gray-200">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <a href="background_tasks.html" class="text-blue-600 font-bold hover:underline">&larr; Background Tasks</a>
-                <a href="../index.html" class="text-blue-600 font-bold hover:underline">На главную &rarr;</a>
+                <a href="../index.html" class="text-blue-600 font-bold hover:underline">Home &rarr;</a>
             </div>
         </div>
 

@@ -129,17 +129,17 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Deployment & Protection</h1>
-            <p class="text-xl text-gray-600">Защита архитектуры тестами, Docker и Makefile.</p>
+            <p class="text-xl text-gray-600">Protecting architecture with tests, Docker, and Makefile.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
 
-    <p>Как гарантировать, что архитектура не "сгниет" через полгода? Как упаковать это всё для продакшена?</p>
+    <p>How do we guarantee the architecture doesn't "rot" in half a year? How do we package it all for production?</p>
 
-    <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">1. Архитектурные Тесты</h2>
-    <p>Документацию не читают. Пайплайн в GitLab/GitHub читают все (когда он падает). Запретим неправильные импорты.</p>
-    <p>Используем <code>pytest-archon</code>.</p>
+    <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">1. Architectural Tests</h2>
+    <p>Nobody reads documentation. Everyone reads the pipeline in GitLab/GitHub (when it fails). Let's forbid incorrect imports.</p>
+    <p>We use <code>pytest-archon</code>.</p>
     
     <pre><code class="language-python"># tests/test_architecture.py
 from pytest_archon import archrule
@@ -157,7 +157,7 @@ def test_domain_isolation():
 </code></pre>
 
     <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. Docker Multi-Stage Build</h2>
-    <p>Ваш образ должен весить 100MB, а не 1GB. Компилируем зависимости отдельно.</p>
+    <p>Your image should weigh 100MB, not 1GB. We compile dependencies separately.</p>
     
     <pre><code class="language-dockerfile"># BUILDER STAGE
 FROM python:3.11-slim as builder
@@ -180,8 +180,8 @@ USER appuser
 CMD ["python", "-m", "src.main"]
 </code></pre>
 
-    <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">3. Makefile как Единая Точка Входа</h2>
-    <p>Никто не помнит команды запуска тестов или линтеров. Сделайте <code>Makefile</code>.</p>
+    <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">3. Makefile as a Single Entry Point</h2>
+    <p>Nobody remembers the commands to run tests or linters. Create a <code>Makefile</code>.</p>
     <pre><code class="language-makefile">test:
     pytest tests/
 

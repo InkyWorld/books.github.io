@@ -129,22 +129,22 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Background Tasks</h1>
-            <p class="text-xl text-gray-600">Celery, Workers и асинхронные задачи в Чистой Архитектуре.</p>
+            <p class="text-xl text-gray-600">Celery, Workers and asynchronous tasks in Clean Architecture.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
 
-        <p>В Чистой Архитектуре Домен не должен знать о Celery, Redis или RabbitMQ. Но как отправить email или обработать видео?</p>
+        <p>In Clean Architecture, the Domain should not know about Celery, Redis, or RabbitMQ. But how do you send emails or process videos?</p>
 
-        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">1. Проблема: Импорт Celery в Use Case</h2>
+        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">1. Problem: Importing Celery into Use Case</h2>
         <div class="bg-red-50 p-4 rounded border border-red-200 mb-4">
-             <code>from worker import celery_app</code> внутри Use Case — это нарушение Dependency Rule. Ваш бизнес-код теперь зависит от очереди задач.
+             <code>from worker import celery_app</code> within Use Case — is a violation of the Dependency Rule. Your business code now depends on the task queue.
         </div>
 
-        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. Решение: Task Dispatcher</h2>
+        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. Solution: Task Dispatcher</h2>
         
-        <p>1. <strong>Interface (Application Layer):</strong> Объявляем, что мы вообще умеем отправлять задачи.</p>
+        <p>1. <strong>Interface (Application Layer):</strong> Declare that we can send tasks.</p>
         <pre><code class="language-python"># application/interfaces/tasks.py
 from typing import Protocol, Any, Dict
 
@@ -153,7 +153,7 @@ class ITaskDispatcher(Protocol):
         ...
 </code></pre>
 
-        <p>2. <strong>Implementation (Infrastructure Layer):</strong> Здесь живет Celery.</p>
+        <p>2. <strong>Implementation (Infrastructure Layer):</strong> Celery lives here.</p>
         <pre><code class="language-python"># infrastructure/tasks/celery_adapter.py
 from celery import Celery
 from application.interfaces.tasks import ITaskDispatcher
@@ -162,11 +162,11 @@ celery_app = Celery("app", broker="redis://localhost")
 
 class CeleryTaskDispatcher(ITaskDispatcher):
     def dispatch(self, task_name: str, payload: Dict[str, Any]):
-        # Отправляем задачу по имени (loose coupling)
+        # Send the task by name (loose coupling)
         celery_app.send_task(task_name, kwargs=payload)
 </code></pre>
 
-        <p>3. <strong>Использование в Use Case:</strong></p>
+        <p>3. <strong>Usage in Use Case:</strong></p>
         <pre><code class="language-python">class RegisterUserUseCase:
     def __init__(self, tasks: ITaskDispatcher):
         self.tasks = tasks
@@ -175,28 +175,28 @@ class CeleryTaskDispatcher(ITaskDispatcher):
         user = User.create(dto)
         self.repo.save(user)
         
-        # Мы просто говорим "Отправь email", не зная КАК
+        # We simply say "Send email", not knowing HOW
         self.tasks.dispatch(
             "send_welcome_email", 
             {"email": user.email, "name": user.name}
         )
 </code></pre>
 
-        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">3. Где живет worker?</h2>
-        <p>Воркер может быть отдельным процессом в том же репозитории или даже в другом проекте. Главное — четко определить границы и dependency flow:</p>
+        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">3. Where does the worker live?</h2>
+        <p>The worker can be a separate process in the same repository or even in a different project. The key is to clearly define boundaries and dependency flow:</p>
         <ul class="list-disc list-inside space-y-2 mb-6">
-            <li><strong>Отдельный репозиторий/сервис:</strong> идеально, если воркер запускается на другой инфраструктуре или требует другого окружения (например, большой Kubernetes job). Поддерживайте общую библиотеку интерфейсов/DTO, чтобы оба проекта знали, как обмениваться задачами.</li>
-            <li><strong>Тот же репозиторий, отдельный пакет:</strong> удобно, когда хочется переиспользовать бизнес-логику и конфигурацию. Восстанавливайте Worker из shared library, но держите зависимости Infrastructure (Celery, Redis) только в его пакете, чтобы остальной сервис оставался чистым.</li>
-            <li><strong>Часть того же приложения:</strong> допустимо для маленьких проектов. Worker стартует из того же кода и использует те же модули, но нужно следить, чтобы работающий сервис не импортировал Celery в Application). Это можно делать через отдельный entrypoint, который только конфигурирует и запускает задачи.</li>
+            <li><strong>Separate repository/service:</strong> ideal if the worker runs on different infrastructure or requires a different environment (for example, a large Kubernetes job). Maintain a common library of interfaces/DTOs so both projects know how to exchange tasks.</li>
+            <li><strong>Same repository, separate package:</strong> convenient when you want to reuse business logic and configuration. Restore the Worker from the shared library, but keep Infrastructure dependencies (Celery, Redis) only in its package so the rest of the service remains clean.</li>
+            <li><strong>Part of the same application:</strong> acceptable for small projects. The Worker starts from the same code and uses the same modules, but you need to make sure the running service doesn't import Celery into the Application. You can do this through a separate entrypoint that only configures and runs tasks.</li>
         </ul>
-        <p>В любом случае не смешивайте worker и HTTP-обработчики в одном потоке: задачи должны вызываться через dispatcher, а worker — только читать Application Interfaces. Это сохраняет правила Clean Architecture.</p>
+        <p>In any case, don't mix worker and HTTP handlers in one thread: tasks should be called through the dispatcher, and the worker should only read Application Interfaces. This keeps the Clean Architecture rules intact.</p>
 
         <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">4. Transactional Outbox</h2>
-        <p>Что если транзакция БД откатится, а задача в Celery уже уйдет? Пользователь получит email "Вы зарегистрированы", но в базе его нет.</p>
-        <p>Смотрите главу <a href="outbox.html" class="text-blue-600 underline">Outbox Pattern</a> для решения этой проблемы (сохранение задачи в ту же БД в одной транзакции).</p>
+        <p>What if the database transaction rolls back, but the task in Celery already goes out? The user will receive an email "You are registered", but they don't exist in the database.</p>
+        <p>See the <a href="outbox.html" class="text-blue-600 underline">Outbox Pattern</a> chapter for a solution to this problem (saving the task to the same database in one transaction).</p>
 
-        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">4. Retry Strategies (Повторы и Backoff)</h2>
-        <p>Задачи могут падать из-за временных проблем (SMTP, сеть). Используйте экспоненциальный backoff с jitter и максимальным числом попыток.</p>
+        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">4. Retry Strategies (Retries and Backoff)</h2>
+        <p>Tasks can fail due to temporary issues (SMTP, network). Use exponential backoff with jitter and a maximum number of attempts.</p>
 <pre><code class="language-python"># Celery example
 from celery import shared_task
 
@@ -205,42 +205,42 @@ def send_email(self, to, subject, body):
     try:
         smtp.send(to, subject, body)
     except Exception as exc:
-        # экспоненциальный backoff
+        # exponential backoff
         raise self.retry(exc=exc, countdown=min(60, 2 ** self.request.retries))
 </code></pre>
 
-        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">5. Dead-letter Queues (DLQ) и наблюдаемость</h2>
-        <p>Задачи, которые падают постоянно, должны попадать в DLQ с причиной ошибки и метаданными. Следите за метриками: failure rate, retry latency, task duration.</p>
+        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">5. Dead-letter Queues (DLQ) and Observability</h2>
+        <p>Tasks that fail permanently should go to the DLQ with the error reason and metadata. Monitor metrics: failure rate, retry latency, task duration.</p>
 
         <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">6. Idempotency & Deduplication</h2>
-        <p>Обработчики должны быть идемпотентны. Используйте бизнес-ключи для dedup (например, event_id или external_id).</p>
-<pre><code class="language-python"># Пример идемпотентной задачи
+        <p>Handlers should be idempotent. Use business keys for dedup (for example, event_id or external_id).</p>
+<pre><code class="language-python"># Example of an idempotent task
 def process_payment(event):
     if payment_exists(event.id):
         return
-    # обработка
+    # processing
     save_payment(event)
 </code></pre>
 
         <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">7. Task Timeouts & Resource Limits</h2>
-        <p>Каждая задача должна иметь таймаут и допустимый набор ресурсов. Для долгих процессов используйте оркестрацию через шаги (chaining) или Saga.</p>
+        <p>Each task should have a timeout and an acceptable set of resources. For long-running processes, use orchestration through steps (chaining) or Saga.</p>
 
         <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">8. Batching & Rate Limiting</h2>
-        <p>Для массовых операций (отправка писем, webhooks) группируйте записи в батчи и ставьте rate limits, чтобы не получить ban у внешнего провайдера.</p>
+        <p>For bulk operations (sending emails, webhooks), group records into batches and set rate limits to avoid being banned by an external provider.</p>
 
         <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">9. Testing Background Tasks</h2>
         <ul class="list-disc list-inside space-y-2 mb-6">
-            <li>Локально запускайте worker и broker (например, redis) в docker-compose для интеграционных тестов.</li>
-            <li>Покрывайте обработчики unit-тестами (без broker): тестируйте бизнес-логику, mock-адаптеры.</li>
-            <li>Проверяйте retry-логику и отметки об обработанных event_ids.</li>
+            <li>Run the worker and broker locally (for example, redis) in docker-compose for integration tests.</li>
+            <li>Cover handlers with unit tests (without broker): test business logic, mock adapters.</li>
+            <li>Check retry logic and marks for processed event_ids.</li>
         </ul>
 
         <h3 class="font-bold text-lg mt-8 mb-4">Pitfalls & Lifehacks</h3>
         <ul class="list-disc list-inside space-y-2 mb-6">
-            <li><strong>Не выполняйте долгое дело внутри HTTP-обработчика:</strong> возвращайте 202 и отправляйте задачу в фон.</li>
-            <li><strong>Idempotency Key:</strong> используйте ключи не только в HTTP, но и внутри задач (event_id), чтобы избежать двойной обработки.</li>
-            <li><strong>Dead-letter monitoring:</strong> автоматизируйте оповещения при росте DLQ.</li>
-            <li><strong>Local development:</strong> используйте sync-adapter (в development mode) который выполняет задачи синхронно — это ускоряет отладку.</li>
+            <li><strong>Don't execute long tasks inside the HTTP handler:</strong> return 202 and send the task to the background.</li>
+            <li><strong>Idempotency Key:</strong> use keys not only in HTTP, but also inside tasks (event_id) to avoid double processing.</li>
+            <li><strong>Dead-letter monitoring:</strong> automate alerts when DLQ grows.</li>
+            <li><strong>Local development:</strong> use sync-adapter (in development mode) that executes tasks synchronously — this speeds up debugging.</li>
         </ul>
 
             </div>

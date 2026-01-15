@@ -101,44 +101,44 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Context Relationships</h1>
-            <p class="text-xl text-gray-600">Классификация отношений между командами и системами.</p>
+            <p class="text-xl text-gray-600">Classification of relationships between teams and systems.</p>
         </header>
 
         <section class="mb-12">
-            <h2 class="text-2xl font-bold mb-6">Типы связей</h2>
+            <h2 class="text-2xl font-bold mb-6">Types of Relationships</h2>
             
             <div class="card border-l-4 border-green-500">
-                <h3 class="font-bold text-lg mb-2">🤝 Partnership (Партнерство)</h3>
-                <p>Две команды работают как одна. Если меняется API одной системы, вторая тут же обновляется. Требует высокой синхронизации и доверия.</p>
-                <div class="mt-4 bg-green-50 p-3 text-sm rounded"><strong>Пример:</strong> Backend-команда и Frontend-команда в одном стартапе.</div>
+                <h3 class="font-bold text-lg mb-2">🤝 Partnership</h3>
+                <p>Two teams work as one. If one system\'s API changes, the other updates immediately. Requires high synchronization and trust.</p>
+                <div class="mt-4 bg-green-50 p-3 text-sm rounded"><strong>Example:</strong> Backend team and Frontend team in one startup.</div>
             </div>
 
             <div class="card border-l-4 border-yellow-500">
-                <h3 class="font-bold text-lg mb-2">🌽 Shared Kernel (Общее Ядро)</h3>
-                <p>Общий кусок кода (библиотека) или часть базы данных, которую используют два контекста. Любое изменение требует согласования всех участников.</p>
-                <div class="mt-4 bg-yellow-50 p-3 text-sm rounded"><strong>Пример:</strong> Библиотека с DTO-классами или пакетом `auth-utils`.</div>
+                <h3 class="font-bold text-lg mb-2">🌽 Shared Kernel</h3>
+                <p>A shared piece of code (library) or part of the database that two contexts use. Any change requires agreement from all participants.</p>
+                <div class="mt-4 bg-yellow-50 p-3 text-sm rounded"><strong>Example:</strong> Library with DTO classes or `auth-utils` package.</div>
             </div>
 
             <div class="card border-l-4 border-blue-500">
                 <h3 class="font-bold text-lg mb-2">🛒 Customer / Supplier</h3>
-                <p>Отношения "Заказчик — Исполнитель". Supplier (поставщик) учитывает пожелания Customer (заказчика), но приоритеты определяет сам. Customer зависит от Supplier.</p>
+                <p>"Customer — Supplier" relationship. Supplier considers Customer\'s wishes, but sets priorities independently. Customer depends on Supplier.</p>
             </div>
 
             <div class="card border-l-4 border-gray-500">
-                <h3 class="font-bold text-lg mb-2">📋 Conformist (Конформист)</h3>
-                <p>Клиент ("Downstream") полностью подстраивается под Поставщика ("Upstream"). Поставщику всё равно на клиента. Клиент не имеет веса.</p>
-                <div class="mt-4 bg-gray-50 p-3 text-sm rounded"><strong>Пример:</strong> Интеграция с Google Maps. Они не будут менять API ради вас. Вы — конформист.</div>
+                <h3 class="font-bold text-lg mb-2">📋 Conformist</h3>
+                <p>The client ("Downstream") fully adapts to the Supplier ("Upstream"). The supplier doesn\'t care about the client. The client has no weight.</p>
+                <div class="mt-4 bg-gray-50 p-3 text-sm rounded"><strong>Example:</strong> Integration with Google Maps. They won\'t change the API for you. You are a conformist.</div>
             </div>
 
              <div class="card border-l-4 border-indigo-500">
                 <h3 class="font-bold text-lg mb-2">🌐 Open Host Service (OHS)</h3>
-                <p>Система предоставляет официальный, публичный API для всех желающих. Она не подстраивается под каждого, а диктует протокол.</p>
+                <p>The system provides an official, public API for everyone. It doesn\'t adapt to each one, but dictates the protocol.</p>
             </div>
 
             <div class="p-6 bg-red-50 rounded-xl border border-red-200">
                 <h3 class="font-bold text-red-900 text-xl mb-2">🛡️ Anti-Corruption Layer (ACL)</h3>
-                <p class="mb-4">Самый важный паттерн для защиты вашего домена от кривых моделей извне.</p>
-                <a href="acl.html" class="inline-block px-6 py-2 bg-red-600 text-white font-bold rounded hover:bg-red-700 transition">Читать подробнее про ACL &rarr;</a>
+                <p class="mb-4">The most important pattern for protecting your domain from crooked external models.</p>
+                <a href="acl.html" class="inline-block px-6 py-2 bg-red-600 text-white font-bold rounded hover:bg-red-700 transition">Read more about ACL &rarr;</a>
             </div>
         </section>
 

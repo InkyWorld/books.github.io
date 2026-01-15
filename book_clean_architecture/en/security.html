@@ -119,85 +119,85 @@
     <!-- CONTENT -->
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Безопасность простыми словами</h1>
-            <p class="text-xl text-gray-600">Убираем сложность: как защитить приложение и не запутаться в слоях.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Security in Simple Terms</h1>
+            <p class="text-xl text-gray-600">Removing complexity: how to secure your application and not get confused in the layers.</p>
         </header>
 
-        <!-- 1. АНАЛОГИЯ -->
+        <!-- 1. ANALOGY -->
         <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-6">🚪 Аналогия с Офисом</h2>
+            <h2 class="text-2xl font-bold mb-6">🚪 Office Analogy</h2>
             <div class="grid md:grid-cols-2 gap-8">
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <div class="text-4xl mb-4">👮‍♂️ Охранник</div>
-                    <h3 class="font-bold text-lg mb-2">Это Authentication</h3>
-                    <p class="text-sm">Стоит на входе (<a href="middleware.html" class="text-blue-600 hover:underline font-bold">Middleware</a>). Проверяет пропуск (Token). Знает, <strong>КТО</strong> вы такой.</p>
+                    <div class="text-4xl mb-4">👮‍♂️ Security Guard</div>
+                    <h3 class="font-bold text-lg mb-2">This is Authentication</h3>
+                    <p class="text-sm">Stands at the entrance (<a href="middleware.html" class="text-blue-600 hover:underline font-bold">Middleware</a>). Checks the pass (Token). Knows <strong>WHO</strong> you are.</p>
                     <div class="mt-4 bg-gray-100 p-2 rounded text-xs font-mono">
-                        — Ваш ID: 123. Проходите.
+                         Your ID: 123. Go ahead.
                     </div>
                 </div>
                 
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                    <div class="text-4xl mb-4">👔 Менеджер</div>
-                    <h3 class="font-bold text-lg mb-2">Это Authorization</h3>
-                    <p class="text-sm">Сидит в кабинете (Use Case). Проверяет, <strong>МОЖНО</strong> ли вам подписывать этот документ.</p>
+                    <div class="text-4xl mb-4">👔 Manager</div>
+                    <h3 class="font-bold text-lg mb-2">This is Authorization</h3>
+                    <p class="text-sm">Sits in the office (Use Case). Checks if you <strong>CAN</strong> sign this document.</p>
                     <div class="mt-4 bg-gray-100 p-2 rounded text-xs font-mono">
-                        — Вы сотрудник, но у вас нет прав на бюджет. Отказ.
+                        You're an employee, but you don't have budget rights. Denied.
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 2. КАК ЭТО В КОДЕ -->
+        <!-- 2. HOW IT LOOKS IN CODE -->
         <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-6">Как это выглядит в коде?</h2>
+            <h2 class="text-2xl font-bold mb-6">How does this look in code?</h2>
             
             <div class="space-y-8">
-                <!-- ШАГ 0 -->
+                <!-- STEP 0 -->
                 <div>
                     <h3 class="text-xl font-bold text-purple-700 flex items-center gap-2">
-                        <span class="bg-purple-100 px-2 rounded">Шаг 0</span> Охрана на входе (Middleware)
+                        <span class="bg-purple-100 px-2 rounded">Step 0</span> Guard at the entrance (Middleware)
                     </h3>
-                    <p class="mb-2">Это слой <span class="font-bold">Infrastructure</span>. Middleware перехватывает запрос <strong>ДО</strong> того, как он попадет в бизнес-логику.</p>
+                    <p class="mb-2">This is the <span class="font-bold">Infrastructure</span> layer. Middleware intercepts the request <strong>BEFORE</strong> it reaches the business logic.</p>
                     <pre><code class="language-python"># infrastructure/web/middleware.py
 
-# Фреймворк вызывает это для КАЖДОГО запроса
+# Framework calls this for EVERY request
 def auth_middleware(request, next_handler):
-    # 1. Стой! Кто идет? (Проверяем токен)
+    # 1. Stop! Who goes there? (Check the token)
     token = request.headers.get("Authorization")
     
     if not is_valid(token):
-        return ErrorResponse("Доступ запрещен", 401)
+        return ErrorResponse("Access denied", 401)
 
-    # 2. Если все ок — запоминаем ID пользователя
-    # (Мы кладем его в "context", чтобы UseCase мог его найти)
+    # 2. If all is good — remember the user ID
+    # (We put it in "context" so UseCase can find it)
     user_context.set(extract_user_id(token))
     
-    # 3. Проходи! (Вызываем следующий слой)
+    # 3. Go ahead! (Call the next layer)
     return next_handler(request)
 </code></pre>
                 </div>
 
-                <!-- ШАГ 1 -->
+                <!-- STEP 1 -->
                 <div>
                     <h3 class="text-xl font-bold text-blue-700 flex items-center gap-2">
-                        <span class="bg-blue-100 px-2 rounded">Шаг 1</span> Создаем "Службу безопасности"
+                        <span class="bg-blue-100 px-2 rounded">Step 1</span> Create a "Security Service"
                     </h3>
-                    <p class="mb-2">В слое Application мы просто говорим: "Мне нужен способ узнать, кто сейчас пользуется системой".</p>
+                    <p class="mb-2">In the Application layer, we simply say: "I need a way to know who is currently using the system".</p>
                     <pre><code class="language-python"># application/security.py
 
 class SecurityService:
     def get_user_id(self) -> str:
-        # Этот метод просто описывает, что мы ХОТИМ получить ID.
+        # This method simply describes what we WANT to get the ID.
         pass
 </code></pre>
                 </div>
 
-                <!-- ШАГ 2 -->
+                <!-- STEP 2 -->
                 <div>
                     <h3 class="text-xl font-bold text-green-700 flex items-center gap-2">
-                        <span class="bg-green-100 px-2 rounded">Шаг 2</span> Используем в Use Case
+                        <span class="bg-green-100 px-2 rounded">Step 2</span> Use in Use Case
                     </h3>
-                    <p class="mb-2">Бизнес-логика (Use Case) использует эту службу, чтобы проверить права.</p>
+                    <p class="mb-2">Business logic (Use Case) uses this service to check permissions.</p>
                     <pre><code class="language-python"># application/use_cases.py
 
 class DeleteOrderUseCase:
@@ -206,48 +206,48 @@ class DeleteOrderUseCase:
         self.repo = repo
 
     def execute(self, order_id):
-        # 1. Спрашиваем: кто пришел?
+        # 1. Ask: who came?
         user_id = self.security.get_user_id()
         
-        # 2. Достаем заказ
+        # 2. Get the order
         order = self.repo.get(order_id)
 
-        # 3. Проверка: это ваш заказ?
+        # 3. Check: is this your order?
         if order.owner_id != user_id:
-             raise Error("Нельзя удалять чужие заказы!")
+             raise Error("You cannot delete other people's orders!")
              
         self.repo.delete(order_id)
 </code></pre>
                 </div>
                 
                 <div class="bg-yellow-50 p-6 rounded border-l-4 border-yellow-400">
-                    <strong>В чем магия?</strong>
-                    <p class="mt-2 text-sm text-gray-800">Обратите внимание: наш Use Case <strong>НЕ знает</strong> про HTTP, Заголовки, Куки или Токены. Он просто просит ID пользователя. Это делает код чистым и простым для тестирования.</p>
+                    <strong>What's the magic?</strong>
+                    <p class="mt-2 text-sm text-gray-800">Notice: our Use Case <strong>DOES NOT know</strong> about HTTP, Headers, Cookies, or Tokens. It simply asks for the user ID. This makes the code clean and simple to test.</p>
                 </div>
             </div>
         </section>
 
-        <!-- 3. ГДЕ ПРОВЕРЯТЬ ПАРОЛЬ? -->
+        <!-- 3. FREQUENTLY ASKED QUESTIONS -->
         <section class="card">
-            <h2 class="text-2xl font-bold mb-4">Часто задаваемые вопросы</h2>
+            <h2 class="text-2xl font-bold mb-4">Frequently Asked Questions</h2>
             
             <details class="group mb-4">
                 <summary class="flex items-center gap-3 p-4 bg-slate-50 rounded cursor-pointer font-bold hover:bg-slate-100">
-                    <span>🗝️ Где проверять логин и пароль?</span>
+                    <span>🗝️ Where to check login and password?</span>
                 </summary>
                 <div class="p-4 border-t text-sm">
-                    Это техническая деталь. Это делает <strong>Infrastructure Layer</strong>.
-                    <br>Обычно это специальный эндпоинт <code>/login</code>, который проверяет хэш пароля в БД и выдает токен.
+                    This is a technical detail. The <strong>Infrastructure Layer</strong> does it.
+                    <br>Usually it's a special endpoint <code>/login</code>, which checks the password hash in the database and issues a token.
                 </div>
             </details>
 
             <details class="group mb-4">
                 <summary class="flex items-center gap-3 p-4 bg-slate-50 rounded cursor-pointer font-bold hover:bg-slate-100">
-                    <span>👮 Где проверять "Админ или не Админ"?</span>
+                    <span>👮 Where to check "Admin or not Admin"?</span>
                 </summary>
                 <div class="p-4 border-t text-sm">
-                    Это бизнес-правило. Это делает <strong>Use Case</strong> (Application Layer).
-                    <br>Например: <code>if not user.is_admin: raise Error()</code>.
+                    This is a business rule. The <strong>Use Case</strong> (Application Layer) does it.
+                    <br>For example: <code>if not user.is_admin: raise Error()</code>.
                 </div>
             </details>
         </section>
