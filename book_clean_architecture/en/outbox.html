@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transactional Outbox - Clean Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
+        p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
+        
+        .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
+        .sidebar-title { color: #f8fafc; }
+        .sidebar-subtitle { color: #60a5fa; }
+        .nav-section { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem 1rem 0.5rem; }
+        .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
+
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+        .code-keyword { color: #c084fc; font-weight: bold; } 
+        .code-class { color: #fbbf24; font-weight: bold; }   
+        .code-func { color: #60a5fa; font-weight: bold; }    
+        .code-str { color: #a3e635; }                        
+        .hljs-comment, .hljs-quote { color: #475569 !important; font-weight: 700 !important; font-style: normal !important; }
+        .code-comment { color: #475569; font-style: normal; font-weight: 700; }
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar hidden md:block">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
+            <span class="sidebar-subtitle text-sm">Author: Alex | InkyWorld</span>
+        </div>
+        
+        <nav class="py-4">
+            <div class="px-4 mb-4">
+                <div class="flex gap-2 text-xs font-bold text-slate-400">
+                    <a href="outbox.html" class="text-blue-400 font-bold">RU</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../en/outbox.html" class="hover:text-white transition">EN</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../ua/outbox.html" class="hover:text-white transition">UA</a>
+                </div>
+            </div>
+
+            <div class="nav-section">Fundamentals</div>
+            <a href="index.html" class="nav-link">📘 Введение</a>
+            <a href="solid.html" class="nav-link">📐 SOLID принципы</a>
+            <a href="project_structure.html" class="nav-link">🧭 Структура проекта (DDD)</a>
+            <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
+
+            <div class="nav-section">Architecture Layers</div>
+            <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link">🌐 Presentation Layer</a>
+            <a href="middleware.html" class="nav-link">🔌 Middleware</a>
+
+            <div class="nav-section">Tactical DDD</div>
+            <a href="aggregates.html" class="nav-link">📦 Aggregates</a>
+            <a href="invariants.html" class="nav-link">🛡️ Инварианты</a>
+            <a href="repository_uow.html" class="nav-link">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link">📋 Specification</a>
+            <a href="domain_events.html" class="nav-link">📣 Domain Events</a>
+            <a href="policies.html" class="nav-link">📜 Policies</a>
+            <a href="versioning.html" class="nav-link">🔄 Versioning</a>
+
+            <div class="nav-section">Strategic DDD</div>
+            <a href="bounded_context.html" class="nav-link">🌍 Bounded Contexts</a>
+            <a href="ubiquitous_language.html" class="nav-link">🗣️ Ubiquitous Language</a>
+            <a href="context_relationships.html" class="nav-link">🤝 Context Relationships</a>
+            <a href="acl.html" class="nav-link">🛡️ Anti-Corruption Layer</a>
+            <a href="subdomains.html" class="nav-link">🧬 Subdomains</a>
+            <a href="modular_monolith.html" class="nav-link">🏗️ Modular Monolith</a>
+            <a href="strategic_integration.html" class="nav-link">🌐 Strategic Integration</a>
+            <a href="big_ball_of_mud.html" class="nav-link">🐷 Big Ball of Mud</a>
+            <a href="boundaries_first.html" class="nav-link">🧠 Boundaries First</a>
+
+            <div class="nav-section">CQRS & Distributed Systems</div>
+            <a href="cqrs_es.html" class="nav-link">⚡ CQRS и ES</a>
+            <a href="saga.html" class="nav-link">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link active">📮 Outbox Pattern</a>
+            <a href="background_tasks.html" class="nav-link">⏳ Background Tasks</a>
+            <a href="observability.html" class="nav-link">🔍 Observability</a>
+
+            <div class="nav-section">Reliability & Security</div>
+            <a href="security.html" class="nav-link">🔐 Auth & Permissions</a>
+            <a href="error_handling.html" class="nav-link">🚫 Error Handling</a>
+            <a href="concurrency.html" class="nav-link">🛑 Concurrency & Migrations</a>
+            <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
+
+            <div class="nav-section">Quality & Practice</div>
+            <a href="testing.html" class="nav-link">🧪 Тестирование</a>
+            <a href="overengineering.html" class="nav-link">🛑 Избыточность</a>
+            <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
+            <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
+            <a href="projects.html" class="nav-link">🚀 Мини-проекты</a>
+            <a href="antipatterns.html" class="nav-link">⚠️ Антипаттерны</a>
+            <a href="advanced_techniques.html" class="nav-link">🚀 Advanced Tech</a>
+
+            <div class="nav-section">About</div>
+            <a href="afterword.html" class="nav-link">👋 Послесловие</a>
+        </nav>
+
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
+        <header class="mb-12 pb-8 border-b border-gray-200">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Transactional Outbox Pattern</h1>
+            <p class="text-xl text-gray-600">Гарантированная доставка сообщений.</p>
+        </header>
+
+        <section class="mb-16">
+            <div class="prose prose-slate max-w-none text-gray-700">
+                
+                <h2 class="text-2xl font-bold mb-4">🧨 Проблема: Dual Write (двойная запись)</h2>
+                <p>Нужно сделать ДВЕ разные вещи:</p>
+                <ol class="list-decimal pl-6 mb-4">
+                    <li>💾 сохранить бизнес-данные в БД</li>
+                    <li>📣 отправить событие в брокер (Kafka / Rabbit)</li>
+                </ol>
+
+                <h3 class="text-xl font-bold mb-2">Что может пойти не так</h3>
+                
+                <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500 mb-4">
+                    <h4 class="font-bold">Сценарий А</h4>
+                    <p>1) INSERT order  ✅<br>
+                    2) SEND event    ❌ (брокер недоступен)</p>
+                    <p class="font-bold text-red-700">➡️ заказ есть, события нет → другие сервисы “не узнали”</p>
+                </div>
+
+                <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500 mb-6">
+                    <h4 class="font-bold">Сценарий B</h4>
+                    <p>1) SEND event    ✅<br>
+                    2) INSERT order  ❌ (rollback)</p>
+                    <p class="font-bold text-red-700">➡️ событие есть, заказа нет → фантомное событие</p>
+                </div>
+
+                <p class="text-lg font-bold text-red-600 mb-8">❌ Это логическая коррупция системы</p>
+
+                <h2 class="text-2xl font-bold mb-4">🧠 Ключевая идея Outbox</h2>
+                <p class="text-xl italic mb-4">База данных = единственный источник истины</p>
+                <p>Если БД зафиксировала факт — он должен когда-нибудь попасть в брокер.</p>
+
+                <h2 class="text-2xl font-bold mt-8 mb-4">✅ Решение: Transactional Outbox</h2>
+                
+                <h3 class="text-xl font-bold mb-2">1️⃣ Пишем событие В БД, а не в брокер</h3>
+                
+                <pre><code class="language-sql">BEGIN;
+
+INSERT INTO orders (id, total)
+VALUES (1, 100);
+
+INSERT INTO outbox (
+    id,
+    aggregate_id,
+    type,
+    payload,
+    created_at
+) VALUES (
+    gen_random_uuid(),
+    1,
+    'OrderCreated',
+    '{"order_id": 1, "total": 100}',
+    now()
+);
+
+COMMIT;</code></pre>
+
+                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 my-4">
+                    <p class="font-bold">👉 Инвариант:</p>
+                    <ul class="list-disc pl-6">
+                        <li>либо и заказ, и событие вместе</li>
+                        <li>либо ничего</li>
+                    </ul>
+                </div>
+
+                <h3 class="text-xl font-bold mt-8 mb-2">2️⃣ Отдельный Relay (Publisher)</h3>
+                <p>Фоновый процесс:</p>
+
+                <pre><code class="language-python">while true:
+    events = SELECT * FROM outbox WHERE processed = false
+    for e in events:
+        publish_to_broker(e)
+        mark_as_processed(e)</code></pre>
+
+                <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500 my-4">
+                    <p class="font-bold">📌 Он:</p>
+                    <ul class="list-disc pl-6">
+                        <li>может падать</li>
+                        <li>может дублировать</li>
+                        <li>может отставать</li>
+                    </ul>
+                    <p class="mt-2 font-bold">И это НОРМАЛЬНО</p>
+                </div>
+
+                <h2 class="text-2xl font-bold mt-8 mb-4">🛡️ Какие гарантии даёт паттерн</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <h4 class="font-bold text-green-800 text-lg mb-2">✅ 1. At-least-once доставка</h4>
+                        <p class="text-green-900">Событие может прийти несколько раз,<br>но НЕ может пропасть.</p>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <h4 class="font-bold text-gray-800 text-lg mb-2">❌ Не гарантирует</h4>
+                        <ul class="list-disc pl-6 text-gray-700">
+                            <li>exactly-once (это иллюзия)</li>
+                            <li>порядок между разными агрегатами</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- NAVIGATION FOOTER -->
+        <div class="mt-24 pt-10 border-t border-slate-200">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <a href="saga.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right bg-white">
+                    <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1 flex justify-end">Previous</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">&larr; 🔄 Saga Pattern</span>
+                </a>
+                <a href="background_tasks.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left bg-white">
+                    <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Next</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">⏳ Background Tasks &rarr;</span>
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

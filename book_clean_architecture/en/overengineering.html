@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Когда паттерны лишние - Clean Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
+        p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
+        
+        .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
+        .sidebar-title { color: #f8fafc; }
+        .sidebar-subtitle { color: #60a5fa; }
+        .nav-section { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem 1rem 0.5rem; }
+        .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
+
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+    <!-- SIDEBAR (Placeholder, will be updated globally) -->
+    <aside class="sidebar hidden md:block">
+        <div class="p-6 pb-4">
+            <a href="index.html" class="block">
+                <h1 class="sidebar-title text-2xl font-black tracking-tighter mb-1">Clean Arch</h1>
+                <p class="sidebar-subtitle text-xs font-bold uppercase tracking-widest">Guide & Patterns</p>
+            </a>
+        </div>
+        <nav class="py-4">
+            <div class="px-4 mb-4">
+                <div class="flex gap-2 text-xs font-bold text-slate-400">
+                    <a href="overengineering.html" class="text-blue-400 font-bold">RU</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../en/overengineering.html" class="hover:text-white transition">EN</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../ua/overengineering.html" class="hover:text-white transition">UA</a>
+                </div>
+            </div>
+
+            <div class="nav-section">Fundamentals</div>
+            <a href="index.html" class="nav-link">📘 Введение</a>
+            <a href="solid.html" class="nav-link">📐 SOLID принципы</a>
+            <a href="project_structure.html" class="nav-link">🧭 Структура проекта (DDD)</a>
+            <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
+
+            <div class="nav-section">Architecture Layers</div>
+            <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link">🌐 Presentation Layer</a>
+            <a href="middleware.html" class="nav-link">🔌 Middleware</a>
+
+            <div class="nav-section">Tactical DDD</div>
+            <a href="aggregates.html" class="nav-link">📦 Aggregates</a>
+            <a href="invariants.html" class="nav-link">🛡️ Инварианты</a>
+            <a href="repository_uow.html" class="nav-link">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link">📋 Specification</a>
+            <a href="domain_events.html" class="nav-link">📣 Domain Events</a>
+            <a href="policies.html" class="nav-link">📜 Policies</a>
+            <a href="versioning.html" class="nav-link">🔄 Versioning</a>
+
+            <div class="nav-section">Strategic DDD</div>
+            <a href="bounded_context.html" class="nav-link">🌍 Bounded Contexts</a>
+            <a href="ubiquitous_language.html" class="nav-link">🗣️ Ubiquitous Language</a>
+            <a href="context_relationships.html" class="nav-link">🤝 Context Relationships</a>
+            <a href="acl.html" class="nav-link">🛡️ Anti-Corruption Layer</a>
+            <a href="subdomains.html" class="nav-link">🧬 Subdomains</a>
+            <a href="modular_monolith.html" class="nav-link">🏗️ Modular Monolith</a>
+            <a href="strategic_integration.html" class="nav-link">🌐 Strategic Integration</a>
+            <a href="big_ball_of_mud.html" class="nav-link">🐷 Big Ball of Mud</a>
+            <a href="boundaries_first.html" class="nav-link">🧠 Boundaries First</a>
+
+            <div class="nav-section">CQRS & Distributed Systems</div>
+            <a href="cqrs_es.html" class="nav-link">⚡ CQRS и ES</a>
+            <a href="saga.html" class="nav-link">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link">📮 Outbox Pattern</a>
+            <a href="background_tasks.html" class="nav-link">⏳ Background Tasks</a>
+            <a href="observability.html" class="nav-link">🔍 Observability</a>
+
+            <div class="nav-section">Reliability & Security</div>
+            <a href="security.html" class="nav-link">🔐 Auth & Permissions</a>
+            <a href="error_handling.html" class="nav-link">🚫 Error Handling</a>
+            <a href="concurrency.html" class="nav-link">🛑 Concurrency & Migrations</a>
+            <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
+
+            <div class="nav-section">Quality & Practice</div>
+            <a href="testing.html" class="nav-link">🧪 Тестирование</a>
+            <a href="overengineering.html" class="nav-link active">🛑 Избыточность</a>
+            <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
+            <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
+            <a href="projects.html" class="nav-link">🚀 Мини-проекты</a>
+            <a href="antipatterns.html" class="nav-link">⚠️ Антипаттерны</a>
+            <a href="advanced_techniques.html" class="nav-link">🚀 Advanced Tech</a>
+
+            <div class="nav-section">About</div>
+            <a href="afterword.html" class="nav-link">👋 Послесловие</a>
+        </nav>
+    </aside>
+
+    <!-- MOBILE HEADER -->
+    <div class="md:hidden fixed w-full bg-slate-900 z-50 p-4 border-b border-slate-700">
+        <div class="flex justify-between items-center text-white">
+            <span class="font-bold text-lg">Clean Architecture</span>
+            <button id="mobile-menu-btn" class="p-2">☰</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 md:ml-72 min-h-screen p-6 md:p-12 lg:p-16 max-w-4xl pt-24 md:pt-16">
+        
+        <header class="mb-12">
+            <div class="text-sm font-bold text-red-600 uppercase tracking-wider mb-2">Прагматизм</div>
+            <h1 class="text-4xl md:text-5xl font-black text-slate-900 leading-tight mb-6">Когда паттерны лишние: Избыточная архитектура</h1>
+            <p class="text-xl text-slate-600">Clean Architecture — это инструмент, а не религия. Узнайте, когда лучше написать простой спагетти-код.</p>
+        </header>
+
+        <article class="prose prose-slate prose-lg max-w-none">
+            
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6">Синдром "Resume Driven Development"</h2>
+                <p>
+                    Часто разработчики внедряют DDD, CQRS, Event Sourcing и Clean Architecture не потому, что это нужно проекту, а потому что хотят попробовать новые технологии или украсить свое резюме. Это приводит к созданию монстров, поддерживать которые сложнее, чем обычный монолит.
+                </p>
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 my-6">
+                    <h3 class="font-bold text-yellow-800 text-lg mb-2">Золотое правило:</h3>
+                    <p class="text-yellow-900 m-0">
+                        Сложность архитектуры не должна превышать сложность решаемой бизнес-задачи. Если ваша задача — CRUD админка для 5 таблиц, Clean Architecture вам не нужна.
+                    </p>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6">Признаки Over-Engineering</h2>
+                <ul class="space-y-4 list-disc list-inside">
+                    <li><strong>DTO для всего:</strong> У вас есть `User`, `UserDTO`, `CreateUserRequest`, `UserResponse`, и они все идентичны.</li>
+                    <li><strong>Интерфейсы с одной реализацией:</strong> У вас есть `IUserRepository` и `UserRepository`, и вы точно знаете, что никогда не замените Postgres на Mongo.</li>
+                    <li><strong>Use Cases, которые ничего не делают:</strong> Классы, которые просто вызывают метод репозитория и возвращают результат.</li>
+                    <li><strong>Надуманная модульность:</strong> Микросервисы, которые общаются друг с другом синхронно по HTTP для выполнения одной операции.</li>
+                </ul>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6">Когда НЕ ИСПОЛЬЗОВАТЬ Clean Architecture</h2>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-lg mb-3">🛠️ Прототипы и MVP</h3>
+                        <p class="text-sm">Когда цель — проверить гипотезу за 2 дня. Здесь важнее скорость. Django/Rails way — ваш выбор.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-lg mb-3">📊 CRUD приложения</h3>
+                        <p class="text-sm">Админки, простые CMS, где логика заключается в "прочитать из БД -> показать -> сохранить".</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-lg mb-3">📜 Скрипты и Утилиты</h3>
+                        <p class="text-sm">Парсеры, миграторы данных, одноразовые задачи. Здесь класс на 500 строк лучше, чем 10 файлов.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 class="font-bold text-lg mb-3">⚡ High Performance</h3>
+                        <p class="text-sm">Если каждый такт CPU на счету (HFT, Real-time), слои абстракции могут быть слишком дорогими.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6">YAGNI и KISS</h2>
+                <p>
+                    <strong>YAGNI (You Ain't Gonna Need It):</strong> Не пишите код для проблем, которые "возможно" возникнут в будущем. Вероятность угадать будущее крайне мала.
+                </p>
+                <p>
+                    <strong>KISS (Keep It Simple, Stupid):</strong> Самый простой код — самый лучший. Если решение можно объяснить джуниору за 5 минут — оно хорошее.
+                </p>
+            </section>
+
+            <section class="mb-12">
+                <h2 class="text-3xl font-bold text-slate-800 mb-6">Гибридный подход: Clean Architecture + CRUD</h2>
+                <p>
+                    Многие думают, что в проекте нужно выбрать что-то одно. Это ошибка. В реальном DDD проекте разные части системы (Bounded Contexts) могут и должны иметь разную сложность архитектуры.
+                </p>
+
+                <div class="my-8">
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-6">
+                        <h4 class="font-bold text-blue-900 text-lg mb-2">Strategic Design в действии</h4>
+                        <ul class="space-y-3 text-blue-800">
+                            <li>
+                                <span class="font-bold">Core Domain (Ядро):</span> Здесь деньги, конкурентное преимущество и сложная логика. Используйте <strong>Clean Architecture</strong>, DDD, и тесты. Изолируйте домен от базы.
+                            </li>
+                            <li>
+                                <span class="font-bold">Generic Subdomain (Вспомогательное):</span> Админка, логирование, управление настройками, простые справочники. Используйте <strong>CRUD</strong>, Django Admin, Active Record. Здесь не нужна сложная архитектура.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3 class="text-2xl font-bold text-slate-800 mt-8 mb-4">Пример Modular Monolith</h3>
+                <p>
+                    Представьте интернет-магазин. У вас могут быть следующие модули в одном репозитории:
+                </p>
+                <div class="grid gap-4 mt-6">
+                    <div class="p-6 bg-white border border-slate-200 rounded-lg">
+                        <h4 class="font-bold text-slate-900">📦 Модуль "Заказы" (Orders)</h4>
+                        <div class="text-sm font-bold text-purple-600 uppercase tracking-wider mb-2">Core Domain</div>
+                        <p class="text-slate-600">Сложная логика скидок, резервирования, статусов. <br><strong>Решение:</strong> Clean Architecture + Rich Domain Model.</p>
+                    </div>
+                    <div class="p-6 bg-white border border-slate-200 rounded-lg">
+                        <h4 class="font-bold text-slate-900">🔔 Модуль "Уведомления" (Notifications)</h4>
+                        <div class="text-sm font-bold text-green-600 uppercase tracking-wider mb-2">Generic Subdomain</div>
+                        <p class="text-slate-600">Просто отправка email/sms. Нет сложной логики. <br><strong>Решение:</strong> Простой Service Class + Infrastructure Adapter.</p>
+                    </div>
+                    <div class="p-6 bg-white border border-slate-200 rounded-lg">
+                        <h4 class="font-bold text-slate-900">📒 Модуль "CMS / Блог"</h4>
+                        <div class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Supporting Subdomain</div>
+                        <p class="text-slate-600">Редактирование статей и новостей. <br><strong>Решение:</strong> Django Models + Django Admin (Pure CRUD).</p>
+                    </div>
+                </div>
+
+                <div class="mt-12">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6">Смешивание стилей в одном модуле (CQRS-lite)</h3>
+                    <p>
+                        Даже внутри сложного Core Domain вам не всегда нужно прогонять всё через Use Cases. 
+                        Архитектура <strong>CQRS (Command Query Responsibility Segregation)</strong> учит нас разделять операции записи (Commands) и чтения (Queries).
+                    </p>
+                    
+                    <div class="grid md:grid-cols-2 gap-8 mt-6">
+                        <div class="bg-red-50 p-6 rounded-xl border border-red-100">
+                            <h4 class="font-bold text-red-800 mb-2">Writing (Commands)</h4>
+                            <p class="text-sm text-red-900 mb-4">Изменение состояния требует валидации инвариантов. Здесь Clean Architecture сияет.</p>
+                            <ul class="text-sm space-y-1 list-disc list-inside text-red-800">
+                                <li><strong>Путь:</strong> Controller → Use Case → Entity → Repository</li>
+                                <li><strong>Зачем:</strong> Защита данных, бизнес-правила.</li>
+                                <li><strong>Пример:</strong> <code>PlaceOrder</code>, <code>ChangePassword</code></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                            <h4 class="font-bold text-blue-800 mb-2">Reading (Queries)</h4>
+                            <p class="text-sm text-blue-900 mb-4">Чтение часто не требует инвариантов. Нам просто нужны данные для UI.</p>
+                            <ul class="text-sm space-y-1 list-disc list-inside text-blue-800">
+                                <li><strong>Путь:</strong> Controller → Read Service (Raw SQL/ORM) → DTO</li>
+                                <li><strong>Зачем:</strong> Производительность, простота.</li>
+                                <li><strong>Пример:</strong> <code>GetOrderById</code>, <code>ListProducts</code></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <p class="mt-6 text-sm bg-slate-100 p-4 rounded-lg font-mono">
+                        💡 <strong>Инсайт:</strong> Нормально иметь в контроллере импорт Use Case для POST-запроса и прямой вызов ORM/Repository для GET-запроса. Не создавайте <code>GetByIdUseCase</code>, если он просто проксирует вызов к базе.
+                    </p>
+                </div>
+
+                <div class="mt-12">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6">Как это выглядит в структуре проекта?</h3>
+                    <p>Вот пример реальной структуры папок, где Clean Architecture и CRUD соседствуют в рамках одного Modular Monolith:</p>
+                    
+                    <pre><code class="language-bash">src/
+├── modules/
+│   ├── ordering/               # 💎 CORE DOMAIN
+│   │   ├── domain/             # Чистые сущности Order, OrderLine
+│   │   ├── application/        
+│   │   │   ├── commands/       # Complex Logic: PlaceOrder (Rich Domain Model)
+│   │   │   ├── queries/        # Fast Reads: GetOrderById (Raw SQL / DTO)
+│   │   │   └── crud/           # Simple Actions: UpdateAdminNote (Service Class)
+│   │   ├── infrastructure/     # Repositories impl, EmailSender impl
+│   │   └── presentation/       # API Routes
+│   │
+│   ├── catalog/                # 🛒 SUPPORTING (CQRS-lite / Transaction Script)
+│   │   ├── models.py           # Просто ORM модели (SQLAlchemy/Django)
+│   │   ├── services.py         # Логика: "найти товар -> проверить сток"
+│   │   └── views.py            # Контроллеры вызывают сервисы напрямую
+│   │
+│   └── audit_log/              # 📝 GENERIC (CRUD)
+│       ├── models.py           # Одна таблица LogEntry
+│       └── admin.py            # Только админка для просмотра
+</code></pre>
+                    <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-500 p-4">
+                        <h4 class="font-bold text-yellow-800 mb-2">Обратите внимание на Application Layer:</h4>
+                        <p class="text-sm text-yellow-900">
+                             Модуль <code>ordering</code> показывает, что <strong>Application Layer</strong> может быть гибридным:
+                        </p>
+                        <ul class="text-sm list-disc list-inside mt-2 text-yellow-900">
+                            <li><strong>Commands (Use Cases):</strong> Только для критически важных операций с инвариантами (Списать деньги, Создать заказ).</li>
+                            <li><strong>Queries:</strong> Для оптимизированного чтения (списки, отчеты).</li>
+                            <li><strong>CRUD / Services:</strong> Для простых полей, не влияющих на бизнес-правила (например, обновить заметку менеджера, изменить тег). Для этого не обязательно создавать отдельный Use Case и проходить через Domain, можно использовать простой Service.</li>
+                        </ul>
+                    </div>
+                    <p class="text-sm mt-4 text-slate-600">
+                        В модуле <code>ordering</code> мы платим налог на сложность только там, где это критично. Тот же <code>UpdateAdminNote</code> может быть просто CRUD-методом, который напрямую обновляет поле в базе, минуя загрузку всего Агрегата.<br>
+                        Не пытайтесь натянуть структуру <code>commands</code> на <code>audit_log</code>!
+                    </p>
+                </div>
+
+                <div class="mt-12 mb-12">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6">Еще 3 гибридных сценария</h3>
+                    
+                    <div class="space-y-8">
+                        <!-- 1. ORM Hybrid -->
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm transition hover:shadow-md">
+                            <h4 class="font-bold text-lg text-indigo-700 flex items-center gap-2 mb-3">
+                                 1. ORM: Active Record (Read) vs Data Mapper (Write)
+                            </h4>
+                            <p class="text-slate-600 text-sm mb-4">
+                                <strong>Проблема:</strong> Превращать строки БД в богатые сущности (Entities) дорого. Для списков это убивает производительность.<br>
+                                <strong>Гибрид:</strong> Для чтения используем мощь ORM или SQL. Для записи — защищаем инварианты через Repository.
+                            </p>
+                            
+                            <pre><code class="language-python"># 1. READ (Query): Быстро, грязно, эффективно
+# Используем возможности ORM/SQL напрямую в контроллере или QueryService
+def get_dashboard_stats(db: Session):
+    # Возвращаем dict или DTO, никаких Entities!
+    return db.execute(
+        text("SELECT status, count(*) FROM orders GROUP BY status")
+    ).all()
+
+# 2. WRITE (Command): Чисто, безопасно
+# А вот здесь уже полная Clean Architecture
+def cancel_order(order_id: UUID, uow: UnitOfWork):
+    with uow:
+        # Репозиторий загружает полноценный Aggregate
+        order = uow.orders.get(order_id)
+        
+        # Выполняем бизнес-логику (проверка правил)
+        order.cancel(reason="Customer request")
+        
+        # Сохраняем изменения
+        uow.commit()</code></pre>
+                            
+                            <div class="mt-4 p-4 bg-indigo-50 rounded text-sm text-indigo-900">
+                                <strong class="block mb-2 text-indigo-800">🤔 Почему так? В чем разница?</strong>
+                                <ul class="list-disc list-inside space-y-2">
+                                    <li>
+                                        <strong>Чтение (Read):</strong> Часто требует "джойнить" 5 таблиц сразу для вывода в таблицу UI. Собирать это через Aggregates — это ад (N+1 запросов, лишняя память). SQL справляется лучше.
+                                    </li>
+                                    <li>
+                                        <strong>Запись (Write):</strong> Требует гарантий. "Если заказ отменен, нельзя добавить товар". Aggregate загружает всё дерево данных, чтобы гарантировать эти правила.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 2. Framework Hybrid -->
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm transition hover:shadow-md">
+                            <h4 class="font-bold text-lg text-indigo-700 flex items-center gap-2 mb-3">
+                                 2. Валидация: Presentation (Format) vs Domain (Rules)
+                            </h4>
+                            <p class="text-slate-600 text-sm mb-4">
+                                <strong>Проблема:</strong> Непонятно, где проверять данные. В Pydantic? В Use Case? В Entity?<br>
+                                <strong>Гибрид:</strong> Pydantic проверяет "форму" (email, int > 0). Домен проверяет "суть" (контекстные правила).
+                            </p>
+                            
+                            <pre><code class="language-python"># Presentation Layer (Pydantic)
+# Проверяем то, что не зависит от состояния БД
+class ChangeEmailRequest(BaseModel):
+    new_email: EmailStr  # Формат email
+    code: str = Field(min_length=6) # Длина кода
+
+# Domain Layer (Entity)
+# Проверяем бизнес-правила, зависящие от состояния
+class User:
+    def change_email(self, new_email: str):
+        # Бизнес-правило: нельзя менять email чаще раза в месяц
+        if self.last_email_change < now() - timedelta(days=30):
+            raise DomainError("Слишком частая смена email")
+        
+        # Бизнес-правило: нельзя менять, если аккаунт заблокирован
+        if self.is_banned:
+            raise DomainError("Аккаунт заблокирован")
+            
+        self.email = new_email</code></pre>
+                        </div>
+    
+                        <!-- 3. Sync/Async Hybrid -->
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm transition hover:shadow-md">
+                            <h4 class="font-bold text-lg text-indigo-700 flex items-center gap-2 mb-3">
+                                 3. Синхронный CRUD + Асинхронный Clean Architecture
+                            </h4>
+                            <p class="text-slate-600 text-sm mb-4">
+                                <strong>Проблема:</strong> Тяжелая доменная логика (генерация PDF, сложные расчеты) тормозит HTTP ответ.<br>
+                                <strong>Гибрид:</strong> HTTP ручка работает в режиме CRUD (просто создает запись "Job"). Clean Architecture живет внутри воркера (Celery).
+                            </p>
+                            
+                            <pre><code class="language-python"># HTTP Controller (FastAPI) - Pure CRUD
+# Максимально тупой и быстрый эндпоинт
+@post("/reports")
+def create_report_request(db: Session):
+    # 1. Просто сохраняем намерение в БД
+    job = ReportJob(status="PENDING", type="SALES")
+    db.add(job)
+    db.commit()
+    
+    # 2. Отправляем ID задачи в очередь
+    generate_report_task.delay(job.id)
+    
+    # 3. Мгновенно отвечаем клиенту
+    return {"job_id": job.id, "status": "PENDING"}
+
+# Background Worker (Celery/TaskIQ) - Pure Clean Architecture
+@task
+def generate_report_task(job_id: int):
+    # Воркер выступает как 'Entry Point' для Use Case
+    uow = UnitOfWork()
+    use_case = GenerateReportUseCase(uow, pdf_generator)
+    
+    # Вся сложная логика, Entities и порты живут тут
+    use_case.execute(job_id)</code></pre>
+                             
+                            <div class="mt-4 p-4 bg-indigo-50 rounded text-sm text-indigo-900">
+                                <strong class="block mb-2 text-indigo-800">🤔 Почему так? В чем разница?</strong>
+                                <ul class="list-disc list-inside space-y-2">
+                                    <li>
+                                        <strong>Контроллер (CRUD):</strong> Его задача — ответить пользователю за 100мс "Я тебя услышал". Ему не нужно поднимать сложную архитектуру, его цель — надежно сохранить "Заявку" (Job).
+                                    </li>
+                                    <li>
+                                        <strong>Воркер (Clean Arch):</strong> Здесь происходит тяжелая магия. Здесь нам инверсия зависимостей (DIP) нужна, чтобы легко тестировать логику генерации отчета без реальной БД или PDF-движка.
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </article>
+
+        <!-- NAVIGATION FOOTER -->
+        <div class="mt-24 pt-10 border-t border-slate-200">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <a href="testing.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right bg-white">
+                    <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1 flex justify-end">Previous</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">&larr; 🧪 Тестирование</span>
+                </a>
+                <a href="deployment.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left bg-white">
+                    <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Next</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">🚀 Deployment & Protection &rarr;</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Mobile menu toggle
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const sidebar = document.querySelector('.sidebar');
+        
+        mobileBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            if (!sidebar.classList.contains('hidden')) {
+                sidebar.style.width = '100%';
+                sidebar.style.position = 'fixed';
+                sidebar.style.top = '60px'; // Below mobile header
+                sidebar.style.height = 'calc(100vh - 60px)';
+            } else {
+                sidebar.removeAttribute('style');
+            }
+        });
+    </script>
+</body>
+</html>

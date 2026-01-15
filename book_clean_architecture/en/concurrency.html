@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concurrency & Migrations - Clean Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        h1, h2, h3, h4 { color: #0f172a; font-weight: 800; letter-spacing: -0.025em; }
+        p, li { font-family: 'Merriweather', serif; line-height: 1.8; color: #334155; margin-bottom: 1em; }
+        
+        .sidebar { background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); border-right: 1px solid #334155; height: 100vh; position: fixed; width: 18rem; overflow-y: auto; z-index: 50; }
+        .sidebar-title { color: #f8fafc; }
+        .sidebar-subtitle { color: #60a5fa; }
+        .nav-section { color: #94a3b8; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 1rem 1rem 0.5rem; }
+        .nav-link { display: block; padding: 0.6rem 1rem; color: #94a3b8; font-weight: 500; font-size: 0.875rem; transition: all 0.2s; border-left: 3px solid transparent; text-decoration: none; }
+        .nav-link:hover { background: rgba(255,255,255,0.05); color: #f1f5f9; border-left-color: #475569; }
+        .nav-link.active { background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-left-color: #3b82f6; }
+
+        pre {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin: 1.5rem 0;
+        }
+        .code-keyword { color: #c084fc; font-weight: bold; } 
+        .code-class { color: #fbbf24; font-weight: bold; }   
+        .code-func { color: #60a5fa; font-weight: bold; }    
+        .code-str { color: #a3e635; }                        
+        .hljs-comment, .hljs-quote { color: #475569 !important; font-weight: 700 !important; font-style: normal !important; }
+        .code-comment { color: #475569; font-style: normal; font-weight: 700; }
+    </style>
+</head>
+<body class="flex bg-slate-50">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar hidden md:block">
+        <div class="p-6 border-b border-gray-700">
+            <h1 class="text-xl font-bold sidebar-title">Clean Architecture</h1>
+            <span class="sidebar-subtitle text-sm">Author: Alex | InkyWorld</span>
+        </div>
+        
+        <nav class="py-4">
+            <div class="px-4 mb-4">
+                <div class="flex gap-2 text-xs font-bold text-slate-400">
+                    <a href="concurrency.html" class="text-blue-400 font-bold">RU</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../en/concurrency.html" class="hover:text-white transition">EN</a>
+                    <span class="text-slate-600">|</span>
+                    <a href="../ua/concurrency.html" class="hover:text-white transition">UA</a>
+                </div>
+            </div>
+
+            <div class="nav-section">Fundamentals</div>
+            <a href="index.html" class="nav-link">📘 Введение</a>
+            <a href="solid.html" class="nav-link">📐 SOLID принципы</a>
+            <a href="project_structure.html" class="nav-link">🧭 Структура проекта (DDD)</a>
+            <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
+
+            <div class="nav-section">Architecture Layers</div>
+            <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
+            <a href="application.html" class="nav-link">⚙️ Application Layer</a>
+            <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
+            <a href="presentation.html" class="nav-link">🌐 Presentation Layer</a>
+            <a href="middleware.html" class="nav-link">🔌 Middleware</a>
+
+            <div class="nav-section">Tactical DDD</div>
+            <a href="aggregates.html" class="nav-link">📦 Aggregates</a>
+            <a href="invariants.html" class="nav-link">🛡️ Инварианты</a>
+            <a href="repository_uow.html" class="nav-link">🗄️ Repository & UoW</a>
+            <a href="specification.html" class="nav-link">📋 Specification</a>
+            <a href="domain_events.html" class="nav-link">📣 Domain Events</a>
+            <a href="policies.html" class="nav-link">📜 Policies</a>
+            <a href="versioning.html" class="nav-link">🔄 Versioning</a>
+
+            <div class="nav-section">Strategic DDD</div>
+            <a href="bounded_context.html" class="nav-link">🌍 Bounded Contexts</a>
+            <a href="ubiquitous_language.html" class="nav-link">🗣️ Ubiquitous Language</a>
+            <a href="context_relationships.html" class="nav-link">🤝 Context Relationships</a>
+            <a href="acl.html" class="nav-link">🛡️ Anti-Corruption Layer</a>
+            <a href="subdomains.html" class="nav-link">🧬 Subdomains</a>
+            <a href="modular_monolith.html" class="nav-link">🏗️ Modular Monolith</a>
+            <a href="strategic_integration.html" class="nav-link">🌐 Strategic Integration</a>
+            <a href="big_ball_of_mud.html" class="nav-link">🐷 Big Ball of Mud</a>
+            <a href="boundaries_first.html" class="nav-link">🧠 Boundaries First</a>
+
+            <div class="nav-section">CQRS & Distributed Systems</div>
+            <a href="cqrs_es.html" class="nav-link">⚡ CQRS и ES</a>
+            <a href="saga.html" class="nav-link">🔄 Saga Pattern</a>
+            <a href="outbox.html" class="nav-link">📮 Outbox Pattern</a>
+            <a href="background_tasks.html" class="nav-link">⏳ Background Tasks</a>
+            <a href="observability.html" class="nav-link">🔍 Observability</a>
+
+            <div class="nav-section">Reliability & Security</div>
+            <a href="security.html" class="nav-link">🔐 Auth & Permissions</a>
+            <a href="error_handling.html" class="nav-link">🚫 Error Handling</a>
+            <a href="concurrency.html" class="nav-link active">🛑 Concurrency & Migrations</a>
+            <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
+
+            <div class="nav-section">Quality & Practice</div>
+            <a href="testing.html" class="nav-link">🧪 Тестирование</a>
+            <a href="overengineering.html" class="nav-link">🛑 Избыточность</a>
+            <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
+            <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
+            <a href="projects.html" class="nav-link">🚀 Мини-проекты</a>
+            <a href="antipatterns.html" class="nav-link">⚠️ Антипаттерны</a>
+            <a href="advanced_techniques.html" class="nav-link">🚀 Advanced Tech</a>
+
+            <div class="nav-section">About</div>
+            <a href="afterword.html" class="nav-link">👋 Послесловие</a>
+        </nav>
+
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
+        <header class="mb-12 pb-8 border-b border-gray-200">
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Concurrency & Migrations</h1>
+            <p class="text-xl text-gray-600">Race conditions, Idempotency и миграции без простоя.</p>
+        </header>
+
+        <section class="mb-16">
+            <div class="prose prose-slate max-w-none text-gray-700">
+
+    <p>Реальный мир беспощаден. Пользователи нажимают кнопки одновременно, интернет отваливается, а бизнес требует менять структуру базы данных на лету.</p>
+
+    <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">1. Race Conditions (Гонка данных)</h2>
+    <div class="bg-red-50 p-4 rounded border border-red-200 mb-4">
+        <h4 class="font-bold text-red-800">Ошибка новичка</h4>
+        <p class="text-sm">Получить товар, проверить <code>quantity > 0</code>, отнять 1, сохранить. <br>В параллельных потоках два процесса прочитают "quantity=1" и оба продадут товар. Результат: -1 на складе.</p>
+    </div>
+    
+    <h3 class="font-bold text-lg mt-6 mb-2">Решение: Pessimistic Locking</h3>
+    <p>Используйте <code>SELECT FOR UPDATE</code>. Это заблокирует строку в базе до конца транзакции.</p>
+    <pre><code class="language-python"># infrastructure/repositories/product_repo.py
+async def decrease_quantity(self, product_id: str, amount: int):
+    # with_for_update блокирует строку!
+    stmt = select(Product).where(Product.id == product_id).with_for_update()
+    result = await self.session.execute(stmt)
+    product = result.scalar_one()
+
+    if product.quantity < amount:
+        raise OutOfStockError()
+
+    product.quantity -= amount
+    # Коммит отпустит блокировку
+</code></pre>
+
+    <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. Idempotency (Идемпотентность)</h2>
+    <p>Что если клиент нажал кнопку дважды? Или сервер ответил 500 (таймаут), но транзакция прошла?</p>
+    <p><strong>Idempotency Key</strong> — уникальный ключ операции (например, UUID), который клиент генерирует и посылает в заголовке.</p>
+    <p>Идемпотентность означает, что повторные вызовы с одним и тем же ключом приводят к одному и тому же результату, как будто операция выполнилась только один раз. Сервер по ключу понимает, что ответ уже есть, и не выполняет повторно тяжелую работу или опасную мутацию.</p>
+    
+    <pre><code class="language-python"># infrastructure/middlewares.py
+async def idempotency_middleware(request: Request, call_next):
+    idem_key = request.headers.get("X-Idempotency-Key")
+    if not idem_key:
+        return await call_next(request)
+        
+    # Проверяем в Redis
+    cached_response = await redis.get(idem_key)
+    if cached_response:
+        return Response(content=cached_response, status_code=200)
+    
+    # Выполняем
+    response = await call_next(request)
+    
+    # Сохраняем результат
+    if response.status_code == 200:
+        await redis.set(idem_key, response.body, ex=3600)
+    return response
+</code></pre>
+
+    <p>Для deduplication используйте бизнес-ключ (например, <code>event_id</code> или внешний идентификатор от клиента). До обработки проверяйте, не существует ли уже запись с этим ключом. Пример: если <code>process_payment</code> запустится дважды с одним <code>event.id</code>, проверка <code>payment_exists</code> остановит повторную обработку и новую запись в базу, а логика останется идемпотентной.</p>
+
+
+    <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">3. Zero-Downtime Migrations</h2>
+    <p>Нельзя просто взять и переименовать колонку в базе. Пока код деплоится, старый инстанс приложения будет падать с ошибкой "Column not found".</p>
+    <p><strong>Агоитм Expand-Contract:</strong></p>
+    <ol class="list-decimal ml-6 space-y-2">
+        <li><strong>Expand:</strong> Создать новую колонку <code>new_title</code>, старую <code>title</code> оставить. Код пишет в ОБЕ, читает из старой.</li>
+        <li><strong>Migrate:</strong> Фоновый скрипт переносит данные из <code>title</code> в <code>new_title</code>.</li>
+        <li><strong>Switch:</strong> Деплоим патч: код читает из <code>new_title</code>, пишет в ОБЕ.</li>
+        <li><strong>Contract:</strong> Удаляем старую колонку <code>title</code>.</li>
+    </ol>
+
+            <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">4. Optimistic Locking (Версионный контроль)</h2>
+            <p>Когда блокировки слишком дорогие, используйте версионное поле (например, <code>version</code>). Перед сохранением проверяем, что версия не изменилась.</p>
+            <p>Идея в том, что каждый объект хранит номер версии. Когда вы загружаете данные, берете текущую версию. Перед записью вы сравниваете: если версия не изменилась, значит никто другой не успел поменять строку, и можно спокойно сохранить. Если версия уже увеличена, кто-то другой обновил ресурс — тогда мы отменяем операцию и повторяем (retry) или сообщаем об ошибке.</p>
+<pre><code class="language-python"># models.py (SQLAlchemy)
+class ProductModel(Base):
+    __tablename__ = "product"
+    id = Column(String, primary_key=True)
+    quantity = Column(Integer)
+    version = Column(Integer, nullable=False, default=0)
+
+# repository
+def decrease_quantity(session, product_id, amount, expected_version):
+    q = session.query(ProductModel).filter_by(id=product_id, version=expected_version)
+    updated = q.update({"quantity": ProductModel.quantity - amount, "version": ProductModel.version + 1})
+    if updated == 0:
+        raise ConcurrencyError("Optimistic lock failed")
+</code></pre>
+
+            <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">5. Transaction Isolation Levels</h2>
+            <p>Уровни изоляции определяют, какой «снимок» данных видит транзакция, пока она работает. Они влияют на такие эффекты, как <em>грязные чтения</em>, повторные чтения и фантомы. Например, в PostgreSQL часто хватает <strong>Read Committed</strong> с дополнительными локами/версионированием.</p>
+            <p>Разберем по ситуациям:</p>
+            <ul class="list-disc list-inside space-y-2 mb-4">
+                <li><strong>Read Uncommitted:</strong> транзакция может прочитать строку, которую другой процесс еще не закоммитил. Если в аналитике достаточно приблизительных данных (например, строим дашборд «за последние 5 минут»), можно пойти на риск получения устаревших/отмененных значений.</li>
+                <li><strong>Read Committed:</strong> PostgreSQL использует его по умолчанию. Читает только закоммиченные записи, поэтому не увидит «грязные» изменения. Если вы перед записью берете явный <code>SELECT ... FOR UPDATE</code> или блокируете строку, то каждая транзакция работает с актуальным значением, а повторные чтения могут показать уже закоммиченные обновления (изменения между запросами возможны).</li>
+                <li><strong>Repeatable Read:</strong> транзакция «замораживает» снимок на момент начала. Повторные SELECT’ы внутри нее всегда возвращают одно и то же. Это удобно в отчетах, где важно, чтобы все запросы видели один и тот же набор строк, даже если другие транзакции обновляют данные.</li>
+                <li><strong>Serializable:</strong> самая строгая модель: база гарантирует, что результат такой, будто транзакции выполняются последовательно. Это нужно, когда даже один фантом или перекрытие операций способен сломать логику — например, когда списываете деньги одновременно с нескольких счетов. Серийные транзакции часто кидают ошибку, если обнаруживают конфликт, поэтому нужно делать retry.</li>
+            </ul>
+            <p>Если появляются фантомы (новые строки, которые не были при первой выборке), попробуйте повысить уровень до <strong>Repeatable Read</strong> или <strong>Serializable</strong>, или же вынесите конфликтные операции из транзакции (например, отложите в очередь и выполняйте по очереди).</p>
+
+            <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">6. Deadlocks (Взаимная блокировка) и обнаружение</h2>
+            <p>Deadlock возникает, когда два транзакции ждут друг друга. Решение: </p>
+            <ul class="list-disc list-inside space-y-2 mb-6">
+                <li>Держите транзакции короткими. Делите длинные операции на несколько шагов, чтобы не держать блокировки минутами.</li>
+                <li>Зафиксируйте порядок доступа к ресурсам: если все транзакции берут таблицы и строки в одном и том же порядке, взаимных ожиданий не возникнет.</li>
+                <li>Ловите ошибку deadlock в базе и выполняйте retry с экспоненциальным backoff. Базы (Postgres, SQL Server) возвращают специальный код ошибки.</li>
+            </ul>
+            <p>Дополнительно можно использовать <strong>timeout</strong> на блокировки: если запрос не смог получить блокировку за N секунд, он отменяется, и вы можете обработать откат.</p>
+            <p>Еще один приём — <strong>инструментальное обнаружение</strong>: логируйте транзакции в момент ожидания блокировок и улучшайте порядок захвата ресурсов. В сложных случаях выносите критические участки в отдельный воркер/брокер сообщений, чтобы обработка стала последовательной.</p>
+
+            <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">7. Advisory Locks (Postgres)</h2>
+            <p>Postgres предоставляет легкие пользовательские блокировки (advisory locks), удобные для координации между процессами без хвостов транзакций.</p>
+<pre><code class="language-python"># example using asyncpg or psycopg2
+SELECT pg_advisory_lock(hashtext('order-123'));
+-- critical section
+SELECT pg_advisory_unlock(hashtext('order-123'));
+</code></pre>
+
+            <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">8. Testing Strategies (Тестирование конкуренции)</h2>
+            <ul class="list-disc list-inside space-y-2 mb-6">
+                <li>Пишите интеграционные тесты, которые запускают несколько воркеров параллельно (синтетические гонки).</li>
+                <li>Тестируйте optimistic lock failures и транзакционные откаты.</li>
+                <li>Используйте chaos testing / fault injection для проверки устойчивости.</li>
+            </ul>
+
+            <h3 class="font-bold text-lg mt-8 mb-4">Pitfalls & Lifehacks</h3>
+            <ul class="list-disc list-inside space-y-2 mb-6">
+                <li><strong>Не держите транзакции долго:</strong> медленные транзакции — основной источник deadlock'ов.</li>
+                <li><strong>Пишите маленькие атомарные команды:</strong> делите большие операции на шаги, которые можно компенсировать (Saga).</li>
+                <li><strong>Логируйте метрики блокировок:</strong> долги по блокировкам и retries — ранние индикаторы проблем.</li>
+            </ul>
+
+            </div>
+        </section>
+    <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="security.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Previous</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Auth & Permissions</span></a><a href="background_tasks.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Next</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Background Tasks &rarr;</span></a></div></div>
+
+        <!-- NAVIGATION FOOTER -->
+        <div class="mt-24 pt-10 border-t border-slate-200">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <a href="error_handling.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right bg-white">
+                    <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1 flex justify-end">Previous</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">&larr; 🚫 Error Handling</span>
+                </a>
+                <a href="config_logging.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left bg-white">
+                    <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Next</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">⚙️ Config & Observability &rarr;</span>
+                </a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
