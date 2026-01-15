@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Глава 8: Тестирование - Clean Architecture</title>
+    <title>Глава 8: Testing - Clean Architecture</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
     <style>
@@ -72,9 +72,9 @@
             </div>
 
             <div class="nav-section">Fundamentals</div>
-            <a href="index.html" class="nav-link">📘 Введение</a>
-            <a href="solid.html" class="nav-link">📐 SOLID принципы</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проекта (DDD)</a>
+            <a href="index.html" class="nav-link">📘 Introduction</a>
+            <a href="solid.html" class="nav-link">📐 SOLID Principles</a>
+            <a href="project_structure.html" class="nav-link">🧭 Project Structure (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
             <div class="nav-section">Architecture Layers</div>
@@ -86,7 +86,7 @@
 
             <div class="nav-section">Tactical DDD</div>
             <a href="aggregates.html" class="nav-link">📦 Aggregates</a>
-            <a href="invariants.html" class="nav-link">🛡️ Инварианты</a>
+            <a href="invariants.html" class="nav-link">🛡️ Invariants</a>
             <a href="repository_uow.html" class="nav-link">🗄️ Repository & UoW</a>
             <a href="specification.html" class="nav-link">📋 Specification</a>
             <a href="domain_events.html" class="nav-link">📣 Domain Events</a>
@@ -105,7 +105,7 @@
             <a href="boundaries_first.html" class="nav-link">🧠 Boundaries First</a>
 
             <div class="nav-section">CQRS & Distributed Systems</div>
-            <a href="cqrs_es.html" class="nav-link">⚡ CQRS и ES</a>
+            <a href="cqrs_es.html" class="nav-link">⚡ CQRS & ES</a>
             <a href="saga.html" class="nav-link">🔄 Saga Pattern</a>
             <a href="outbox.html" class="nav-link">📮 Outbox Pattern</a>
             <a href="background_tasks.html" class="nav-link">⏳ Background Tasks</a>
@@ -118,16 +118,16 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Quality & Practice</div>
-            <a href="testing.html" class="nav-link active">🧪 Тестирование</a>
-            <a href="overengineering.html" class="nav-link">🛑 Избыточность</a>
+            <a href="testing.html" class="nav-link active">🧪 Testing</a>
+            <a href="overengineering.html" class="nav-link">🛑 Overengineering</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
-            <a href="projects.html" class="nav-link">🚀 Мини-проекты</a>
-            <a href="antipatterns.html" class="nav-link">⚠️ Антипаттерны</a>
+            <a href="projects.html" class="nav-link">🚀 Mini Projects</a>
+            <a href="antipatterns.html" class="nav-link">⚠️ Antipatterns</a>
             <a href="advanced_techniques.html" class="nav-link">🚀 Advanced Tech</a>
 
             <div class="nav-section">About</div>
-            <a href="afterword.html" class="nav-link">👋 Послесловие</a>
+            <a href="afterword.html" class="nav-link">👋 Afterword</a>
         </nav>
     </aside>
 
@@ -218,10 +218,10 @@
 
         <!-- DOMAIN TESTS -->
         <section id="domain-tests" class="mb-16">
-            <h2 class="text-2xl font-bold mb-4">1. Тестирование Domain Layer (Unit Tests)</h2>
+            <h2 class="text-2xl font-bold mb-4">1. Testing Domain Layer (Unit Tests)</h2>
             <p>Это самые простые и быстрые тесты. Домен — чистый Python. Никаких зависимостей, никаких моков. Просто создаем объекты и проверяем их поведение.</p>
             
-            <h3 class="text-lg font-bold mt-6 mb-2 text-gray-700">1.1 Тестирование Value Objects</h3>
+            <h3 class="text-lg font-bold mt-6 mb-2 text-gray-700">1.1 Testing Value Objects</h3>
 <pre><code class="language-python"><span class="code-comment"># tests/domain/test_value_objects.py</span>
 <span class="code-keyword">import</span> pytest
 <span class="code-keyword">from</span> domain.value_objects <span class="code-keyword">import</span> Money, Email
@@ -307,7 +307,7 @@
             Email(invalid_email)
 </code></pre>
 
-            <h3 class="text-lg font-bold mt-8 mb-2 text-gray-700">1.2 Тестирование Entities</h3>
+            <h3 class="text-lg font-bold mt-8 mb-2 text-gray-700">1.2 Testing Entities</h3>
 <pre><code class="language-python"><span class="code-comment"># tests/domain/test_entities.py</span>
 <span class="code-keyword">import</span> pytest
 <span class="code-keyword">import</span> uuid
@@ -407,7 +407,7 @@
 
         <!-- APPLICATION TESTS -->
         <section id="app-tests" class="card">
-            <h2 class="text-2xl font-bold mb-6">2. Тестирование Application Layer (Use Cases)</h2>
+            <h2 class="text-2xl font-bold mb-6">2. Testing Application Layer (Use Cases)</h2>
             <p>Здесь мы тестируем Use Cases. Они зависят от интерфейсов (Repositories, Services), которые мы <strong>мокаем</strong>.</p>
             <p class="text-sm bg-blue-50 p-3 rounded border border-blue-200"><strong>Мок (Mock)</strong> — это поддельная реализация интерфейса. Она позволяет тестировать логику без реальной БД или email-сервера.</p>
 
@@ -550,7 +550,7 @@
 
         <!-- INFRASTRUCTURE TESTS -->
         <section id="infra-tests" class="mb-16">
-            <h2 class="text-2xl font-bold mb-4">3. Тестирование Infrastructure Layer (Integration)</h2>
+            <h2 class="text-2xl font-bold mb-4">3. Testing Infrastructure Layer (Integration)</h2>
             <p>Здесь мы тестируем реальные реализации: SQLAlchemy Repository, Email Adapter и т.д. Нужна тестовая БД.</p>
 
 <pre><code class="language-python"><span class="code-comment"># tests/infrastructure/test_repositories.py</span>
@@ -798,14 +798,14 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
                 </div>
                 
                 <div class="bg-red-50 p-6 rounded-lg border border-red-200">
-                    <h3 class="font-bold text-red-800 mb-3">❌ Антипаттерны</h3>
+                    <h3 class="font-bold text-red-800 mb-3">❌ Antipatterns</h3>
                     <ul class="space-y-2 text-sm text-red-700">
                         <li>• Тесты зависят друг от друга (порядок важен)</li>
                         <li>• Тесты медленные (БД в unit-тестах)</li>
                         <li>• Слишком много моков (тест не проверяет реальное поведение)</li>
                         <li>• Тесты дублируют логику (копипаст из продакшн-кода)</li>
                         <li>• Нет assertion (тест просто "не падает")</li>
-                        <li>• Тестирование приватных методов</li>
+                        <li>• Testing приватных методов</li>
                     </ul>
                 </div>
             </div>
@@ -842,7 +842,7 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
                 </a>
                 <a href="overengineering.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left bg-white">
                     <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Next</span>
-                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">🛑 Избыточность &rarr;</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">🛑 Overengineering &rarr;</span>
                 </a>
             </div>
         </div>

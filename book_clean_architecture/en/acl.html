@@ -37,9 +37,9 @@
             </div>
 
             <div class="nav-section">Fundamentals</div>
-            <a href="index.html" class="nav-link">📘 Введение</a>
-            <a href="solid.html" class="nav-link">📐 SOLID принципы</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проекта (DDD)</a>
+            <a href="index.html" class="nav-link">📘 Introduction</a>
+            <a href="solid.html" class="nav-link">📐 SOLID Principles</a>
+            <a href="project_structure.html" class="nav-link">🧭 Project Structure (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
             <div class="nav-section">Architecture Layers</div>
@@ -51,7 +51,7 @@
 
             <div class="nav-section">Tactical DDD</div>
             <a href="aggregates.html" class="nav-link">📦 Aggregates</a>
-            <a href="invariants.html" class="nav-link">🛡️ Инварианты</a>
+            <a href="invariants.html" class="nav-link">🛡️ Invariants</a>
             <a href="repository_uow.html" class="nav-link">🗄️ Repository & UoW</a>
             <a href="specification.html" class="nav-link">📋 Specification</a>
             <a href="domain_events.html" class="nav-link">📣 Domain Events</a>
@@ -70,7 +70,7 @@
             <a href="boundaries_first.html" class="nav-link">🧠 Boundaries First</a>
 
             <div class="nav-section">CQRS & Distributed Systems</div>
-            <a href="cqrs_es.html" class="nav-link">⚡ CQRS и ES</a>
+            <a href="cqrs_es.html" class="nav-link">⚡ CQRS & ES</a>
             <a href="saga.html" class="nav-link">🔄 Saga Pattern</a>
             <a href="outbox.html" class="nav-link">📮 Outbox Pattern</a>
             <a href="background_tasks.html" class="nav-link">⏳ Background Tasks</a>
@@ -83,51 +83,51 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Quality & Practice</div>
-            <a href="testing.html" class="nav-link">🧪 Тестирование</a>
-            <a href="overengineering.html" class="nav-link">🛑 Избыточность</a>
+            <a href="testing.html" class="nav-link">🧪 Testing</a>
+            <a href="overengineering.html" class="nav-link">🛑 Overengineering</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
-            <a href="projects.html" class="nav-link">🚀 Мини-проекты</a>
-            <a href="antipatterns.html" class="nav-link">⚠️ Антипаттерны</a>
+            <a href="projects.html" class="nav-link">🚀 Mini Projects</a>
+            <a href="antipatterns.html" class="nav-link">⚠️ Antipatterns</a>
             <a href="advanced_techniques.html" class="nav-link">🚀 Advanced Tech</a>
 
             <div class="nav-section">About</div>
-            <a href="afterword.html" class="nav-link">👋 Послесловие</a>
+            <a href="afterword.html" class="nav-link">👋 Afterword</a>
         </nav>
     </aside>
 
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Anti-Corruption Layer (ACL)</h1>
-            <p class="text-xl text-gray-600">Таможня, которая не пускает ментальный мусор в ваш чистый код.</p>
+            <p class="text-xl text-gray-600">A customs checkpoint that prevents mental garbage from entering your clean code.</p>
         </header>
 
         <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-6">Зачем это нужно?</h2>
-            <p>Когда вы интегрируетесь с Legacy-системой или внешним API (например, SAP, 1C или старый CRM), их модель данных обычно ужасна. </p>
+            <h2 class="text-2xl font-bold mb-6">Why Do You Need It?</h2>
+            <p>When you integrate with a legacy system or external API (for example, SAP, 1C, or an old CRM), their data model is usually terrible. </p>
             <ul class="list-disc pl-5 mb-6">
-                <li>Названия полей непонятны (<code>KUNNR</code>, <code>BUKRS</code>).</li>
-                <li>Логика размазана.</li>
-                <li>Типы данных не совпадают.</li>
+                <li>Field names are incomprehensible (<code>KUNNR</code>, <code>BUKRS</code>).</li>
+                <li>Logic is scattered.</li>
+                <li>Data types don't match.</li>
             </ul>
-            <p><strong>Ошибка новичка:</strong> Использовать классы внешней системы (или JSON ответы API) прямо в своей бизнес-логике. Это заражает ваш код.</p>
+            <p><strong>Beginner's mistake:</strong> Using external system classes (or API JSON responses) directly in your business logic. This contaminates your code.</p>
 
             <div class="bg-green-50 p-6 rounded-xl border border-green-200 my-8">
-                <h3 class="font-bold text-green-900 text-lg mb-2">✅ Решение: ACL</h3>
-                <p>Вы создаете слой-транслятор. Он конвертирует "их странные данные" в "ваши красивые объекты".</p>
+                <h3 class="font-bold text-green-900 text-lg mb-2">✅ Solution: ACL</h3>
+                <p>You create a translator layer. It converts "their strange data" into "your beautiful objects".</p>
                 <div class="font-mono text-sm mt-4 bg-white p-4 rounded border">
                     External System (KUNNR) -> [ ACL ] -> Internal System (CustomerId)
                 </div>
             </div>
 
-            <h3 class="font-bold text-lg mb-4">Реализация в коде</h3>
-            <pre><code class="language-python"># 1. External DTO (Грязная модель)
+            <h3 class="font-bold text-lg mb-4">Implementation in Code</h3>
+            <pre><code class="language-python"># 1. External DTO (Dirty model)
 @dataclass
 class SapCustomerResponse:
     KUNNR: str  # Customer Number
     NAME1: str  # Name
 
-# 2. Internal Entity (Чистая модель)
+# 2. Internal Entity (Clean model)
 @dataclass
 class Customer:
     id: CustomerId

@@ -64,9 +64,9 @@
             </div>
 
             <div class="nav-section">Fundamentals</div>
-            <a href="index.html" class="nav-link">📘 Введение</a>
-            <a href="solid.html" class="nav-link">📐 SOLID принципы</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проекта (DDD)</a>
+            <a href="index.html" class="nav-link">📘 Introduction</a>
+            <a href="solid.html" class="nav-link">📐 SOLID Principles</a>
+            <a href="project_structure.html" class="nav-link">🧭 Project Structure (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
             <div class="nav-section">Architecture Layers</div>
@@ -78,7 +78,7 @@
 
             <div class="nav-section">Tactical DDD</div>
             <a href="aggregates.html" class="nav-link">📦 Aggregates</a>
-            <a href="invariants.html" class="nav-link">🛡️ Инварианты</a>
+            <a href="invariants.html" class="nav-link">🛡️ Invariants</a>
             <a href="repository_uow.html" class="nav-link">🗄️ Repository & UoW</a>
             <a href="specification.html" class="nav-link">📋 Specification</a>
             <a href="domain_events.html" class="nav-link">📣 Domain Events</a>
@@ -97,7 +97,7 @@
             <a href="boundaries_first.html" class="nav-link">🧠 Boundaries First</a>
 
             <div class="nav-section">CQRS & Distributed Systems</div>
-            <a href="cqrs_es.html" class="nav-link active">⚡ CQRS и ES</a>
+            <a href="cqrs_es.html" class="nav-link active">⚡ CQRS & ES</a>
             <a href="saga.html" class="nav-link">🔄 Saga Pattern</a>
             <a href="outbox.html" class="nav-link">📮 Outbox Pattern</a>
             <a href="background_tasks.html" class="nav-link">⏳ Background Tasks</a>
@@ -110,16 +110,16 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Quality & Practice</div>
-            <a href="testing.html" class="nav-link">🧪 Тестирование</a>
-            <a href="overengineering.html" class="nav-link">🛑 Избыточность</a>
+            <a href="testing.html" class="nav-link">🧪 Testing</a>
+            <a href="overengineering.html" class="nav-link">🛑 Overengineering</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
-            <a href="projects.html" class="nav-link">🚀 Мини-проекты</a>
-            <a href="antipatterns.html" class="nav-link">⚠️ Антипаттерны</a>
+            <a href="projects.html" class="nav-link">🚀 Mini Projects</a>
+            <a href="antipatterns.html" class="nav-link">⚠️ Antipatterns</a>
             <a href="advanced_techniques.html" class="nav-link">🚀 Advanced Tech</a>
 
             <div class="nav-section">About</div>
-            <a href="afterword.html" class="nav-link">👋 Послесловие</a>
+            <a href="afterword.html" class="nav-link">👋 Afterword</a>
         </nav>
     </aside>
 
@@ -311,7 +311,7 @@ def save_order_and_outbox(session, order, event):
     # commit — всё вместе, потом внешняя задача возьмёт записи Outbox и отправит в брокер
 </code></pre>
 
-            <h3 class="font-bold text-lg mt-8 mb-4">7. Тестирование и отладка</h3>
+            <h3 class="font-bold text-lg mt-8 mb-4">7. Testing и отладка</h3>
             <ul class="list-disc list-inside space-y-2 mb-6">
                 <li><strong>Тесты восстановления:</strong> проверяйте, что replay событий приводит к ожидаемому состоянию агрегата.</li>
                 <li><strong>Тесты проекций:</strong> имитируйте поток событий и проверяйте Read Models.</li>
@@ -374,7 +374,7 @@ def save_order_and_outbox(session, order, event):
             <ul class="list-disc list-inside space-y-2 mb-6">
                 <li><strong>Outbox:</strong> вынесите отправку сообщений из основного потока в отдельный процесс; не делайте send внутри коммитного кода.</li>
                 <li><strong>Идемпотентность:</strong> используйте уникальные индексы по <code>event_id</code> или <code>message_id</code> для защиты от дублей.</li>
-                <li><strong>Тестирование:</strong> для интеграционных тестов используйте docker-compose с in-memory broker и базой для ускорения проверки сценариев.</li>
+                <li><strong>Testing:</strong> для интеграционных тестов используйте docker-compose с in-memory broker и базой для ускорения проверки сценариев.</li>
             </ul>
 
             <h3 class="font-bold text-lg mt-8 mb-4">11. Further reading</h3>

@@ -36,9 +36,9 @@
             </div>
 
             <div class="nav-section">Fundamentals</div>
-            <a href="index.html" class="nav-link">📘 Введение</a>
-            <a href="solid.html" class="nav-link">📐 SOLID принципы</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проекта (DDD)</a>
+            <a href="index.html" class="nav-link">📘 Introduction</a>
+            <a href="solid.html" class="nav-link">📐 SOLID Principles</a>
+            <a href="project_structure.html" class="nav-link">🧭 Project Structure (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
             <div class="nav-section">Architecture Layers</div>
@@ -50,7 +50,7 @@
 
             <div class="nav-section">Tactical DDD</div>
             <a href="aggregates.html" class="nav-link">📦 Aggregates</a>
-            <a href="invariants.html" class="nav-link">🛡️ Инварианты</a>
+            <a href="invariants.html" class="nav-link">🛡️ Invariants</a>
             <a href="repository_uow.html" class="nav-link">🗄️ Repository & UoW</a>
             <a href="specification.html" class="nav-link">📋 Specification</a>
             <a href="domain_events.html" class="nav-link">📣 Domain Events</a>
@@ -69,7 +69,7 @@
             <a href="boundaries_first.html" class="nav-link">🧠 Boundaries First</a>
 
             <div class="nav-section">CQRS & Distributed Systems</div>
-            <a href="cqrs_es.html" class="nav-link">⚡ CQRS и ES</a>
+            <a href="cqrs_es.html" class="nav-link">⚡ CQRS & ES</a>
             <a href="saga.html" class="nav-link">🔄 Saga Pattern</a>
             <a href="outbox.html" class="nav-link">📮 Outbox Pattern</a>
             <a href="background_tasks.html" class="nav-link">⏳ Background Tasks</a>
@@ -82,44 +82,44 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Quality & Practice</div>
-            <a href="testing.html" class="nav-link">🧪 Тестирование</a>
-            <a href="overengineering.html" class="nav-link">🛑 Избыточность</a>
+            <a href="testing.html" class="nav-link">🧪 Testing</a>
+            <a href="overengineering.html" class="nav-link">🛑 Overengineering</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
-            <a href="projects.html" class="nav-link">🚀 Мини-проекты</a>
-            <a href="antipatterns.html" class="nav-link">⚠️ Антипаттерны</a>
+            <a href="projects.html" class="nav-link">🚀 Mini Projects</a>
+            <a href="antipatterns.html" class="nav-link">⚠️ Antipatterns</a>
             <a href="advanced_techniques.html" class="nav-link">🚀 Advanced Tech</a>
 
             <div class="nav-section">About</div>
-            <a href="afterword.html" class="nav-link">👋 Послесловие</a>
+            <a href="afterword.html" class="nav-link">👋 Afterword</a>
         </nav>
     </aside>
 
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Big Ball of Mud</h1>
-            <p class="text-xl text-gray-600">Антипаттерн или реальность? Как не утонуть в болоте.</p>
+            <p class="text-xl text-gray-600">Antipattern or reality? How not to drown in the swamp.</p>
         </header>
 
         <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-6">Что это такое?</h2>
+            <h2 class="text-2xl font-bold mb-6">What is it?</h2>
             <div class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-6">
-                <strong>Определение:</strong> "Хаотично спроектированная, разросшаяся система, где никто точно не знает, как всё взаимосвязано. Код спагетти в масштабе архитектуры."
+                <strong>Definition:</strong> "A chaotically designed, sprawling system where no one knows exactly how everything is interconnected. Spaghetti code at architectural scale."
             </div>
             
-            <p class="mb-4">В DDD "Big Ball of Mud" — это не ругательство, а <strong>признание факта</strong>. Иногда вам достается легаси, которое невозможно рефакторить быстро.</p>
+            <p class="mb-4">In DDD, "Big Ball of Mud" is not a swear word, but <strong>an acknowledgment of fact</strong>. Sometimes you inherit legacy that\'s impossible to refactor quickly.</p>
             
-            <h3 class="text-xl font-bold mt-8 mb-4">Что с ним делать? (Стратегия DDD)</h3>
+            <h3 class="text-xl font-bold mt-8 mb-4">What to do with it? (DDD Strategy)</h3>
             <ol class="list-decimal pl-6 space-y-2 mb-6">
-                <li><strong>Не пытайтесь "исправить всё сразу".</strong> Это убьет проект.</li>
-                <li><strong>Очертите границы (Draw a line).</strong> Признайте: "Внутри этого старого модуля — хаос. Мы это знаем".</li>
-                <li><strong>Изоляция.</strong> Новые фичи делайте ВНЕ этого болота, общаясь через строгий <strong>ACL (Anti-Corruption Layer)</strong>.</li>
+                <li><strong>Don\'t try to "fix everything at once".</strong> This will kill the project.</li>
+                <li><strong>Draw boundaries (Draw a line).</strong> Acknowledge: "Inside this old module is chaos. We know this".</li>
+                <li><strong>Isolation.</strong> Build new features OUTSIDE this swamp, communicating through a strict <strong>ACL (Anti-Corruption Layer)</strong>.</li>
             </ol>
 
-            <h3 class="text-xl font-bold mt-8 mb-4">Пример из жизни</h3>
-            <p>У вас есть монолит на PHP 5.3 с глобальными переменными. Бизнес просит новую программу лояльности.</p>
-            <p class="mb-2"><strong>Плохой путь:</strong> Встроить лояльность внутрь монолита, т.к. там "есть данные о заказах".</p>
-            <p><strong>Путь DDD:</strong> Создать микросервис "Лояльность" (чистый код). Настроить синхронизацию событий из монолита. Ставим забор вокруг грязи.</p>
+            <h3 class="text-xl font-bold mt-8 mb-4">Real-life Example</h3>
+            <p>You have a PHP 5.3 monolith with global variables. Business asks for a new loyalty program.</p>
+            <p class="mb-2"><strong>Bad path:</strong> Embed loyalty inside the monolith because "it has order data".</p>
+            <p><strong>DDD path:</strong> Create a "Loyalty" microservice (clean code). Set up event synchronization from the monolith. Put a fence around the dirt.</p>
         </section>
 
         <div class="mt-12 pt-8 border-t border-gray-200">
