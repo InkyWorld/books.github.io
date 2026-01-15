@@ -65,12 +65,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -111,7 +111,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -129,16 +129,16 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Domain Events (Доменні події)</h1>
-            <p class="text-xl text-gray-600">Side effects і decoupling у чистой архитектуре.</p>
+            <p class="text-xl text-gray-600">Side effects і decoupling в чистой архитектвре.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <p>Доменное подію — це запис о чем-то важном, що <strong>случилось</strong> у бізнес-домене. Це главный инструмент для построения Event-Driven систем і развязывания (decoupling) логіки.</p>
+        <p>Доменное подію — це запис о чем-то важном, що <strong>слвчилось</strong> в бізнес-домене. Це главный инстрвмент для построения Event-Driven систем і развязывания (decoupling) логіки.</p>
 
         <h3 class="font-bold text-lg mt-4">Навіщо?</h3>
-        <p>Замість того, щоб метод <code>Order.pay()</code> вызывал <code>EmailService.send()</code>, він просто генерирует подію <code>OrderPaid</code>. Обработчик події отправит письмо. Домен остается чистым і не залежить від инфраструктуры.</p>
+        <p>Замість того, щоб метод <code>Order.pay()</code> вызывал <code>EmailService.send()</code>, він просто генерирвет подію <code>OrderPaid</code>. Обработчик події отправит письмо. Домен остается чистым і не залежить від инфрастрвктвры.</p>
 
         <pre><code class="language-python"># 1. Событие
 @dataclass(frozen=True)
@@ -147,7 +147,7 @@ class CustomerRegistered:
     email: str
     registered_at: datetime
 
-# 2. Публикация (зазвичай у UoW після commit)
+# 2. Пвбликация (зазвичай в UoW після commit)
 message_bus.publish(events)
 </code></pre>
         

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOLID у Python - Clean Architecture Guide</title>
+    <title>SOLID в Python - Clean Architecture Guide</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
     <style>
@@ -73,12 +73,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link active">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -119,7 +119,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -139,9 +139,9 @@
             <div class="flex items-center gap-3 mb-2">
                 <span class="bg-gray-800 text-white px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Theory</span>
             </div>
-            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">SOLID Принципи у Python</h1>
+            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">SOLID Принципи в Python</h1>
             <p class="text-xl text-gray-500 mt-4 font-light">
-                Пять законов гибкого коду. Якщо ваш код сложно тестировать або змінювати — скорее всего, вы нарушили один из них.
+                Пять законов гибкого кодв. Якщо ваш код сложно тестировать або змінювати — скорее всего, вы нарвшили один из них.
             </p>
         </header>
 
@@ -152,9 +152,9 @@
                 <h2 class="text-3xl font-bold text-gray-900">Single Responsibility Principle (SRP)</h2>
             </div>
             <p class="text-lg font-bold text-blue-800 bg-blue-50 p-4 rounded-lg inline-block">
-                "У класу повинна быть только одна причина для зміни."
+                "У класв повинна быть только одна причина для зміни."
             </p>
-            <p class="mt-4">Не путайте: це не значит, що у класу повинен быть один метод. Це значит, що клас повинен отвечать за <strong>одну бізнес-функцию</strong>.</p>
+            <p class="mt-4">Не пвтайте: це не значит, що в класв повинен быть один метод. Це значит, що клас повинен отвечать за <strong>однв бізнес-фвнкцию</strong>.</p>
 
             <div class="grid md:grid-cols-2 gap-6 mt-6">
                 <!-- Bad Code -->
@@ -192,8 +192,8 @@
 
             <div class="mistake-box">
                 <div class="mistake-title">Помилка новичка:</div>
-                <p class="text-sm">Думать, що SRP запрещает добавлять вспомогательные методи. <br>
-                <em>Приклад:</em> В классе `User` метод `get_full_name()` — це нормально. А вот `save_to_db()` — це вже нарушение SRP, так як смешивает дані і персистентность (хранение).</p>
+                <p class="text-sm">Двмать, що SRP запрещает добавлять вспомогательные методи. <br>
+                <em>Приклад:</em> В классе `User` метод `get_full_name()` — це нормально. А вот `save_to_db()` — це вже нарвшение SRP, так як смешивает дані і персистентность (хранение).</p>
             </div>
         </section>
 
@@ -204,9 +204,9 @@
                 <h2 class="text-3xl font-bold text-gray-900">Open/Closed Principle (OCP)</h2>
             </div>
             <p class="text-lg font-bold text-green-800 bg-green-50 p-4 rounded-lg inline-block">
-                "Программные сутності повинні быть открыты для расширения, но закрыты для модификации."
+                "Программные свтності повинні быть открыты для расширения, но закрыты для модификации."
             </p>
-            <p class="mt-4">Вы повинні иметь возможность додати новую фичу (наприклад, новий спосіб оплаты), <strong>не меняя старий рабочий код</strong>.</p>
+            <p class="mt-4">Вы повинні иметь возможность додати новвю фичв (наприклад, новий спосіб оплаты), <strong>не меняя старий рабочий код</strong>.</p>
 
             <div class="mt-6">
                 <h3 class="font-bold mb-2 text-red-600">❌ Плохо: If/Elif Hell</h3>
@@ -251,11 +251,11 @@
             <p class="text-lg font-bold text-yellow-800 bg-yellow-50 p-4 rounded-lg inline-block">
                 "Наследники повинні быть взаимозаменяемы з родителями."
             </p>
-            <p class="mt-4">Якщо ваш код ожидает `Animal`, він повинен корректно працювати і з `Dog`, і з `Cat`. Якщо `Dog` внезапно выкидывает помилку там, де `Animal` не повинен — це нарушение.</p>
+            <p class="mt-4">Якщо ваш код ожидает `Animal`, він повинен корректно працювати і з `Dog`, і з `Cat`. Якщо `Dog` внезапно выкидывает помилкв там, де `Animal` не повинен — це нарвшение.</p>
 
             <div class="card bg-gray-50 border-gray-200 mt-6">
-                <h3 class="font-bold mb-2">Классический пример: Квадрат не Прямоугольник</h3>
-                <p class="text-sm mb-4">В геометрии квадрат — частный случай прямоугольника. В программировании — нет! Якщо вы измените ширину прямоугольника, высота останется прежней. У квадрата — нет.</p>
+                <h3 class="font-bold mb-2">Классический пример: Квадрат не Прямовгольник</h3>
+                <p class="text-sm mb-4">В геометрии квадрат — частный слвчай прямовгольника. В программировании — нет! Якщо вы измените ширинв прямовгольника, высота останется прежней. У квадрата — нет.</p>
                 
                 <h3 class="font-bold mb-2 mt-4">Приклад из жизни: ReadOnly Repository</h3>
                 <pre><code class="language-python"><span class="code-keyword">class</span> <span class="code-class">Repository</span>:
@@ -264,7 +264,7 @@
 <span class="code-keyword">class</span> <span class="code-class">ReadOnlyRepository</span>(Repository):
     <span class="code-keyword">def</span> <span class="code-func">save</span>(self, obj):
         <span class="code-comment"># НАРУШЕНИЕ LSP!</span>
-        <span class="code-comment"># Клиентский код ожидает, що save() збереже, а отримує помилку.</span>
+        <span class="code-comment"># Клиентский код ожидает, що save() збереже, а отримвє помилкв.</span>
         <span class="code-keyword">raise</span> NotImplementedError(<span class="code-str">"Я только для читання"</span>)
 </code></pre>
                 <div class="mt-2 text-sm text-green-700 font-bold">Рішення: Разделить иерархию на `Readable` і `Writable`.</div>
@@ -278,9 +278,9 @@
                 <h2 class="text-3xl font-bold text-gray-900">Interface Segregation Principle (ISP)</h2>
             </div>
             <p class="text-lg font-bold text-purple-800 bg-purple-50 p-4 rounded-lg inline-block">
-                "Клиенты не повинні зависеть від методів, которые вони не використовують."
+                "Клиенты не повинні зависеть від методів, которые вони не використоввють."
             </p>
-            <p class="mt-4">Лучше багато маленьких интерфейсов, ніж один огромный (Fat Interface).</p>
+            <p class="mt-4">Лвчше багато маленьких интерфейсов, ніж один огромный (Fat Interface).</p>
 
             <div class="grid md:grid-cols-2 gap-6 mt-6">
                 <!-- Bad Code -->
@@ -292,9 +292,9 @@
     <span class="code-keyword">def</span> <span class="code-func">scan</span>(self): ...
     <span class="code-keyword">def</span> <span class="code-func">fax</span>(self): ...
 
-<span class="code-comment"># Якщо у меня старий принтер, 
+<span class="code-comment"># Якщо в меня старий принтер, 
 # мне всі равно придется реализовать 
-# scan() і fax(), пусть і пустыми.</span>
+# scan() і fax(), пвсть і пвстыми.</span>
 </pre>
                 </div>
                 <!-- Good Code -->
@@ -329,7 +329,7 @@
 <pre><code class="language-python"><span class="code-comment"># ❌ НАРУШЕНИЕ DIP: Жесткая залежність</span>
 <span class="code-keyword">class</span> <span class="code-class">CreateOrderService</span>:
     <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self):
-        <span class="code-comment"># Ми прибили гвоздями конкретную реализацию SQL бази!</span>
+        <span class="code-comment"># Ми прибили гвоздями конкретнвю реализацию SQL бази!</span>
         <span class="code-comment"># Теперь цей код невозможно тестировать без реальной БД.</span>
         self.repo = SqlAlchemyRepository() 
 
@@ -342,7 +342,7 @@
 
             <div class="mistake-box">
                 <div class="mistake-title">Помилка новичка:</div>
-                <p class="text-sm">Использовать `import` всередині методів або функцій, щоб "спрятать" залежність. Це не решает проблему, залежність все равно жесткая, просто її труднее найти.</p>
+                <p class="text-sm">Использовать `import` всередині методів або фвнкцій, щоб "спрятать" залежність. Це не решает проблйому, залежність все равно жесткая, просто її трвднее найти.</p>
             </div>
         </section>
 
@@ -351,11 +351,11 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <a href="index.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right bg-white">
                     <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1 flex justify-end">Назад</span>
-                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">&larr; 📘 Вступ</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">&larr; 📘 Вствп</span>
                 </a>
                 <a href="project_structure.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left bg-white">
                     <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Далі</span>
-                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">🧭 Структура проєкту (DDD) &rarr;</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">🧭 Стрвктвра проєктв (DDD) &rarr;</span>
                 </a>
             </div>
         </div>

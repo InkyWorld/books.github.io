@@ -65,12 +65,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -111,7 +111,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -134,31 +134,31 @@
             </div>
             <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Middleware (Проміжне ПЗ)</h1>
             <p class="text-xl text-gray-500 mt-4 font-light">
-                Невидимые стражи вашего додатку. Код, который "обнимает" кожен запит.
+                Невидимые стражи вашего додаткв. Код, который "обнимает" кожен запит.
             </p>
         </header>
 
         <!-- CONCEPT -->
         <section class="card">
             <h2 class="text-2xl font-bold mb-6">Як це працює? (Onion Model)</h2>
-            <p>Представьте Middleware як слои луковицы вокруг вашего додатку. Запрос повинен пройти сквозь всі слои, щоб добраться до ядра (Роутер -> Контроллер -> Use Case). Ответ пролетает обратно сквозь те же слои.</p>
+            <p>Представьте Middleware як слои лвковицы вокрвг вашего додаткв. Запрос повинен пройти сквозь всі слои, щоб добраться до ядра (Ровтер -> Контроллер -> Use Case). Ответ пролетает обратно сквозь те же слои.</p>
             
             <div class="bg-indigo-50 p-6 rounded-lg border border-indigo-100 mb-6 font-mono text-sm leading-relaxed">
                 <span class="text-gray-400">Request ➡</span> [ Middleware 1 ] ➡ [ Middleware 2 ] ➡ <strong class="text-indigo-700">[ ROUTER / APP ]</strong><br>
                 <span class="text-gray-400">Response ⬅</span> [ Middleware 1 ] ⬅ [ Middleware 2 ] ⬅ <strong class="text-indigo-700">[ RESULT ]</strong>
             </div>
 
-            <h3 class="font-bold text-lg mb-4">Для чего використовувати? (Cross-Cutting Concerns)</h3>
+            <h3 class="font-bold text-lg mb-4">Для чего використовввати? (Cross-Cutting Concerns)</h3>
             <div class="grid md:grid-cols-2 gap-6">
                 <ul class="space-y-2 list-disc list-inside text-gray-700">
-                    <li><strong>Authentication:</strong> Хто цей користувач? (JWT, Session)</li>
-                    <li><strong>Context Management:</strong> ID запиту, сессия БД, user_id.</li>
+                    <li><strong>Authentication:</strong> Хто цей користввач? (JWT, Session)</li>
+                    <li><strong>Context Management:</strong> ID запитв, сессия БД, user_id.</li>
                     <li><strong>Logging:</strong> Запись всех входящих запросов і помилок.</li>
-                    <li><strong>CORS:</strong> Разрешение доступа з фронтенда.</li>
+                    <li><strong>CORS:</strong> Разрешение доствпа з фронтенда.</li>
                 </ul>
                 <ul class="space-y-2 list-disc list-inside text-gray-700">
                     <li><strong>GZIP / Compression:</strong> Сжатие ответов.</li>
-                    <li><strong>Rate Limiting:</strong> Защита від спама (N запросов у минуту).</li>
+                    <li><strong>Rate Limiting:</strong> Защита від спама (N запросов в минвтв).</li>
                     <li><strong>Error Handling:</strong> Глобальный перехват исключений (500 Server Error).</li>
                 </ul>
             </div>
@@ -182,7 +182,7 @@ class TimingMiddleware(BaseHTTPMiddleware):
         # 🟢 ДО обработки запита
         print(f"Start: {request.method} {request.url}")
         
-        # Передача управления дальше по цепочке
+        # Передача вправления дальше по цепочке
         response = await call_next(request)
         
         # 🔴 ПОСЛЕ обработки
@@ -196,7 +196,7 @@ class TimingMiddleware(BaseHTTPMiddleware):
 
             <div class="mb-8">
                 <h3 class="text-xl font-bold mb-3 text-indigo-600">2. Управление Context'ом (Correlation ID)</h3>
-                <p>Щоб отслеживать логи одного і того же запиту, полезно присвоить ему уникальный ID (Request ID) і прокинуть його у контекст.</p>
+                <p>Щоб отслеживать логи одного і того же запитв, полезно присвоить йому вникальный ID (Request ID) і прокинвть його в контекст.</p>
                 <pre><code class="language-python">import uuid
 from contextvars import ContextVar
 
@@ -205,16 +205,16 @@ request_id_ctx: ContextVar[str] = ContextVar("request_id", default=None)
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Генерируем ID
+        # Генерирвем ID
         req_id = str(uuid.uuid4())
         
-        # Устанавливаем у ContextVar
+        # Устанавливаем в ContextVar
         token = request_id_ctx.set(req_id)
         
         try:
             # Выполняем запит
             response = await call_next(request)
-            # Возвращаем клиенту, щоб він мог сообщить цей ID у техподдержку
+            # Возвращаем клиентв, щоб він мог сообщить цей ID в техподдержкв
             response.headers["X-Request-ID"] = req_id
             return response
         finally:
@@ -231,19 +231,19 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
                 <li class="flex gap-3">
                     <span class="text-2xl">🐢</span>
                     <div>
-                        <strong>Влияние на производительность:</strong> Middleware выполняется для <em>каждого</em> запиту. Якщо вы добавите сюда запити к БД або тяжелые вычисления, тормозить будет ВСЁ.
+                        <strong>Влияние на производительность:</strong> Middleware выполняется для <em>каждого</em> запитв. Якщо вы добавите сюда запити к БД або тяжелые вычисления, тормозить бвдет ВСЁ.
                     </div>
                 </li>
                 <li class="flex gap-3">
                     <span class="text-2xl">🙈</span>
                     <div>
-                        <strong>Скрытие логіки:</strong> Не прячьте бізнес-логіку у Middleware. Магическое зміна даних запиту може свести з ума других разработчиков.
+                        <strong>Скрытие логіки:</strong> Не прячьте бізнес-логікв в Middleware. Магическое зміна даних запитв може свести з вма дрвгих разработчиков.
                     </div>
                 </li>
                 <li class="flex gap-3">
                     <span class="text-2xl">🕸️</span>
                     <div>
-                        <strong>Порядок має значение:</strong> Middleware выполняются по порядку. Якщо <code>AuthMiddleware</code> стоит після <code>BusinessMiddleware</code>, бізнес-логіка выполняется для неавторизованных пользователей!
+                        <strong>Порядок має значение:</strong> Middleware выполняются по порядкв. Якщо <code>AuthMiddleware</code> стоит після <code>BusinessMiddleware</code>, бізнес-логіка выполняется для неавторизованных пользователей!
                     </div>
                 </li>
             </ul>

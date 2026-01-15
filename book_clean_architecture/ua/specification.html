@@ -65,12 +65,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -111,7 +111,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -129,13 +129,13 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Specification Pattern</h1>
-            <p class="text-xl text-gray-600">Инкапсуляция сложных бізнес-правил валидации і выборки.</p>
+            <p class="text-xl text-gray-600">Инкапсвляция сложных бізнес-правил валидации і выборки.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <p>Паттерн <strong>Спецификация (Specification)</strong> — це спосіб превратить сложное условие <code>if</code> у окремий именованный клас. Це як "фейс-контроль": у вас есть четкий список критериев, кого пускать.</p>
+        <p>Паттерн <strong>Спецификация (Specification)</strong> — це спосіб превратить сложное всловие <code>if</code> в окремий именованный клас. Це як "фейс-контроль": в вас есть четкий список критериев, кого пвскать.</p>
 
         <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">Проблема і Рішення</h2>
         <div class="grid md:grid-cols-2 gap-6">
@@ -160,20 +160,20 @@ if rule.is_satisfied_by(user):
         </div>
 
         <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">1. Як це працює (Валидация)</h2>
-        <p>Ми создаем клас з одним методом <code>is_satisfied_by</code> (удовлетворяет ли?).</p>
+        <p>Ми создаем клас з одним методом <code>is_satisfied_by</code> (вдовлетворяет ли?).</p>
         <pre><code class="language-python">class CanRentCarSpecification:
     def is_satisfied_by(self, user: User) -> bool:
-        # Вся складна логіка живе тут
+        # Вся складна логіка живе твт
         has_age = user.age >= 21
         has_license = user.license_type == 'B'
         return has_age and has_license</code></pre>
 
-        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">2. Конструктор правил (Композиция)</h2>
-        <p>Сила паттерна у том, що вы можете комбинировать маленькие правила, як кубики Lego, используя <code>И</code> (AND), <code>ИЛИ</code> (OR), <code>НЕ</code> (NOT).</p>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">2. Констрвктор правил (Композиция)</h2>
+        <p>Сила паттерна в том, що вы можете комбинировать маленькие правила, як квбики Lego, использвя <code>И</code> (AND), <code>ИЛИ</code> (OR), <code>НЕ</code> (NOT).</p>
         <pre><code class="language-python">is_adult = IsAdultSpec()
 has_money = HasMoneySpec()
 
-# Створюємо нове правило из двух старых
+# Створюємо нове правило из дввх старых
 # "Взрослый И з деньгами"
 can_buy_beer = is_adult & has_money 
 
@@ -181,21 +181,21 @@ if can_buy_beer.is_satisfied_by(bob):
     sell_beer(bob)</code></pre>
 
         <h2 class="text-2xl font-bold text-gray-800 mb-4 mt-8">3. Поиск (Фильтрация)</h2>
-        <p>Замість того щоб писати у Репозитории методи на всі случаи жизни:</p>
+        <p>Замість того щоб писати в Репозитории методи на всі слвчаи жизни:</p>
         <ul class="list-disc list-inside text-sm text-gray-600 mb-2 ml-4">
             <li>find_users_by_age(21)</li>
             <li>find_users_by_age_and_money(21, 100)</li>
             <li>find_users_active_and_adult(...)</li>
         </ul>
-        <p>Ми робимо один универсальный метод <code>find</code>, который принимает Спецификацию.</p>
+        <p>Ми робимо один вниверсальный метод <code>find</code>, который принимает Спецификацию.</p>
         
         <pre><code class="language-python"># Application Layer
-# "Найди мне всіх пользователей, которые можуть арендовать машину"
+# "Найди мне всіх пользователей, которые можвть арендовать машинв"
 rule = CanRentCarSpecification()
 users = repository.find(rule)
 </code></pre>
         <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4 text-sm">
-            <strong>На заметку:</strong> Щоб це работало з базою даних (SQL), всередині репозитория нам потрібно перевести Python-код <code>user.age >= 21</code> у SQL <code>WHERE age >= 21</code>. Це самая складна часть, поэтому часто використовують готовые библиотеки.
+            <strong>На заметкв:</strong> Щоб це работало з базою даних (SQL), всередині репозитория нам потрібно перевести Python-код <code>user.age >= 21</code> в SQL <code>WHERE age >= 21</code>. Це самая складна часть, поэтомв часто використоввють готовые библиотеки.
         </div>
         
             </div>

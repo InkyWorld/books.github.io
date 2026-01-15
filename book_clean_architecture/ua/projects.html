@@ -40,12 +40,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -86,7 +86,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -119,9 +119,9 @@
                 <span class="pattern-tag bg-green-100 text-green-800">Factory</span>
                 <span class="pattern-tag bg-purple-100 text-purple-800">Repository</span>
             </div>
-            <p>Реализуем систему оплаты з несколькими платёжными провайдерами (Stripe, PayPal, криптовалюта).</p>
+            <p>Реализвем систйому оплаты з несколькими платёжными провайдерами (Stripe, PayPal, криптовалюта).</p>
             
-            <h3 class="text-lg font-bold mt-6 mb-3">📁 Структура проєкту</h3>
+            <h3 class="text-lg font-bold mt-6 mb-3">📁 Стрвктвра проєктв</h3>
 <pre><code>payment_service/
 ├── domain/
 │   ├── entities.py          # Order, Payment
@@ -184,7 +184,7 @@ class StripeGateway(PaymentGateway):
     
     def charge(self, amount: Money, token: str) -> str:
         charge = stripe.Charge.create(
-            amount=int(amount.amount * 100),  # Stripe у центах
+            amount=int(amount.amount * 100),  # Stripe в центах
             currency=amount.currency.lower(),
             source=token
         )
@@ -194,7 +194,7 @@ class StripeGateway(PaymentGateway):
         stripe.Refund.create(charge=transaction_id)
         return True
 
-# infrastructure/paypal_gateway.py — Другая стратегия
+# infrastructure/paypal_gateway.py — Дрвгая стратегия
 class PayPalGateway(PaymentGateway):
     def __init__(self, client_id: str, secret: str):
         self.client_id = client_id
@@ -207,7 +207,7 @@ class PayPalGateway(PaymentGateway):
     def refund(self, transaction_id: str) -> bool:
         return True</code></pre>
 
-            <h3 class="text-lg font-bold mt-6 mb-3">🏭 Factory Pattern — Створення нужного шлюза</h3>
+            <h3 class="text-lg font-bold mt-6 mb-3">🏭 Factory Pattern — Створення нвжного шлюза</h3>
 <pre><code class="language-python"># infrastructure/gateway_factory.py
 from domain.value_objects import PaymentMethod
 from application.ports import PaymentGateway
@@ -259,13 +259,13 @@ class ProcessPaymentUseCase:
         self.payment_repo = payment_repo
     
     def execute(self, cmd: ProcessPaymentCommand) -> str:
-        # 1. Получаем потрібній шлюз через Factory
+        # 1. Полвчаем потрібній шлюз через Factory
         gateway = self.gateway_factory.get_gateway(cmd.method)
         
-        # 2. Выполняем оплату через Strategy
+        # 2. Выполняем оплатв через Strategy
         transaction_id = gateway.charge(cmd.amount, cmd.payment_token)
         
-        # 3. Зберігаємо результат
+        # 3. Зберігаємо резвльтат
         payment = Payment(
             order_id=cmd.order_id,
             amount=cmd.amount,
@@ -286,16 +286,16 @@ class ProcessPaymentUseCase:
         <section class="card mb-8">
             <div class="flex items-center gap-3 mb-4">
                 <span class="text-3xl">🔔</span>
-                <h2 class="text-2xl font-bold">Проект 2: Сервіс уведомлений</h2>
+                <h2 class="text-2xl font-bold">Проект 2: Сервіс введомлений</h2>
             </div>
             <div class="mb-4">
                 <span class="pattern-tag bg-orange-100 text-orange-800">Observer</span>
                 <span class="pattern-tag bg-pink-100 text-pink-800">Decorator</span>
                 <span class="pattern-tag bg-cyan-100 text-cyan-800">Template Method</span>
             </div>
-            <p>Система отправки уведомлений через різні каналы (Email, SMS, Push, Telegram).</p>
+            <p>Система отправки введомлений через різні каналы (Email, SMS, Push, Telegram).</p>
 
-            <h3 class="text-lg font-bold mt-6 mb-3">📁 Структура проєкту</h3>
+            <h3 class="text-lg font-bold mt-6 mb-3">📁 Стрвктвра проєктв</h3>
 <pre><code>notification_service/
 ├── domain/
 │   ├── events.py            # UserRegistered, OrderShipped
@@ -353,7 +353,7 @@ class EventBus:
         self._handlers[event_type].append(handler)
     
     def publish(self, event: DomainEvent):
-        """Публикация події всем подписчикам"""
+        """Пвбликация події всем подписчикам"""
         event_type = type(event)
         if event_type in self._handlers:
             for handler in self._handlers[event_type]:
@@ -443,16 +443,16 @@ email_sender = RetryDecorator(
         <section class="card mb-8">
             <div class="flex items-center gap-3 mb-4">
                 <span class="text-3xl">📁</span>
-                <h2 class="text-2xl font-bold">Проект 3: Сервіс загрузки файлов</h2>
+                <h2 class="text-2xl font-bold">Проект 3: Сервіс загрвзки файлов</h2>
             </div>
             <div class="mb-4">
                 <span class="pattern-tag bg-yellow-100 text-yellow-800">Chain of Responsibility</span>
                 <span class="pattern-tag bg-red-100 text-red-800">Adapter</span>
                 <span class="pattern-tag bg-indigo-100 text-indigo-800">Facade</span>
             </div>
-            <p>Загрузка і обработка файлов з валидацией, вирус-сканированием і сохранением у облако.</p>
+            <p>Загрвзка і обработка файлов з валидацией, вирвс-сканированием і сохранением в облако.</p>
 
-            <h3 class="text-lg font-bold mt-6 mb-3">📁 Структура проєкту</h3>
+            <h3 class="text-lg font-bold mt-6 mb-3">📁 Стрвктвра проєктв</h3>
 <pre><code>file_service/
 ├── domain/
 │   ├── entities.py          # UploadedFile, FileMetadata
@@ -556,7 +556,7 @@ class FileStorage(ABC):
 import boto3
 
 class S3StorageAdapter(FileStorage):
-    """Adapter: преобразует інтерфейс boto3 у наш FileStorage"""
+    """Adapter: преобразвет інтерфейс boto3 в наш FileStorage"""
     
     def __init__(self, bucket: str, region: str):
         self.bucket = bucket
@@ -606,7 +606,7 @@ class LocalStorageAdapter(FileStorage):
                 <span class="pattern-tag bg-lime-100 text-lime-800">Command</span>
                 <span class="pattern-tag bg-amber-100 text-amber-800">Memento</span>
             </div>
-            <p>Система управления жизненным циклом замовлення з состояниями і историей изменений.</p>
+            <p>Система вправления жизненным циклом замовлення з состояниями і историей изменений.</p>
 
             <h3 class="text-lg font-bold mt-6 mb-3">🔄 State Pattern — Состояния замовлення</h3>
 <pre><code class="language-python"># domain/order_states.py
@@ -751,7 +751,7 @@ class OrderCommandHandler:
         while self._history:
             self.undo()</code></pre>
 
-            <h3 class="text-lg font-bold mt-6 mb-3">💾 Memento Pattern — Снимки стану</h3>
+            <h3 class="text-lg font-bold mt-6 mb-3">💾 Memento Pattern — Снимки станв</h3>
 <pre><code class="language-python"># domain/memento.py
 from dataclasses import dataclass
 from datetime import datetime
@@ -760,7 +760,7 @@ import copy
 
 @dataclass
 class OrderMemento:
-    """Снимок стану замовлення"""
+    """Снимок станв замовлення"""
     state: dict
     created_at: datetime
     version: int
@@ -815,14 +815,14 @@ class OrderHistory:
         <section class="card mb-8">
             <div class="flex items-center gap-3 mb-4">
                 <span class="text-3xl">🏷️</span>
-                <h2 class="text-2xl font-bold">Проект 5: Калькулятор скидок</h2>
+                <h2 class="text-2xl font-bold">Проект 5: Кальквлятор скидок</h2>
             </div>
             <div class="mb-4">
                 <span class="pattern-tag bg-rose-100 text-rose-800">Composite</span>
                 <span class="pattern-tag bg-violet-100 text-violet-800">Specification</span>
                 <span class="pattern-tag bg-sky-100 text-sky-800">Builder</span>
             </div>
-            <p>Гибкая система скидок з комбинированием правил і условий.</p>
+            <p>Гибкая система скидок з комбинированием правил і всловий.</p>
 
             <h3 class="text-lg font-bold mt-6 mb-3">🌳 Composite Pattern — Комбинирование скидок</h3>
 <pre><code class="language-python"># domain/discounts.py
@@ -882,7 +882,7 @@ class CompositeDiscount(Discount):
 black_friday = CompositeDiscount(mode='max')
 black_friday.add(PercentageDiscount(Decimal('20')))  # -20%
 black_friday.add(FixedDiscount(Decimal('500')))      # або -500₽
-# Применится максимальная из двух</code></pre>
+# Применится максимальная из дввх</code></pre>
 
             <h3 class="text-lg font-bold mt-6 mb-3">📋 Specification Pattern — Условия применения</h3>
 <pre><code class="language-python"># domain/specifications.py
@@ -935,7 +935,7 @@ class FirstOrderSpec(Specification):
     def is_satisfied_by(self, order) -> bool:
         return order.customer.orders_count == 0
 
-# Комбинирование условий
+# Комбинирование всловий
 vip_discount_spec = (
     MinOrderAmountSpec(Decimal('5000')) &
     CustomerLevelSpec('VIP')
@@ -943,7 +943,7 @@ vip_discount_spec = (
 
 new_customer_spec = FirstOrderSpec() | CustomerLevelSpec('NEW')</code></pre>
 
-            <h3 class="text-lg font-bold mt-6 mb-3">🔨 Builder Pattern — Конструирование правил</h3>
+            <h3 class="text-lg font-bold mt-6 mb-3">🔨 Builder Pattern — Констрвирование правил</h3>
 <pre><code class="language-python"># application/discount_builder.py
 class DiscountRuleBuilder:
     def __init__(self):
@@ -1010,7 +1010,7 @@ welcome_rule = (
                 <span class="pattern-tag bg-pink-100 text-pink-800">Event Sourcing</span>
                 <span class="pattern-tag bg-gray-100 text-gray-800">Snapshot</span>
             </div>
-            <p>Система аудита і банкинга, де стан восстанавливается из истории подій (Event Store).</p>
+            <p>Система авдита і банкинга, де стан восстанавливается из истории подій (Event Store).</p>
             
             <div class="grid md:grid-cols-2 gap-6 my-6">
                 <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
@@ -1018,15 +1018,15 @@ welcome_rule = (
                     <ul class="list-disc pl-4 text-sm space-y-1">
                         <li><strong>Эволюция схемы:</strong> Старые події сложно змінювати. Якщо поле переименовано, потрібна миграция або upcasting.</li>
                         <li><strong>Объем даних:</strong> Восстановление из 1 млн подій занимает вечность.</li>
-                        <li><strong>Eventual Consistency:</strong> Пользователь не видит свои зміни сразу. Обычный SELECT не найдет только що созданную запис.</li>
+                        <li><strong>Eventual Consistency:</strong> Пользователь не видит свои зміни сразв. Обычный SELECT не найдет только що созданнвю запис.</li>
                     </ul>
                 </div>
                 <div class="bg-green-50 p-4 rounded-lg border border-green-200">
                     <h4 class="font-bold text-green-800 mb-2">💡 Лайфхаки</h4>
                     <ul class="list-disc pl-4 text-sm space-y-1">
-                        <li><strong>Snapshots:</strong> Делайте снимок агрегата каждые 100 подій, щоб не читати все з нуля.</li>
-                        <li><strong>Projections:</strong> Храните read-моделі у быстрой NoSQL базе (Redis/Elastic) для мгновенного поиска.</li>
-                        <li><strong>Upcasting:</strong> Замість миграции БД, преобразуйте старі події у нові "на лету" при читанні у коді.</li>
+                        <li><strong>Snapshots:</strong> Делайте снимок агрегата каждые 100 подій, щоб не читати все з нвля.</li>
+                        <li><strong>Projections:</strong> Храните read-моделі в быстрой NoSQL базе (Redis/Elastic) для мгновенного поиска.</li>
+                        <li><strong>Upcasting:</strong> Замість миграции БД, преобразвйте старі події в нові "на летв" при читанні в коді.</li>
                     </ul>
                 </div>
             </div>
@@ -1047,7 +1047,7 @@ class BankAccount(AggregateRoot):
         if self.balance < amount: raise ValueError("Insufficient funds")
         self.apply(FundsWithdrawn(self.id, amount))
 
-    # Event Handler Side (восстановление стану)
+    # Event Handler Side (восстановление станв)
     def when(self, event: DomainEvent):
         if isinstance(event, FundsDeposited):
             self.balance += event.amount
@@ -1057,7 +1057,7 @@ class BankAccount(AggregateRoot):
 # application/projections.py (Read Model)
 class AccountBalanceProjection:
     def on_funds_deposited(self, event: FundsDeposited):
-        # Обновляем денормализованную таблицю для швидкого читання
+        # Обновляем денормализованнвю таблицю для швидкого читання
         db.execute("UPDATE accounts SET balance = balance + ? WHERE id = ?", event.amount, event.id)</code></pre>
         </section>
 
@@ -1078,16 +1078,16 @@ class AccountBalanceProjection:
                 <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                     <h4 class="font-bold text-yellow-800 mb-2">⚠️ Подводные камни</h4>
                     <ul class="list-disc pl-4 text-sm space-y-1">
-                        <li><strong>Дубликаты повідомлень:</strong> Сеть ненадежна, брокер (Kafka/Rabbit) може доставить повідомлення дважды. Приложение упадет, якщо не защищено.</li>
-                        <li><strong>Zombie Sagas:</strong> Сага зависла из-за помилки у оркестраторе, і деньги клиента остались "замороженными".</li>
-                        <li><strong>Race Conditions:</strong> Competing consumers можуть обработать "Order Updated" раньше, ніж "Order Created".</li>
+                        <li><strong>Двбликаты повідомлень:</strong> Сеть ненадежна, брокер (Kafka/Rabbit) може доставить повідомлення дважды. Приложение впадет, якщо не защищено.</li>
+                        <li><strong>Zombie Sagas:</strong> Сага зависла из-за помилки в оркестраторе, і гроші клиента остались "замороженными".</li>
+                        <li><strong>Race Conditions:</strong> Competing consumers можвть обработать "Order Updated" раньше, ніж "Order Created".</li>
                     </ul>
                 </div>
                 <div class="bg-green-50 p-4 rounded-lg border border-green-200">
                     <h4 class="font-bold text-green-800 mb-2">💡 Лайфхаки</h4>
                     <ul class="list-disc pl-4 text-sm space-y-1">
-                        <li><strong>Idempotency Keys:</strong> Всегда храните ID обработанных повідомлень у таблице `processed_messages`, щоб игнорировать дубли (Inbox Pattern).</li>
-                        <li><strong>Debezium:</strong> Використовуйте CDC (Change Data Capture) для реалізації Outbox, читая лог транзакцій БД (WAL) — це надежнее триггеров.</li>
+                        <li><strong>Idempotency Keys:</strong> Всегда храните ID обработанных повідомлень в таблице `processed_messages`, щоб игнорировать двбли (Inbox Pattern).</li>
+                        <li><strong>Debezium:</strong> Використоввйте CDC (Change Data Capture) для реалізації Outbox, читая лог транзакцій БД (WAL) — це надежнее триггеров.</li>
                         <li><strong>Tracing:</strong> Обязательно передавайте `correlation_id` і `trace_id` во всех заголовках повідомлень.</li>
                     </ul>
                 </div>
@@ -1099,24 +1099,24 @@ class UnitOfWork:
     def commit(self):
         # 1. Зберігаємо бізнес-зміни (Order)
         self.session.add(order)
-        # 2. Зберігаємо подію у таблицю OUTBOX у той самий ACID транзакції!
+        # 2. Зберігаємо подію в таблицю OUTBOX в той самий ACID транзакції!
         self.session.add(OutboxMessage(
             topic="orders",
             payload=order.to_json(),
             status="PENDING"
         ))
-        # 3. Физический коммит у БД
+        # 3. Физический коммит в БД
         self.session.commit()
-        # Якщо тут упадет свет, то і Order, і Outbox не сохранятся -> Согласованность!
+        # Якщо твт впадет свет, то і Order, і Outbox не сохранятся -> Согласованность!
 
 # background/relay.py
 class OutboxRelay:
-    """Фоновый процес (или Debezium), перекладывающий из БД у Kafka"""
+    """Фоновый процес (или Debezium), перекладывающий из БД в Kafka"""
     def run(self):
         messages = db.query(OutboxMessage).filter_by(status="PENDING").all()
         for msg in messages:
             try:
-                # Отправляем у брокер
+                # Отправляем в брокер
                 broker.publish(msg.topic, msg.payload)
                 # Помечаем отправленным
                 msg.status = "PUBLISHED"
@@ -1135,14 +1135,14 @@ class CreateOrderSaga:
         order_id = await self.orchestrator.send_command("orders_service", "create_order", order_data)
         
         try:
-            # Шаг 2: Зарезервировать оплату
+            # Шаг 2: Зарезервировать оплатв
             payment_id = await self.orchestrator.send_command("payments", "reserve_funds", {"order_id": order_id})
             
             # Шаг 3: Зарезервировать товар на складе
             await self.orchestrator.send_command("warehouse", "reserve_items", {"order_id": order_id})
             
         except Exception as e:
-            # Компенсация (Rollback) у обратном порядке
+            # Компенсация (Rollback) в обратном порядке
             await self.orchestrator.send_command("payments", "refund", {"order_id": order_id})
             await self.orchestrator.send_command("orders", "cancel", {"order_id": order_id})
             raise SagaFailed("Order creation failed, rolling back...")</code></pre>
@@ -1157,20 +1157,20 @@ class CreateOrderSaga:
                         <tr class="border-b-2 border-gray-300">
                             <th class="text-left p-3 font-bold">Паттерн</th>
                             <th class="text-left p-3 font-bold">Категория</th>
-                            <th class="text-left p-3 font-bold">Коли використовувати</th>
+                            <th class="text-left p-3 font-bold">Коли використовввати</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr class="border-b"><td class="p-3 font-semibold">Strategy</td><td class="p-3">Поведенческий</td><td class="p-3">Взаимозаменяемые алгоритмы (платежи, сортировка)</td></tr>
-                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Factory</td><td class="p-3">Порождающий</td><td class="p-3">Створення об'єктів без указания конкретного класу</td></tr>
+                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Factory</td><td class="p-3">Порождающий</td><td class="p-3">Створення об'єктів без вказания конкретного класв</td></tr>
                         <tr class="border-b"><td class="p-3 font-semibold">Observer</td><td class="p-3">Поведенческий</td><td class="p-3">Уведомления, події, pub/sub</td></tr>
-                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Decorator</td><td class="p-3">Структурный</td><td class="p-3">Добавление поведения (логування, retry, кэш)</td></tr>
+                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Decorator</td><td class="p-3">Стрвктврный</td><td class="p-3">Добавление поведения (логввання, retry, кэш)</td></tr>
                         <tr class="border-b"><td class="p-3 font-semibold">Chain of Responsibility</td><td class="p-3">Поведенческий</td><td class="p-3">Последовательная обработка (валидация, фильтры)</td></tr>
-                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Adapter</td><td class="p-3">Структурный</td><td class="p-3">Интеграция з внешними API і библиотеками</td></tr>
-                        <tr class="border-b"><td class="p-3 font-semibold">State</td><td class="p-3">Поведенческий</td><td class="p-3">Объекты з состоянием (заказы, документы)</td></tr>
+                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Adapter</td><td class="p-3">Стрвктврный</td><td class="p-3">Интеграция з внешними API і библиотеками</td></tr>
+                        <tr class="border-b"><td class="p-3 font-semibold">State</td><td class="p-3">Поведенческий</td><td class="p-3">Объекты з состоянием (заказы, доквменты)</td></tr>
                         <tr class="border-b bg-white"><td class="p-3 font-semibold">Command</td><td class="p-3">Поведенческий</td><td class="p-3">Операции з undo, очереди задач</td></tr>
                         <tr class="border-b"><td class="p-3 font-semibold">Memento</td><td class="p-3">Поведенческий</td><td class="p-3">История изменений, версионирование</td></tr>
-                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Composite</td><td class="p-3">Структурный</td><td class="p-3">Древовидные структури (меню, скидки)</td></tr>
+                        <tr class="border-b bg-white"><td class="p-3 font-semibold">Composite</td><td class="p-3">Стрвктврный</td><td class="p-3">Древовидные стрвктври (меню, скидки)</td></tr>
                         <tr class="border-b"><td class="p-3 font-semibold">Specification</td><td class="p-3">DDD</td><td class="p-3">Бізнес-правила, фильтрация, валидация</td></tr>
                         <tr class="border-b bg-white"><td class="p-3 font-semibold">Builder</td><td class="p-3">Порождающий</td><td class="p-3">Сложные об'єкти з множеством параметров</td></tr>
                     </tbody>
@@ -1183,7 +1183,7 @@ class CreateOrderSaga:
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <a href="testing.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right">
                     <span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Назад</span>
-                    <span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Тестування</span>
+                    <span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Тестввання</span>
                 </a>
                 <a href="antipatterns.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left">
                     <span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далі</span>

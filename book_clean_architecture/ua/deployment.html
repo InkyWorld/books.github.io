@@ -65,12 +65,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -111,7 +111,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link active">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -129,17 +129,17 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Deployment & Protection</h1>
-            <p class="text-xl text-gray-600">Защита архитектуры тестами, Docker і Makefile.</p>
+            <p class="text-xl text-gray-600">Защита архитектвры тестами, Docker і Makefile.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
 
-    <p>Як гарантировать, що архитектура не "сгниет" через полгода? Як упаковать це все для продакшена?</p>
+    <p>Як гарантировать, що архитектвра не "сгниет" через полгода? Як впаковать це все для продакшена?</p>
 
-    <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">1. Архітектурні Тести</h2>
-    <p>Документацию не читают. Пайплайн у GitLab/GitHub читают всі (коли він падает). Запретим неправильные импорты.</p>
-    <p>Используем <code>pytest-archon</code>.</p>
+    <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">1. Архітектврні Тести</h2>
+    <p>Доквментацию не читают. Пайплайн в GitLab/GitHub читают всі (коли він падает). Запретим неправильные импорты.</p>
+    <p>Использвем <code>pytest-archon</code>.</p>
     
     <pre><code class="language-python"># tests/test_architecture.py
 from pytest_archon import archrule
@@ -157,7 +157,7 @@ def test_domain_isolation():
 </code></pre>
 
     <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. Docker Multi-Stage Build</h2>
-    <p>Ваш образ повинен весить 100MB, а не 1GB. Компилируем залежності отдельно.</p>
+    <p>Ваш образ повинен весить 100MB, а не 1GB. Компилирвем залежності отдельно.</p>
     
     <pre><code class="language-dockerfile"># BUILDER STAGE
 FROM python:3.11-slim as builder
@@ -181,7 +181,7 @@ CMD ["python", "-m", "src.main"]
 </code></pre>
 
     <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">3. Makefile як Единая Точка Входа</h2>
-    <p>Никто не помнит команды запуска тестів або линтеров. Сделайте <code>Makefile</code>.</p>
+    <p>Никто не помнит команды запвска тестів або линтеров. Сделайте <code>Makefile</code>.</p>
     <pre><code class="language-makefile">test:
     pytest tests/
 

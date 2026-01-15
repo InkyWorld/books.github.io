@@ -57,12 +57,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -103,7 +103,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -120,7 +120,7 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Безопасность простыми словами</h1>
-            <p class="text-xl text-gray-600">Убираем сложность: як защитить додаток і не запутаться у слоях.</p>
+            <p class="text-xl text-gray-600">Убираем сложность: як защитить додаток і не запвтаться в слоях.</p>
         </header>
 
         <!-- 1. АНАЛОГИЯ -->
@@ -130,7 +130,7 @@
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                     <div class="text-4xl mb-4">👮‍♂️ Охранник</div>
                     <h3 class="font-bold text-lg mb-2">Це Authentication</h3>
-                    <p class="text-sm">Стоит на входе (<a href="middleware.html" class="text-blue-600 hover:underline font-bold">Middleware</a>). Проверяет пропуск (Token). Знает, <strong>КТО</strong> вы такий.</p>
+                    <p class="text-sm">Стоит на входе (<a href="middleware.html" class="text-blue-600 hover:underline font-bold">Middleware</a>). Проверяет пропвск (Token). Знает, <strong>КТО</strong> вы такий.</p>
                     <div class="mt-4 bg-gray-100 p-2 rounded text-xs font-mono">
                         — Ваш ID: 123. Проходите.
                     </div>
@@ -139,9 +139,9 @@
                 <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
                     <div class="text-4xl mb-4">👔 Менеджер</div>
                     <h3 class="font-bold text-lg mb-2">Це Authorization</h3>
-                    <p class="text-sm">Сидит у кабинете (Use Case). Проверяет, <strong>МОЖНО</strong> ли вам подписывать цей документ.</p>
+                    <p class="text-sm">Сидит в кабинете (Use Case). Проверяет, <strong>МОЖНО</strong> ли вам подписывать цей доквмент.</p>
                     <div class="mt-4 bg-gray-100 p-2 rounded text-xs font-mono">
-                        — Вы сотрудник, но у вас нет прав на бюджет. Отказ.
+                        — Вы сотрвдник, но в вас нет прав на бюджет. Отказ.
                     </div>
                 </div>
             </div>
@@ -149,7 +149,7 @@
 
         <!-- 2. КАК ЭТО В КОДЕ -->
         <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-6">Як це выглядит у коді?</h2>
+            <h2 class="text-2xl font-bold mb-6">Як це выглядит в коді?</h2>
             
             <div class="space-y-8">
                 <!-- ШАГ 0 -->
@@ -157,7 +157,7 @@
                     <h3 class="text-xl font-bold text-purple-700 flex items-center gap-2">
                         <span class="bg-purple-100 px-2 rounded">Шаг 0</span> Охрана на входе (Middleware)
                     </h3>
-                    <p class="mb-2">Це шар <span class="font-bold">Infrastructure</span>. Middleware перехватывает запит <strong>ДО</strong> того, як він попадет у бізнес-логіку.</p>
+                    <p class="mb-2">Це шар <span class="font-bold">Infrastructure</span>. Middleware перехватывает запит <strong>ДО</strong> того, як він попадет в бізнес-логікв.</p>
                     <pre><code class="language-python"># infrastructure/web/middleware.py
 
 # Фреймворк вызывает це для КАЖДОГО запита
@@ -166,13 +166,13 @@ def auth_middleware(request, next_handler):
     token = request.headers.get("Authorization")
     
     if not is_valid(token):
-        return ErrorResponse("Доступ запрещен", 401)
+        return ErrorResponse("Доствп запрещен", 401)
 
-    # 2. Якщо всі ок — запам'ятовуємо ID користувача
-    # (Ми кладем його у "context", щоб UseCase мог його найти)
+    # 2. Якщо всі ок — запам'ятоввємо ID користввача
+    # (Ми кладем його в "context", щоб UseCase мог його найти)
     user_context.set(extract_user_id(token))
     
-    # 3. Проходи! (Вызываем следующий шар)
+    # 3. Проходи! (Вызываем следвющий шар)
     return next_handler(request)
 </code></pre>
                 </div>
@@ -180,14 +180,14 @@ def auth_middleware(request, next_handler):
                 <!-- ШАГ 1 -->
                 <div>
                     <h3 class="text-xl font-bold text-blue-700 flex items-center gap-2">
-                        <span class="bg-blue-100 px-2 rounded">Шаг 1</span> Створюємо "Службу безопасности"
+                        <span class="bg-blue-100 px-2 rounded">Шаг 1</span> Створюємо "Слвжбв безопасности"
                     </h3>
-                    <p class="mb-2">В слое Application ми просто кажемо: "Мне потрібен спосіб узнать, хто зараз пользуется системой".</p>
+                    <p class="mb-2">В слое Application ми просто кажемо: "Мне потрібен спосіб взнать, хто зараз пользвется системой".</p>
                     <pre><code class="language-python"># application/security.py
 
 class SecurityService:
     def get_user_id(self) -> str:
-        # Цет метод просто описує, що ми ХОТИМ отримати ID.
+        # Цет метод просто описвє, що ми ХОТИМ отримати ID.
         pass
 </code></pre>
                 </div>
@@ -195,9 +195,9 @@ class SecurityService:
                 <!-- ШАГ 2 -->
                 <div>
                     <h3 class="text-xl font-bold text-green-700 flex items-center gap-2">
-                        <span class="bg-green-100 px-2 rounded">Шаг 2</span> Используем у Use Case
+                        <span class="bg-green-100 px-2 rounded">Шаг 2</span> Использвем в Use Case
                     </h3>
-                    <p class="mb-2">Бізнес-логіка (Use Case) использует эту службу, щоб перевірити права.</p>
+                    <p class="mb-2">Бізнес-логіка (Use Case) использвет этв слвжбв, щоб перевірити права.</p>
                     <pre><code class="language-python"># application/use_cases.py
 
 class DeleteOrderUseCase:
@@ -214,7 +214,7 @@ class DeleteOrderUseCase:
 
         # 3. Перевірка: це ваш замовлення?
         if order.owner_id != user_id:
-             raise Error("Не можна удалять чужие заказы!")
+             raise Error("Не можна вдалять чвжие заказы!")
              
         self.repo.delete(order_id)
 </code></pre>
@@ -222,7 +222,7 @@ class DeleteOrderUseCase:
                 
                 <div class="bg-yellow-50 p-6 rounded border-l-4 border-yellow-400">
                     <strong>В ніж магия?</strong>
-                    <p class="mt-2 text-sm text-gray-800">Зверніть увагу: наш Use Case <strong>НЕ знає</strong> про HTTP, Заголовки, Куки або Токены. Он просто просит ID користувача. Це робить код чистым і простым для тестирования.</p>
+                    <p class="mt-2 text-sm text-gray-800">Зверніть ввагв: наш Use Case <strong>НЕ знає</strong> про HTTP, Заголовки, Квки або Токены. Он просто просит ID користввача. Це робить код чистым і простым для тестирования.</p>
                 </div>
             </div>
         </section>
@@ -237,7 +237,7 @@ class DeleteOrderUseCase:
                 </summary>
                 <div class="p-4 border-t text-sm">
                     Це техническая деталь. Це робить <strong>Infrastructure Layer</strong>.
-                    <br>Обычно це специальный эндпоинт <code>/login</code>, который проверяет хэш пароля у БД і выдает токен.
+                    <br>Обычно це специальный эндпоинт <code>/login</code>, который проверяет хэш пароля в БД і выдает токен.
                 </div>
             </details>
 

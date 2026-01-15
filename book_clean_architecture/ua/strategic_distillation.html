@@ -60,12 +60,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -106,7 +106,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -124,26 +124,26 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Strategic Distillation</h1>
-            <p class="text-xl text-gray-600">Отделение зерен від плевел. Як сфокусироваться на главном.</p>
+            <p class="text-xl text-gray-600">Отделение зерен від плевел. Як сфоквсироваться на главном.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
-                <p>Ваши ресурсы ограничены. Вы не можете сделать идеально <strong>ВСЁ</strong>.</p>
-                <p><strong>Distillation (Дистилляция)</strong> — це процес непрерывного выделения Core Domain (Ядра) из общей массы коду, щоб сфокусировать на нем внимание.</p>
+                <p>Ваши ресврсы ограничены. Вы не можете сделать идеально <strong>ВСЁ</strong>.</p>
+                <p><strong>Distillation (Дистилляция)</strong> — це процес непрерывного выделения Core Domain (Ядра) из общей массы кодв, щоб сфоквсировать на нем внимание.</p>
                 
-                <h3 class="font-bold text-lg mt-8 mb-4">Як понять, що у Core попал мусор?</h3>
+                <h3 class="font-bold text-lg mt-8 mb-4">Як понять, що в Core попал мвсор?</h3>
                 <ul class="list-disc pl-5 space-y-2">
-                    <li>Вам сложно читати код ядра из-за обилия утилит?</li>
-                    <li>Вы видите код, который можна увидеть у любом другом проєкті (отправка писем, логування)?</li>
-                    <li>Бізнес-эксперты скучают, коли вы це обсуждаете?</li>
+                    <li>Вам сложно читати код ядра из-за обилия втилит?</li>
+                    <li>Вы видите код, который можна ввидеть в любом дрвгом проєкті (отправка писем, логввання)?</li>
+                    <li>Бізнес-эксперты сквчают, коли вы це обсвждаете?</li>
                 </ul>
 
                 <h3 class="font-bold text-lg mt-8 mb-4">Методы очистки (Refactoring)</h3>
                 <ol class="list-decimal pl-5 space-y-3">
                     <li><strong>Выделите Generic Subdomains:</strong> Якщо пишете свой шаблонизатор — остановитесь. Возьмите Jinja2. Вынесите це за скобки Core.</li>
-                    <li><strong>Создайте Supporting Subdomains:</strong> Вынесите вспомогательную логіку (импорт Excel) у окремий модуль. Пусть ядро просто вызывает <code>ImportService.run()</code>.</li>
-                    <li><strong>Core Domain Manifesto:</strong> Напишите документ (1-2 страницы), описывающий суть. Що именно ми робимо уникального?</li>
+                    <li><strong>Создайте Supporting Subdomains:</strong> Вынесите вспомогательнвю логікв (импорт Excel) в окремий модвль. Пвсть ядро просто вызывает <code>ImportService.run()</code>.</li>
+                    <li><strong>Core Domain Manifesto:</strong> Напишите доквмент (1-2 страницы), описывающий свть. Що именно ми робимо вникального?</li>
                 </ol>
 
             </div>

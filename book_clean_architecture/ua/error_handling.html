@@ -65,12 +65,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -111,7 +111,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -129,17 +129,17 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Обработка помилок</h1>
-            <p class="text-xl text-gray-600">Як превратить Exception у HTTP 400 красиво.</p>
+            <p class="text-xl text-gray-600">Як превратить Exception в HTTP 400 красиво.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <p>Исключения — це часть інтерфейсу вашего шару. Важливо иметь четкую иерархию.</p>
+        <p>Исключения — це часть інтерфейсв вашего шарв. Важливо иметь четквю иерархию.</p>
 
         <h3 class="font-bold text-lg mt-6">1. Иерархия исключений</h3>
         <pre><code class="language-python">class AppException(Exception):
-    """Базовый клас для всех помилок додатку"""
+    """Базовый клас для всех помилок додаткв"""
     pass
 
 class DomainException(AppException):
@@ -147,19 +147,19 @@ class DomainException(AppException):
     pass
 
 class ResourceNotFound(AppException):
-    """Не найдено у репозиторії"""
+    """Не найдено в репозиторії"""
     pass
 </code></pre>
 
         <h3 class="font-bold text-lg mt-6">2. Централизованная обработка (Exception Handlers)</h3>
-        <p>Домен выбрасывает `DomainError`. Presentation Layer повинен перехватить їх і превратить у понятные HTTP-ответы. Use Case не повинен повертати `JSONResponse`!</p>
+        <p>Домен выбрасывает `DomainError`. Presentation Layer повинен перехватить їх і превратить в понятные HTTP-ответы. Use Case не повинен повертати `JSONResponse`!</p>
 
         <pre><code class="language-python"># presentation/exception_handlers.py
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from starlette import status
 
-# Імпортуємо помилки домена
+# Імпортвємо помилки домена
 from domain.exceptions import (
     DomainError,
     InvalidEmailError,
@@ -169,7 +169,7 @@ from domain.exceptions import (
 )
 
 
-# Маппинг: Помилка домена → HTTP статус + код
+# Маппинг: Помилка домена → HTTP статвс + код
 ERROR_MAPPING = {
     InvalidEmailError: (status.HTTP_400_BAD_REQUEST, "INVALID_EMAIL"),
     OrderNotFoundError: (status.HTTP_404_NOT_FOUND, "ORDER_NOT_FOUND"),
@@ -181,7 +181,7 @@ ERROR_MAPPING = {
 async def domain_error_handler(request: Request, exc: DomainError):
     """
     Глобальный обработчик всех помилок домена.
-    Превращает DomainError у красивый JSON-ответ.
+    Превращает DomainError в красивый JSON-ответ.
     """
     # Ищем маппинг для конкретного типа помилки
     error_type = type(exc)
@@ -200,16 +200,16 @@ async def domain_error_handler(request: Request, exc: DomainError):
     )
 
 
-# Регистрация у main.py:
+# Регистрация в main.py:
 # app.add_exception_handler(DomainError, domain_error_handler)
 </code></pre>
 
         <div class="bg-green-50 p-4 rounded border border-green-200 mt-4 text-sm text-green-900">
-            <strong>Преимущество:</strong> Домен остается чистым. Он не знає про HTTP-коды. А ми можемо легко змінювати формат ответов, не трогая бізнес-логіку.
+            <strong>Преимвщество:</strong> Домен остается чистым. Он не знає про HTTP-коды. А ми можемо легко змінювати формат ответов, не трогая бізнес-логікв.
         </div>
 
         <h3 class="font-bold text-lg mt-6">3. Result Pattern (Alternative)</h3>
-        <p>Замість `raise` можна повертати результат "Успех або Помилка" (монада Result). Це популярно у функциональном программировании і Rust.</p>
+        <p>Замість `raise` можна повертати резвльтат "Успех або Помилка" (монада Result). Це попвлярно в фвнкциональном программировании і Rust.</p>
         <pre><code class="language-python"># Возвращает Success(Order) або Failure(Error)
 def create_order(...) -> Result[Order, AppError]: 
     if error:

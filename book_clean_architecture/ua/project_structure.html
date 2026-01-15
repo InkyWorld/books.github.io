@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Структура проєкту — Clean Architecture + DDD</title>
+    <title>Стрвктвра проєктв — Clean Architecture + DDD</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
@@ -73,12 +73,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link active">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link active">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -119,7 +119,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -135,24 +135,24 @@
     <!-- CONTENT -->
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Структура проєкту — Clean Architecture + DDD</h1>
-            <p class="text-xl text-gray-600">Примерная і рекомендуемая структура Python-проєкту, следуя принципам Clean Architecture і DDD.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Стрвктвра проєктв — Clean Architecture + DDD</h1>
+            <p class="text-xl text-gray-600">Примерная і рекомендвемая стрвктвра Python-проєктв, следвя принципам Clean Architecture і DDD.</p>
         </header>
 
         <section class="mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Приклад структури каталогов</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Приклад стрвктври каталогов</h2>
             <pre class="code-wide" style="white-space: pre; overflow-x: auto;"><code class="language-python">project_name/                       
 ├─ pyproject.toml                   # Метаданные сборки і залежності (PEP 621/Poetry/Flit)
-├─ README.md                        # Краткое опис проєкту, запуcк і разработка
-├─ Dockerfile                       # Инструкции для сборки контейнера
-├─ .env.example                     # Приклад переменных окружения (без секретов!)
+├─ README.md                        # Краткое опис проєктв, запвcк і разработка
+├─ Dockerfile                       # Инстрвкции для сборки контейнера
+├─ .env.example                     # Приклад переменных окрвжения (без секретов!)
 ├─ alembic/                         # Миграции бази даних (якщо Alembic)
 ├─ scripts/                         # Утилиты і скрипты (для разработки, деплоя, миграций)
 ├─ src/                             # Исходный код (src layout для изоляции)
-│  └─ project_name/                 # Основной пакет додатку
+│  └─ project_name/                 # Основной пакет додаткв
 │     │
 │     ├─ domain/                    # 🟢 DOMAIN (Бізнес-логіка). Зависимости: НЕТ
-│     │  ├─ entities.py             # Сутності (Order, User)
+│     │  ├─ entities.py             # Свтності (Order, User)
 │     │  ├─ value_objects.py        # Объекты-значения (Email, Money)
 │     │  ├─ services.py             # Доменные сервисы (чистая логіка)
 │     │  └─ events.py               # Доменні події (OrderPaid)
@@ -171,7 +171,7 @@
 │     │  ├─ api/                    # API ендпоинты (FastAPI routers)
 │     │  └─ cli.py                  # CLI команды
 │     │
-│     ├─ config/                    # Конфигурация (Pydantic Settings)
+│     ├─ config/                    # Конфигврация (Pydantic Settings)
 │     └─ tests/                     # Тести (Unit, Integration, E2E)
 │
 └─ .github/                         # CI/CD workflows</code></pre>
@@ -180,8 +180,8 @@
         <section class="mb-8">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Коротко о каждом компоненте</h2>
             <ul class="list-disc list-inside space-y-2 text-gray-700">
-                <li><strong>domain/</strong> — бізнес-правила: сутності, value objects, domain services, domain events. Никаких зовнішніх залежностей.</li>
-                <li><strong>application/</strong> — use cases, порты (інтерфейси) і оркестровка. Тут определяются інтерфейси репозиториев і UoW.</li>
+                <li><strong>domain/</strong> — бізнес-правила: свтності, value objects, domain services, domain events. Никаких зовнішніх залежностей.</li>
+                <li><strong>application/</strong> — use cases, порты (інтерфейси) і оркестровка. Твт определяются інтерфейси репозиториев і UoW.</li>
                 <li><strong>infrastructure/</strong> — реалізації адаптеров: ORM, брокеры, зовнішні API-клиенты. Зависит від application/domain.</li>
                 <li><strong>presentation/</strong> — API endpoints, CLI, background task entrypoints. Составляет додаток из адаптеров і сервисов.</li>
                 <li><strong>tests/</strong> — unit і integration тести. Prefer testing domain & application in isolation using fakes/mocks for infrastructure.</li>
@@ -192,13 +192,13 @@
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Практические советы</h2>
             <ul class="list-disc list-inside space-y-2 text-gray-700">
                 <li>Домен — чистый код без імпортів зовнішніх библиотек (кроме typing, dataclasses і stdlib).</li>
-                <li>Application хранит інтерфейси (порты); Infrastructure реализует їх (адаптеры).</li>
-                <li>Використовуйте UoW для обеспечения атомарности операцій (транзакцій).</li>
-                <li>Пакеты повинні быть небольшими і понятными; тести рядом з кодом або у отдельном каталоге `tests/`.</li>
+                <li>Application хранит інтерфейси (порты); Infrastructure реализвет їх (адаптеры).</li>
+                <li>Використоввйте UoW для обеспечения атомарности операцій (транзакцій).</li>
+                <li>Пакеты повинні быть небольшими і понятными; тести рядом з кодом або в отдельном каталоге `tests/`.</li>
             </ul>
         </section>
 
-        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="index.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Назад</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Вступ &larr;</span></a><a href="domain.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далі</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Domain &rarr;</span></a></div></div>
+        <div class="mt-12 pt-8 border-t border-gray-200"><div class="flex flex-col md:flex-row justify-between items-center gap-4"><a href="index.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1 flex justify-end">Назад</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Вствп &larr;</span></a><a href="domain.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left"><span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далі</span><span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">Domain &rarr;</span></a></div></div>
 
         <!-- NAVIGATION FOOTER -->
         <div class="mt-24 pt-10 border-t border-slate-200">

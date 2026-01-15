@@ -72,12 +72,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link active">🔧 Infrastructure Layer</a>
@@ -118,7 +118,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -139,15 +139,15 @@
                 <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">Layer 3</span>
                 <span class="text-gray-400 text-sm font-mono">SQLAlchemy / Redis / Requests</span>
             </div>
-            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Infrastructure Layer (Шар Інфраструктури)</h1>
+            <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Infrastructure Layer (Шар Інфрастрвктври)</h1>
             <p class="text-xl text-gray-500 mt-4 font-light">
-                Тут абстракции встречаются з реальностью. Це единственный шар, де разрешено писати <code>import sqlalchemy</code>.
+                Твт абстракции встречаются з реальностью. Це единственный шар, де разрешено писати <code>import sqlalchemy</code>.
             </p>
         </header>
 
         <!-- ANATOMY -->
         <section class="card">
-            <h2 class="text-2xl font-bold mb-6">Анатомія Шару</h2>
+            <h2 class="text-2xl font-bold mb-6">Анатомія Шарв</h2>
             <div class="grid md:grid-cols-2 gap-8">
                 <div>
                     <h3 class="flex items-center gap-2 font-bold text-blue-800 mb-4 border-b border-blue-200 pb-2 w-full">
@@ -176,11 +176,11 @@
                     <ul class="space-y-4 text-sm">
                         <li class="flex items-start">
                             <span class="badge badge-red mt-1">Logic</span>
-                            <div><strong>Бізнес-правила:</strong> Не можна проверять инварианты тут ("не можна створити замовлення з ценой < 0"). Це ответственность Домена.</div>
+                            <div><strong>Бізнес-правила:</strong> Не можна проверять инварианты твт ("не можна створити замовлення з ценой < 0"). Це ответственность Домена.</div>
                         </li>
                         <li class="flex items-start">
                             <span class="badge badge-red mt-1">Flow</span>
-                            <div><strong>Use Cases:</strong> Инфраструктура не повинна вызывать інші Use Case. Вона "тупой исполнитель".</div>
+                            <div><strong>Use Cases:</strong> Инфрастрвктвра не повинна вызывать інші Use Case. Вона "твпой исполнитель".</div>
                         </li>
                     </ul>
                 </div>
@@ -191,15 +191,15 @@
         <section id="mapper" class="mb-16">
             <h2 class="text-2xl font-bold mb-4">2. Проблема Data Mapper</h2>
             <p>Самая большая боль новичков: <span class="font-bold bg-yellow-100 px-1">SQL Model != Domain Entity</span>.</p>
-            <p><strong>Чому не можна використовувати ORM модель як Сущность?</strong></p>
+            <p><strong>Чомв не можна використовввати ORM модель як Свщность?</strong></p>
             <ul class="list-disc pl-5 mb-4 text-sm">
                 <li>ORM модель привязана к БД (ForeignKey, Integer).</li>
-                <li>Доменная сутність привязана к бизнесу (Value Objects, логіка).</li>
-                <li>Якщо вы измените структуру таблиці, вы не повинні ломать бізнес-логіку.</li>
+                <li>Доменная свтність привязана к бизнесв (Value Objects, логіка).</li>
+                <li>Якщо вы измените стрвктврв таблиці, вы не повинні ломать бізнес-логікв.</li>
             </ul>
 
             <p class="text-sm text-gray-600">
-                В примере ниже `OrderModel` — це <em>«грязная» модель</em>, то есть конструкция, которую принимают і ждут библиотеки БД. Вона хранит простий `String`, `Float`, `JSON`, і потому що вона связана з инфраструктурой, ми можемо змінювати структуру таблиц без риска разорвать бізнес-логіку у Domain Layer.
+                В примере ниже `OrderModel` — це <em>«грязная» модель</em>, то есть констрвкция, которвю принимают і ждвт библиотеки БД. Вона хранит простий `String`, `Float`, `JSON`, і потомв що вона связана з инфрастрвктврой, ми можемо змінювати стрвктврв таблиц без риска разорвать бізнес-логікв в Domain Layer.
                 Domain Entity, напротив, хранит Value Objects, инварианты і поведение, і вона живёт независимо від SQL.
             </p>
 
@@ -225,13 +225,13 @@ Base = declarative_base()
         <!-- REPO VARIANTS -->
         <section id="repo" class="mb-16">
             <h2 class="text-2xl font-bold mb-6">3. Repository Pattern: 4 Реализации</h2>
-            <p class="mb-6">Репозиторій — це мост. Он берет <strong>Сущность</strong>, разбирает її на части і кладет у <strong>ORM Модель</strong>. И наоборот.</p>
+            <p class="mb-6">Репозиторій — це мост. Он берет <strong>Свщность</strong>, разбирает її на части і кладет в <strong>ORM Модель</strong>. И наоборот.</p>
 
             <!-- VARIANT 1 -->
             <details>
                 <summary>Вариант 1: Простейший CRUD (Без UoW)</summary>
                 <div>
-                    <p class="text-sm mb-4">Подходит для простых додатків. Минус: `commit` происходит всередині метода, транзакционность только у рамках одного вызова.</p>
+                    <p class="text-sm mb-4">Подходит для простых додатків. Минвс: `commit` відбувається всередині метода, транзакционность только в рамках одного вызова.</p>
 <pre><code class="language-python"><span class="code-keyword">from</span> domain.entities <span class="code-keyword">import</span> Order, Money, Email
 <span class="code-keyword">from</span> application.interfaces <span class="code-keyword">import</span> OrderRepository
 <span class="code-keyword">from</span> .models <span class="code-keyword">import</span> OrderModel
@@ -254,7 +254,7 @@ Base = declarative_base()
         <span class="code-comment"># 2. Upsert (Insert or Update)</span>
         self.session.merge(order_model)
         
-        <span class="code-comment"># 3. Commit (Сразу фиксируем)</span>
+        <span class="code-comment"># 3. Commit (Сразв фиксирвем)</span>
         self.session.commit()
 </code></pre>
                 </div>
@@ -262,11 +262,11 @@ Base = declarative_base()
 
             <!-- VARIANT 2 -->
             <details>
-                <summary>Вариант 2: С поддержкой Unit of Work (Рекомендуемый)</summary>
+                <summary>Вариант 2: С поддержкой Unit of Work (Рекомендвемый)</summary>
                 <div>
-                    <p class="text-sm mb-4">Тут ми робимо `flush()` замість `commit()`. Коммит будет робити клас UnitOfWork. Це дозволяє змінити замовлення і списать баланс користувача у <strong>однієї атомарной транзакції</strong>.</p>
+                    <p class="text-sm mb-4">Твт ми робимо `flush()` замість `commit()`. Коммит бвдет робити клас UnitOfWork. Це дозволяє змінити замовлення і списать баланс користввача в <strong>однієї атомарной транзакції</strong>.</p>
                     <p class="text-sm text-gray-600">
-                        UnitOfWork — це об'єкт, который открывает транзакцию, прокидывает одну сессию во всі репозиторії і у конце робить `commit()` або `rollback()` у залежності від результату. Вариант 2 показує, як репозиторій «кладёт» дані і дозволяє UoW решить, коли фиксировать їх целиком. Смотри реализацию `SqlAlchemyUnitOfWork` ниже — він створює `SqlAlchemyOrderRepository(self.session)` у `__enter__`, а Use Case пишет `with self.uow:` і вызывает `self.uow.orders.save(order)`; коммит происходит автоматом після выхода из блока.
+                        UnitOfWork — це об'єкт, который открывает транзакцию, прокидывает однв сессию во всі репозиторії і в конце робить `commit()` або `rollback()` в залежності від резвльтатв. Вариант 2 показвє, як репозиторій «кладёт» дані і дозволяє UoW решить, коли фиксировать їх целиком. Смотри реализацию `SqlAlchemyUnitOfWork` ниже — він створює `SqlAlchemyOrderRepository(self.session)` в `__enter__`, а Use Case пишет `with self.uow:` і вызывает `self.uow.orders.save(order)`; коммит відбувається автоматом після выхода из блока.
                     </p>
 <pre><code class="language-python"><span class="code-keyword">class</span> <span class="code-class">SqlAlchemyOrderRepository</span>(OrderRepository):
     <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, session):
@@ -277,7 +277,7 @@ Base = declarative_base()
         model = self._map_to_model(order)
         
         self.session.merge(model)
-        self.session.flush() <span class="code-comment"># Отправляем у БД, но ждем общего коммита</span>
+        self.session.flush() <span class="code-comment"># Отправляем в БД, но ждем общего коммита</span>
 
     <span class="code-keyword">def</span> <span class="code-func">get_by_id</span>(self, oid) -> Order:
         model = self.session.query(OrderModel).get(str(oid))
@@ -285,8 +285,8 @@ Base = declarative_base()
             <span class="code-keyword">return</span> <span class="code-keyword">None</span>
         
         <span class="code-comment"># MAPPING: DB Model -> Domain Entity</span>
-        <span class="code-comment"># Воссоздаем об'єкти. Важливо не вызывать бізнес-логіку тут!</span>
-        <span class="code-comment"># Можно використовувати "грязный хак" або фабричный метод.</span>
+        <span class="code-comment"># Воссоздаем об'єкти. Важливо не вызывать бізнес-логікв твт!</span>
+        <span class="code-comment"># Можно використовввати "грязный хак" або фабричный метод.</span>
         order = Order(uuid.UUID(model.id), Email(model.email))
         
         <span class="code-comment"># Восстанавливаем приватное стан (Python дозволяє це робити)</span>
@@ -302,12 +302,12 @@ Base = declarative_base()
             <details>
                 <summary>Вариант 3: С Кэшированием (Decorator Pattern)</summary>
                 <div>
-                    <p class="text-sm mb-4">Ми не меняем код SQL репозитория. Ми оборачиваем його у декоратор. Принцип Open/Closed.</p>
+                    <p class="text-sm mb-4">Ми не меняем код SQL репозитория. Ми оборачиваем його в декоратор. Принцип Open/Closed.</p>
                     <p class="text-sm text-gray-600">
-                        Декоратор — це об'єкт, реализующий той самий інтерфейс, що і декорируемый репозиторій. Он держит ссылку на оригинал (`decoratee`) і делегирует ему запити, добавляя свои шаги до або после. В примере ниже спочатку идёт збереження у БД, потім декоратор инвалидирует кэш.
+                        Декоратор — це об'єкт, реализвющий той самий інтерфейс, що і декорирвемый репозиторій. Он держит ссылкв на оригинал (`decoratee`) і делегирвет йому запити, добавляя свои шаги до або после. В примере ниже спочаткв идёт збереження в БД, потім декоратор инвалидирвет кэш.
                     </p>
                     <p class="text-sm text-gray-600">
-                        В реальном приложении `decoratee` — це наш Postgres-репозиторій (варіант 2), а `CachedOrderRepository` просто оборачивает його. Ми зберігаємо всі операції у основной репозиторій, а після цього сбрасываем і обновляем кеш, не переписывая базовые методи.
+                        В реальном приложении `decoratee` — це наш Postgres-репозиторій (варіант 2), а `CachedOrderRepository` просто оборачивает його. Ми зберігаємо всі операції в основной репозиторій, а після цього сбрасываем і обновляем кеш, не переписывая базовые методи.
                     </p>
 <pre><code class="language-python"><span class="code-keyword">import</span> json
 
@@ -324,19 +324,19 @@ Base = declarative_base()
         <span class="code-keyword">if</span> data:
             <span class="code-keyword">return</span> self._deserialize(json.loads(data))
         
-        <span class="code-comment"># 2. Якщо нет - идем у реальную БД</span>
+        <span class="code-comment"># 2. Якщо нет - идем в реальнвю БД</span>
         order = self._decoratee.get_by_id(oid)
         
-        <span class="code-comment"># 3. Зберігаємо у кэш на 1 час</span>
+        <span class="code-comment"># 3. Зберігаємо в кэш на 1 час</span>
         <span class="code-keyword">if</span> order:
             self._redis.setex(cache_key, 3600, self._serialize(order))
             
         <span class="code-keyword">return</span> order
 
     <span class="code-keyword">def</span> <span class="code-func">save</span>(self, order: Order):
-        <span class="code-comment"># Сначала зберігаємо у БД</span>
+        <span class="code-comment"># Сначала зберігаємо в БД</span>
         self._decoratee.save(order)
-        <span class="code-comment"># Инвалидируем кэш (удаляем старе значение)</span>
+        <span class="code-comment"># Инвалидирвем кэш (вдаляем старе значение)</span>
         self._redis.delete(<span class="code-str">f"order:{order.id}"</span>)
 </code></pre>
                 </div>
@@ -346,7 +346,7 @@ Base = declarative_base()
             <details>
                 <summary>Вариант 4: С обработкой Событий (Domain Events)</summary>
                 <div>
-                    <p class="text-sm mb-4">Репозиторій (или UoW) собирает події из сутності перед сохранением.</p>
+                    <p class="text-sm mb-4">Репозиторій (или UoW) собирает події из свтності перед сохранением.</p>
 <pre><code class="language-python"><span class="code-keyword">class</span> <span class="code-class">EventDispatcherRepository</span>(OrderRepository):
     <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, decoratee: OrderRepository, bus):
         self._decoratee = decoratee
@@ -359,7 +359,7 @@ Base = declarative_base()
         <span class="code-comment"># 2. Забираем події (OrderPaid)</span>
         events = order.collect_events()
         
-        <span class="code-comment"># 3. Отправляем їх у шину подій</span>
+        <span class="code-comment"># 3. Отправляем їх в шинв подій</span>
         <span class="code-keyword">for</span> event <span class="code-keyword">in</span> events:
             self._bus.publish(event)
 </code></pre>
@@ -370,7 +370,7 @@ Base = declarative_base()
         <!-- UNIT OF WORK -->
         <section id="uow" class="card bg-gray-50 border-gray-200">
             <h2 class="text-2xl font-bold mb-4">4. Unit of Work (Единица роботи)</h2>
-            <p>Паттерн для управления транзакциями. Гарантирует, що <strong>все або ничего</strong> будет сохранено.</p>
+            <p>Паттерн для вправления транзакциями. Гарантирвет, що <strong>все або ничего</strong> бвдет сохранено.</p>
             
 <pre><code class="language-python"><span class="code-keyword">class</span> <span class="code-class">SqlAlchemyUnitOfWork</span>:
     <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, session_factory):
@@ -379,7 +379,7 @@ Base = declarative_base()
     <span class="code-keyword">def</span> <span class="code-func">__enter__</span>(self):
         <span class="code-comment"># Начало транзакції</span>
         self.session = self.session_factory()
-        <span class="code-comment"># Инициализируем репозиторії этой сессией</span>
+        <span class="code-comment"># Инициализирвем репозиторії этой сессией</span>
         self.orders = SqlAlchemyOrderRepository(self.session)
         <span class="code-keyword">return</span> self
 
@@ -387,21 +387,21 @@ Base = declarative_base()
         <span class="code-keyword">if</span> exc_type:
             self.session.rollback() <span class="code-comment"># Помилка? Откат!</span>
         <span class="code-keyword">else</span>:
-            self.session.commit() <span class="code-comment"># Всё ок? Фиксируем!</span>
+            self.session.commit() <span class="code-comment"># Всё ок? Фиксирвем!</span>
         self.session.close()
 
-<span class="code-comment"># Використання у UseCase:</span>
+<span class="code-comment"># Використання в UseCase:</span>
 <span class="code-comment"># with self.uow:</span>
 <span class="code-comment">#     self.uow.orders.save(order1)</span>
 <span class="code-comment">#     self.uow.orders.save(order2)</span>
-<span class="code-comment">#     # commit произойдет автоматически тут</span>
+<span class="code-comment">#     # commit произойдет автоматически твт</span>
 </code></pre>
         </section>
 
         <!-- ADAPTERS -->
         <section id="adapters" class="mb-16">
             <h2 class="text-2xl font-bold mb-4">5. Adapters (Внешние сервисы)</h2>
-            <p>Тут ми реализуем інтерфейси типа `EmailService`. Используем реальные библиотеки.</p>
+            <p>Твт ми реализвем інтерфейси типа `EmailService`. Использвем реальные библиотеки.</p>
 
 <pre><code class="language-python"><span class="code-comment"># infrastructure/adapters/email.py</span>
 <span class="code-keyword">import</span> smtplib
@@ -429,7 +429,7 @@ Base = declarative_base()
 
         <!-- ANTIPATTERNS -->
         <section id="antipatterns">
-            <h2 class="text-2xl font-bold text-red-700 mb-6">⚠️ Антипатерни Инфраструктуры</h2>
+            <h2 class="text-2xl font-bold text-red-700 mb-6">⚠️ Антипатерни Инфрастрвктвры</h2>
             
             <div class="space-y-4">
                 <div class="p-4 border border-red-200 rounded bg-white">

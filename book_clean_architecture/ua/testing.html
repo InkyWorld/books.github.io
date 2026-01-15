@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Розділ 8: Тестування - Clean Architecture</title>
+    <title>Розділ 8: Тестввання - Clean Architecture</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
     <style>
@@ -72,12 +72,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -118,7 +118,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link active">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link active">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -141,14 +141,14 @@
             </div>
             <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Стратегия Тестирования</h1>
             <p class="text-xl text-gray-500 mt-4 font-light">
-                Як Clean Architecture робить ваш код тестируемым. Разные слои — різні типы тестів.
+                Як Clean Architecture робить ваш код тестирвемым. Разные слои — різні типы тестів.
             </p>
         </header>
 
         <!-- TESTING PYRAMID -->
         <section class="card">
             <h2 class="text-2xl font-bold mb-6">Пирамида Тестирования</h2>
-            <p>Clean Architecture идеально ложится на классическую пирамиду тестів.</p>
+            <p>Clean Architecture идеально ложится на классическвю пирамидв тестів.</p>
 
             <div class="flex justify-center my-8">
                 <svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
@@ -173,7 +173,7 @@
                     <path d="M250 240 L550 240 L620 330 L180 330 Z" fill="#dcfce7" stroke="#22c55e" stroke-width="2" filter="url(#shadow)"/>
                     <text x="400" y="280" text-anchor="middle" font-family="sans-serif" font-weight="bold" fill="#166534" font-size="14">Unit Tests</text>
                     <text x="400" y="300" text-anchor="middle" font-family="sans-serif" fill="#166534" font-size="12">(БЫСТРЫЕ!)</text>
-                    <text x="400" y="315" text-anchor="middle" font-family="sans-serif" fill="#166534" font-size="11">Це основа. 80% тестів тут.</text>
+                    <text x="400" y="315" text-anchor="middle" font-family="sans-serif" fill="#166534" font-size="11">Це основа. 80% тестів твт.</text>
             
                     <!-- Annotations -->
                     
@@ -181,19 +181,19 @@
                     <line x1="450" y1="100" x2="600" y2="100" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4"/>
                     <circle cx="600" cy="100" r="3" fill="#94a3b8"/>
                     <text x="610" y="95" font-family="sans-serif" font-weight="bold" fill="#475569" font-size="13">Presentation (API)</text>
-                    <text x="610" y="113" font-family="sans-serif" fill="#64748b" font-size="12">Требуют: запущенный сервер</text>
+                    <text x="610" y="113" font-family="sans-serif" fill="#64748b" font-size="12">Требвют: запвщенный сервер</text>
             
                     <!-- Integration Annotation -->
                     <line x1="520" y1="195" x2="600" y2="195" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4"/>
                     <circle cx="600" cy="195" r="3" fill="#94a3b8"/>
                     <text x="610" y="190" font-family="sans-serif" font-weight="bold" fill="#475569" font-size="13">Infrastructure + Application</text>
-                    <text x="610" y="208" font-family="sans-serif" fill="#64748b" font-size="12">Требуют: тестовую БД</text>
+                    <text x="610" y="208" font-family="sans-serif" fill="#64748b" font-size="12">Требвют: тестоввю БД</text>
             
                     <!-- Unit Annotation -->
                     <line x1="600" y1="285" x2="630" y2="285" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4"/>
                     <circle cx="630" cy="285" r="3" fill="#94a3b8"/>
                     <text x="640" y="280" font-family="sans-serif" font-weight="bold" fill="#475569" font-size="13">Domain + Application</text>
-                    <text x="640" y="298" font-family="sans-serif" fill="#64748b" font-size="12">Требуют: НИЧЕГО</text>
+                    <text x="640" y="298" font-family="sans-serif" fill="#64748b" font-size="12">Требвют: НИЧЕГО</text>
                 </svg>
             </div>
 
@@ -201,7 +201,7 @@
                 <div class="bg-green-50 p-4 rounded-lg border border-green-200">
                     <span class="badge badge-unit mb-2">Unit</span>
                     <h4 class="font-bold text-green-800">Domain Layer</h4>
-                    <p class="text-sm text-green-700">Чистий Python. Без моков. Тестируем Entities і Value Objects.</p>
+                    <p class="text-sm text-green-700">Чистий Python. Без моков. Тестирвем Entities і Value Objects.</p>
                 </div>
                 <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                     <span class="badge badge-integration mb-2">Integration</span>
@@ -211,17 +211,17 @@
                 <div class="bg-red-50 p-4 rounded-lg border border-red-200">
                     <span class="badge badge-e2e mb-2">E2E</span>
                     <h4 class="font-bold text-red-800">Presentation</h4>
-                    <p class="text-sm text-red-700">HTTP-запити к реальному API. TestClient FastAPI/Django.</p>
+                    <p class="text-sm text-red-700">HTTP-запити к реальномв API. TestClient FastAPI/Django.</p>
                 </div>
             </div>
         </section>
 
         <!-- DOMAIN TESTS -->
         <section id="domain-tests" class="mb-16">
-            <h2 class="text-2xl font-bold mb-4">1. Тестування Domain Layer (Unit Tests)</h2>
+            <h2 class="text-2xl font-bold mb-4">1. Тестввання Domain Layer (Unit Tests)</h2>
             <p>Це самые прості і быстрые тести. Домен — чистый Python. Никаких залежностей, никаких моков. Просто создаем об'єкти і перевіряємо їх поведение.</p>
             
-            <h3 class="text-lg font-bold mt-6 mb-2 text-gray-700">1.1 Тестування Value Objects</h3>
+            <h3 class="text-lg font-bold mt-6 mb-2 text-gray-700">1.1 Тестввання Value Objects</h3>
 <pre><code class="language-python"><span class="code-comment"># tests/domain/test_value_objects.py</span>
 <span class="code-keyword">import</span> pytest
 <span class="code-keyword">from</span> domain.value_objects <span class="code-keyword">import</span> Money, Email
@@ -232,19 +232,19 @@
     <span class="code-str">"""Тести для Value Object Money"""</span>
 
     <span class="code-keyword">def</span> <span class="code-func">test_create_valid_money</span>(self):
-        <span class="code-str">"""Успешное створення денежной суммы"""</span>
+        <span class="code-str">"""Успешное створення денежной свммы"""</span>
         money = Money(100.50, <span class="code-str">"USD"</span>)
         
         <span class="code-keyword">assert</span> money.amount == 100.50
         <span class="code-keyword">assert</span> money.currency == <span class="code-str">"USD"</span>
 
     <span class="code-keyword">def</span> <span class="code-func">test_create_zero_money</span>(self):
-        <span class="code-str">"""Ноль — допустимая сумма"""</span>
+        <span class="code-str">"""Ноль — допвстимая свмма"""</span>
         money = Money(0)
         <span class="code-keyword">assert</span> money.amount == 0
 
     <span class="code-keyword">def</span> <span class="code-func">test_negative_money_raises_error</span>(self):
-        <span class="code-str">"""ИНВАРИАНТ: Отрицательная сумма запрещена"""</span>
+        <span class="code-str">"""ИНВАРИАНТ: Отрицательная свмма запрещена"""</span>
         <span class="code-keyword">with</span> pytest.raises(NegativeMoneyError):
             Money(-50)
 
@@ -302,12 +302,12 @@
         <span class="code-str">"spaces in@email.com"</span>,
     ])
     <span class="code-keyword">def</span> <span class="code-func">test_invalid_emails_raise_error</span>(self, invalid_email):
-        <span class="code-str">"""Невалидные email выбрасывают помилку"""</span>
+        <span class="code-str">"""Невалидные email выбрасывают помилкв"""</span>
         <span class="code-keyword">with</span> pytest.raises(InvalidEmailError):
             Email(invalid_email)
 </code></pre>
 
-            <h3 class="text-lg font-bold mt-8 mb-2 text-gray-700">1.2 Тестування Entities</h3>
+            <h3 class="text-lg font-bold mt-8 mb-2 text-gray-700">1.2 Тестввання Entities</h3>
 <pre><code class="language-python"><span class="code-comment"># tests/domain/test_entities.py</span>
 <span class="code-keyword">import</span> pytest
 <span class="code-keyword">import</span> uuid
@@ -322,7 +322,7 @@
 
     <span class="code-dec">@pytest.fixture</span>
     <span class="code-keyword">def</span> <span class="code-func">order</span>(self):
-        <span class="code-str">"""Фикстура: создает пустой замовлення для каждого теста"""</span>
+        <span class="code-str">"""Фикствра: создает пвстой замовлення для каждого теста"""</span>
         <span class="code-keyword">return</span> Order(
             order_id=uuid.uuid4(),
             customer=Email(<span class="code-str">"test@example.com"</span>)
@@ -330,7 +330,7 @@
 
     <span class="code-dec">@pytest.fixture</span>
     <span class="code-keyword">def</span> <span class="code-func">order_with_items</span>(self, order):
-        <span class="code-str">"""Фикстура: замовлення з товарами"""</span>
+        <span class="code-str">"""Фикствра: замовлення з товарами"""</span>
         order.add_item(<span class="code-str">"Book"</span>, Money(29.99))
         order.add_item(<span class="code-str">"Pen"</span>, Money(5.00))
         <span class="code-keyword">return</span> order
@@ -340,14 +340,14 @@
     <span class="code-comment"># ═══════════════════════════════════════════════</span>
 
     <span class="code-keyword">def</span> <span class="code-func">test_add_item_to_order</span>(self, order):
-        <span class="code-str">"""Добавление товару у замовлення"""</span>
+        <span class="code-str">"""Добавление товарв в замовлення"""</span>
         order.add_item(<span class="code-str">"Python Book"</span>, Money(49.99))
         
         <span class="code-keyword">assert</span> len(order.items) == 1
         <span class="code-keyword">assert</span> order.items[0][<span class="code-str">"name"</span>] == <span class="code-str">"Python Book"</span>
 
     <span class="code-keyword">def</span> <span class="code-func">test_total_price_calculation</span>(self, order_with_items):
-        <span class="code-str">"""Расчет общей суммы"""</span>
+        <span class="code-str">"""Расчет общей свммы"""</span>
         total = order_with_items.total_price
         
         <span class="code-keyword">assert</span> total.amount == 34.99  <span class="code-comment"># 29.99 + 5.00</span>
@@ -364,7 +364,7 @@
         <span class="code-keyword">assert</span> order_with_items.is_paid == <span class="code-keyword">True</span>
 
     <span class="code-keyword">def</span> <span class="code-func">test_pay_empty_order_fails</span>(self, order):
-        <span class="code-str">"""ИНВАРИАНТ: Не можна оплатить пустой замовлення"""</span>
+        <span class="code-str">"""ИНВАРИАНТ: Не можна оплатить пвстой замовлення"""</span>
         <span class="code-keyword">with</span> pytest.raises(OrderEmptyError):
             order.pay()
 
@@ -387,7 +387,7 @@
     <span class="code-comment"># ═══════════════════════════════════════════════</span>
 
     <span class="code-keyword">def</span> <span class="code-func">test_order_paid_event_generated</span>(self, order_with_items):
-        <span class="code-str">"""При оплате генерируется подію OrderPaid"""</span>
+        <span class="code-str">"""При оплате генерирвется подію OrderPaid"""</span>
         order_with_items.pay()
         
         events = order_with_items.collect_events()
@@ -407,9 +407,9 @@
 
         <!-- APPLICATION TESTS -->
         <section id="app-tests" class="card">
-            <h2 class="text-2xl font-bold mb-6">2. Тестування Application Layer (Use Cases)</h2>
-            <p>Тут ми тестируем Use Cases. Они залежать від интерфейсов (Repositories, Services), которые ми <strong>мокаем</strong>.</p>
-            <p class="text-sm bg-blue-50 p-3 rounded border border-blue-200"><strong>Мок (Mock)</strong> — це поддельная реалізація інтерфейсу. Вона дозволяє тестировать логіку без реальной БД або email-сервера.</p>
+            <h2 class="text-2xl font-bold mb-6">2. Тестввання Application Layer (Use Cases)</h2>
+            <p>Твт ми тестирвем Use Cases. Они залежать від интерфейсов (Repositories, Services), которые ми <strong>мокаем</strong>.</p>
+            <p class="text-sm bg-blue-50 p-3 rounded border border-blue-200"><strong>Мок (Mock)</strong> — це поддельная реалізація інтерфейсв. Вона дозволяє тестировать логікв без реальной БД або email-сервера.</p>
 
 <pre><code class="language-python"><span class="code-comment"># tests/application/test_use_cases.py</span>
 <span class="code-keyword">import</span> pytest
@@ -437,7 +437,7 @@
 
     <span class="code-dec">@pytest.fixture</span>
     <span class="code-keyword">def</span> <span class="code-func">mock_email_service</span>(self):
-        <span class="code-str">"""Мок email сервісу"""</span>
+        <span class="code-str">"""Мок email сервісв"""</span>
         <span class="code-keyword">return</span> Mock(spec=EmailService)
 
     <span class="code-dec">@pytest.fixture</span>
@@ -459,7 +459,7 @@
         <span class="code-comment"># Act: выполняем</span>
         result = use_case.execute(command)
 
-        <span class="code-comment"># Assert: перевіряємо результат</span>
+        <span class="code-comment"># Assert: перевіряємо резвльтат</span>
         <span class="code-keyword">assert</span> result.order_id <span class="code-keyword">is not</span> <span class="code-keyword">None</span>
         <span class="code-keyword">assert</span> result.customer_email == <span class="code-str">"user@example.com"</span>
         <span class="code-keyword">assert</span> result.total_amount == 29.99
@@ -486,7 +486,7 @@
 
     <span class="code-keyword">def</span> <span class="code-func">test_transaction_rollback_on_error</span>(self, mock_uow, mock_email_service):
         <span class="code-str">"""Транзакция откатывается при ошибке"""</span>
-        <span class="code-comment"># Arrange: email сервіс выбрасывает помилку</span>
+        <span class="code-comment"># Arrange: email сервіс выбрасывает помилкв</span>
         mock_email_service.send_order_confirmation.side_effect = Exception(<span class="code-str">"SMTP Error"</span>)
         
         use_case = CreateOrderUseCase(
@@ -512,13 +512,13 @@
 
     <span class="code-dec">@pytest.fixture</span>
     <span class="code-keyword">def</span> <span class="code-func">existing_order</span>(self):
-        <span class="code-str">"""Существующий замовлення з товарами"""</span>
+        <span class="code-str">"""Свществвющий замовлення з товарами"""</span>
         order = Order(uuid.uuid4(), Email(<span class="code-str">"test@example.com"</span>))
         order.add_item(<span class="code-str">"Book"</span>, Money(50))
         <span class="code-keyword">return</span> order
 
     <span class="code-keyword">def</span> <span class="code-func">test_pay_existing_order</span>(self, existing_order):
-        <span class="code-str">"""Оплата существующего замовлення"""</span>
+        <span class="code-str">"""Оплата свществвющего замовлення"""</span>
         <span class="code-comment"># Arrange: мокаем репозиторій, который вернет наш замовлення</span>
         mock_uow = Mock()
         mock_uow.orders.get_by_id.return_value = existing_order
@@ -535,7 +535,7 @@
         <span class="code-keyword">assert</span> existing_order.is_paid == <span class="code-keyword">True</span>
 
     <span class="code-keyword">def</span> <span class="code-func">test_pay_nonexistent_order_fails</span>(self):
-        <span class="code-str">"""Оплата несуществующего замовлення"""</span>
+        <span class="code-str">"""Оплата несвществвющего замовлення"""</span>
         mock_uow = Mock()
         mock_uow.orders.get_by_id.return_value = <span class="code-keyword">None</span>  <span class="code-comment"># Не найден!</span>
         mock_uow.__enter__ = Mock(return_value=mock_uow)
@@ -550,8 +550,8 @@
 
         <!-- INFRASTRUCTURE TESTS -->
         <section id="infra-tests" class="mb-16">
-            <h2 class="text-2xl font-bold mb-4">3. Тестування Infrastructure Layer (Integration)</h2>
-            <p>Тут ми тестируем реальные реалізації: SQLAlchemy Repository, Email Adapter і т.д. Нужна тестовая БД.</p>
+            <h2 class="text-2xl font-bold mb-4">3. Тестввання Infrastructure Layer (Integration)</h2>
+            <p>Твт ми тестирвем реальные реалізації: SQLAlchemy Repository, Email Adapter і т.д. Нвжна тестовая БД.</p>
 
 <pre><code class="language-python"><span class="code-comment"># tests/infrastructure/test_repositories.py</span>
 <span class="code-keyword">import</span> pytest
@@ -565,13 +565,13 @@
 <span class="code-keyword">from</span> domain.value_objects <span class="code-keyword">import</span> Email, Money
 
 
-<span class="code-comment"># Используем SQLite in-memory для скорости</span>
+<span class="code-comment"># Использвем SQLite in-memory для скорости</span>
 TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
 
 
 <span class="code-dec">@pytest.fixture</span>(scope=<span class="code-str">"function"</span>)
 <span class="code-keyword">def</span> <span class="code-func">session</span>():
-    <span class="code-str">"""Создает чистую БД для каждого теста"""</span>
+    <span class="code-str">"""Создает чиствю БД для каждого теста"""</span>
     engine = create_engine(TEST_DATABASE_URL)
     Base.metadata.create_all(engine)
     
@@ -594,7 +594,7 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
     <span class="code-str">"""Интеграционные тести репозитория"""</span>
 
     <span class="code-keyword">def</span> <span class="code-func">test_save_and_retrieve_order</span>(self, repository, session):
-        <span class="code-str">"""Сохранение і получение замовлення"""</span>
+        <span class="code-str">"""Сохранение і полвчение замовлення"""</span>
         <span class="code-comment"># Arrange</span>
         order_id = uuid.uuid4()
         order = Order(order_id, Email(<span class="code-str">"test@example.com"</span>))
@@ -605,7 +605,7 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
         repository.save(order)
         session.commit()
 
-        <span class="code-comment"># Act: загружаем</span>
+        <span class="code-comment"># Act: загрвжаем</span>
         loaded = repository.get_by_id(order_id)
 
         <span class="code-comment"># Assert</span>
@@ -616,12 +616,12 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
         <span class="code-keyword">assert</span> loaded.total_price.amount == 34.99
 
     <span class="code-keyword">def</span> <span class="code-func">test_get_nonexistent_order_returns_none</span>(self, repository):
-        <span class="code-str">"""Несуществующий замовлення повертає None"""</span>
+        <span class="code-str">"""Несвществвющий замовлення повертає None"""</span>
         result = repository.get_by_id(uuid.uuid4())
         <span class="code-keyword">assert</span> result <span class="code-keyword">is</span> <span class="code-keyword">None</span>
 
     <span class="code-keyword">def</span> <span class="code-func">test_update_existing_order</span>(self, repository, session):
-        <span class="code-str">"""Обновление существующего замовлення"""</span>
+        <span class="code-str">"""Обновление свществвющего замовлення"""</span>
         order_id = uuid.uuid4()
         order = Order(order_id, Email(<span class="code-str">"test@example.com"</span>))
         order.add_item(<span class="code-str">"Book"</span>, Money(29.99))
@@ -629,7 +629,7 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
         repository.save(order)
         session.commit()
 
-        <span class="code-comment"># Загружаем, изменяем, зберігаємо</span>
+        <span class="code-comment"># Загрвжаем, изменяем, зберігаємо</span>
         loaded = repository.get_by_id(order_id)
         loaded.add_item(<span class="code-str">"Pen"</span>, Money(5.00))
         repository.save(loaded)
@@ -657,7 +657,7 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
         <!-- E2E TESTS -->
         <section id="e2e-tests" class="card bg-gray-50 border-gray-200">
             <h2 class="text-2xl font-bold mb-4">4. E2E тести (Presentation Layer)</h2>
-            <p>Перевіряємо API целиком. Используем TestClient від FastAPI (или Django TestCase).</p>
+            <p>Перевіряємо API целиком. Использвем TestClient від FastAPI (или Django TestCase).</p>
 
 <pre><code class="language-python"><span class="code-comment"># tests/e2e/test_api.py</span>
 <span class="code-keyword">import</span> pytest
@@ -670,7 +670,7 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
 <span class="code-keyword">from</span> presentation.dependencies <span class="code-keyword">import</span> get_session
 
 
-<span class="code-comment"># Переопределяем залежність БД на тестовую</span>
+<span class="code-comment"># Переопределяем залежність БД на тестоввю</span>
 TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
 
 
@@ -701,7 +701,7 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
     <span class="code-str">"""E2E тести API замовлень"""</span>
 
     <span class="code-keyword">def</span> <span class="code-func">test_create_order_success</span>(self, test_app):
-        <span class="code-str">"""POST /api/v1/orders - успешное створення"""</span>
+        <span class="code-str">"""POST /api/v1/orders - вспешное створення"""</span>
         response = test_app.post(
             <span class="code-str">"/api/v1/orders"</span>,
             json={
@@ -733,7 +733,7 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
         <span class="code-keyword">assert</span> <span class="code-str">"error"</span> <span class="code-keyword">in</span> response.json()
 
     <span class="code-keyword">def</span> <span class="code-func">test_create_order_empty_items</span>(self, test_app):
-        <span class="code-str">"""POST /api/v1/orders - пустой список товаров"""</span>
+        <span class="code-str">"""POST /api/v1/orders - пвстой список товаров"""</span>
         response = test_app.post(
             <span class="code-str">"/api/v1/orders"</span>,
             json={
@@ -745,14 +745,14 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
         <span class="code-keyword">assert</span> response.status_code == 422  <span class="code-comment"># Validation Error</span>
 
     <span class="code-keyword">def</span> <span class="code-func">test_get_order_not_found</span>(self, test_app):
-        <span class="code-str">"""GET /api/v1/orders/{id} - несуществующий замовлення"""</span>
+        <span class="code-str">"""GET /api/v1/orders/{id} - несвществвющий замовлення"""</span>
         fake_id = <span class="code-str">"00000000-0000-0000-0000-000000000000"</span>
         response = test_app.get(<span class="code-str">f"/api/v1/orders/{fake_id}"</span>)
         
         <span class="code-keyword">assert</span> response.status_code == 404
 
     <span class="code-keyword">def</span> <span class="code-func">test_full_order_flow</span>(self, test_app):
-        <span class="code-str">"""Полный цикл: створення → получение → оплата"""</span>
+        <span class="code-str">"""Полный цикл: створення → полвчение → оплата"""</span>
         <span class="code-comment"># 1. Створюємо замовлення</span>
         create_response = test_app.post(
             <span class="code-str">"/api/v1/orders"</span>,
@@ -764,7 +764,7 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
         <span class="code-keyword">assert</span> create_response.status_code == 201
         order_id = create_response.json()[<span class="code-str">"id"</span>]
 
-        <span class="code-comment"># 2. Получаем замовлення</span>
+        <span class="code-comment"># 2. Полвчаем замовлення</span>
         get_response = test_app.get(<span class="code-str">f"/api/v1/orders/{order_id}"</span>)
         <span class="code-keyword">assert</span> get_response.status_code == 200
         <span class="code-keyword">assert</span> get_response.json()[<span class="code-str">"status"</span>] == <span class="code-str">"created"</span>
@@ -774,7 +774,7 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
         <span class="code-keyword">assert</span> pay_response.status_code == 200
         <span class="code-keyword">assert</span> pay_response.json()[<span class="code-str">"status"</span>] == <span class="code-str">"paid"</span>
 
-        <span class="code-comment"># 4. Повторная оплата повинна повернути помилку</span>
+        <span class="code-comment"># 4. Повторная оплата повинна повернвти помилкв</span>
         pay_again = test_app.post(<span class="code-str">f"/api/v1/orders/{order_id}/pay"</span>)
         <span class="code-keyword">assert</span> pay_again.status_code == 409  <span class="code-comment"># Conflict</span>
 </code></pre>
@@ -782,30 +782,30 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
 
         <!-- TIPS -->
         <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-4">5. Поради з тестування</h2>
+            <h2 class="text-2xl font-bold mb-4">5. Поради з тестввання</h2>
             
             <div class="grid md:grid-cols-2 gap-6">
                 <div class="bg-green-50 p-6 rounded-lg border border-green-200">
                     <h3 class="font-bold text-green-800 mb-3">✅ Хорошие практики</h3>
                     <ul class="space-y-2 text-sm text-green-700">
                         <li>• Один тест — одна перевірка (Arrange-Act-Assert)</li>
-                        <li>• Використовуйте фикстуры для повторяющегося коду</li>
+                        <li>• Використоввйте фикствры для повторяющегося кодв</li>
                         <li>• Давайте тестам говорящие имена</li>
-                        <li>• Тестируйте граничные случаи і помилки</li>
-                        <li>• Використовуйте `pytest.mark.parametrize` для множества входных даних</li>
-                        <li>• Запускайте unit-тести на кожен коммит</li>
+                        <li>• Тестирвйте граничные слвчаи і помилки</li>
+                        <li>• Використоввйте `pytest.mark.parametrize` для множества входных даних</li>
+                        <li>• Запвскайте unit-тести на кожен коммит</li>
                     </ul>
                 </div>
                 
                 <div class="bg-red-50 p-6 rounded-lg border border-red-200">
                     <h3 class="font-bold text-red-800 mb-3">❌ Антипатерни</h3>
                     <ul class="space-y-2 text-sm text-red-700">
-                        <li>• Тести залежать друг від друга (порядок важен)</li>
-                        <li>• Тести медленные (БД у unit-тестах)</li>
+                        <li>• Тести залежать дрвг від дрвга (порядок важен)</li>
+                        <li>• Тести медленные (БД в unit-тестах)</li>
                         <li>• Слишком багато моков (тест не проверяет реальное поведение)</li>
-                        <li>• Тести дублируют логіку (копипаст из продакшн-коду)</li>
+                        <li>• Тести двблирвют логікв (копипаст из продакшн-кодв)</li>
                         <li>• Нет assertion (тест просто "не падает")</li>
-                        <li>• Тестування приватных методів</li>
+                        <li>• Тестввання приватных методів</li>
                     </ul>
                 </div>
             </div>

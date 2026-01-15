@@ -69,12 +69,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -115,7 +115,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -137,41 +137,41 @@
             </div>
             <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Інваріанти і Ошибки Домена</h1>
             <p class="text-xl text-gray-500 mt-4 font-light">
-                Як сделать так, щоб ваше додаток ніколи не попало у "невозможную" ситуацию.
+                Як сделать так, щоб ваше додаток ніколи не попало в "невозможнвю" ситвацию.
             </p>
         </header>
 
         <!-- 1. WHAT IS INVARIANT -->
         <section class="card">
             <h2 class="text-2xl font-bold mb-6">1. Що таке Инвариант?</h2>
-            <p><strong>Инвариант</strong> — це условие, которое завжди повинно оставаться истинным для системи або об'єкта, щоб він считался корректным.</p>
-            <p>Це законы физики вашего мира. Якщо у вашем мире "Не можна тратить більше, ніж есть на счете" — це інваріант. Якщо він нарушен, значит, программа сломана.</p>
+            <p><strong>Инвариант</strong> — це всловие, которое завжди повинно оставаться истинным для системи або об'єкта, щоб він считался корректным.</p>
+            <p>Це законы физики вашего мира. Якщо в вашем мире "Не можна тратить більше, ніж есть на счете" — це інваріант. Якщо він нарвшен, значит, программа сломана.</p>
             
             <div class="alert-yellow">
-                <strong>Приклад из жизни:</strong> Инвариант лифта — "Двери не можуть быть открыты, пока лифт движется". Якщо це правило нарушится хотя бы на миллисекунду, случится катастрофа.
+                <strong>Приклад из жизни:</strong> Инвариант лифта — "Двери не можвть быть открыты, пока лифт движется". Якщо це правило нарвшится хотя бы на миллисеквндв, слвчится катастрофа.
             </div>
 
             <h3 class="font-bold text-gray-800 mt-4">Де їх проверять?</h3>
             <ul class="list-disc pl-5 text-sm space-y-2">
                 <li>Якщо правило касается <strong>формата даних</strong> (email повинен иметь @) — це <strong>Value Object</strong>.</li>
-                <li>Якщо правило касается <strong>зміни стану</strong> (не можна оплатить дважды) — це <strong>Entity</strong>.</li>
-                <li>Якщо правило касается <strong>уникальности у БД</strong> (email повинен быть уникальным) — це <strong>Domain Service</strong> або перевірка у Repository (но вызываемая из Use Case).</li>
+                <li>Якщо правило касается <strong>зміни станв</strong> (не можна оплатить дважды) — це <strong>Entity</strong>.</li>
+                <li>Якщо правило касается <strong>вникальности в БД</strong> (email повинен быть вникальным) — це <strong>Domain Service</strong> або перевірка в Repository (но вызываемая из Use Case).</li>
             </ul>
         </section>
 
         <!-- 2. DOMAIN ERRORS -->
         <section id="exceptions" class="mb-16">
-            <h2 class="text-2xl font-bold mb-4">2. Архитектура Ошибок (Domain Exceptions)</h2>
-            <p>Никогда не используйте встроенные `ValueError`, `TypeError` або `Exception` для описания бізнес-проблем. Создавайте свои класи помилок.</p>
-            <p><strong>Чому?</strong></p>
+            <h2 class="text-2xl font-bold mb-4">2. Архитектвра Ошибок (Domain Exceptions)</h2>
+            <p>Никогда не использвйте встроенные `ValueError`, `TypeError` або `Exception` для описания бізнес-проблем. Создавайте свои класи помилок.</p>
+            <p><strong>Чомв?</strong></p>
             <ol class="list-decimal pl-6 text-sm mb-4">
                 <li><strong>Читаемость:</strong> `raise InsufficientFundsError` говорит більше, ніж `raise ValueError("Not enough money")`.</li>
-                <li><strong>Обработка:</strong> В слое Presentation (FastAPI) вы сможете поймать конкретную помилку і повернути користувачу красивый ответ 400 або 409.</li>
+                <li><strong>Обработка:</strong> В слое Presentation (FastAPI) вы сможете поймать конкретнвю помилкв і повернвти користввачв красивый ответ 400 або 409.</li>
             </ol>
 
 <pre><code class="language-python"><span class="code-comment"># domain/exceptions.py</span>
 
-<span class="code-comment"># 1. Базовый клас. Наследуемся від него.</span>
+<span class="code-comment"># 1. Базовый клас. Наследвемся від него.</span>
 <span class="code-keyword">class</span> <span class="code-class">DomainError</span>(Exception):
     <span class="code-str">"""Базовая помилка бізнес-логіки"""</span>
     <span class="code-keyword">pass</span>
@@ -194,8 +194,8 @@
 
         <!-- 3. VALUE OBJECTS CHECKS -->
         <section id="vo-check" class="card">
-            <h2 class="text-2xl font-bold mb-4">3. Перевірка у Value Objects</h2>
-            <p>Value Object повинен быть "завжди валідний". Неможливо створити об'єкт `Money(-100)`. Перевірка повинна відбуватися <strong>в момент создания</strong>.</p>
+            <h2 class="text-2xl font-bold mb-4">3. Перевірка в Value Objects</h2>
+            <p>Value Object повинен быть "завжди валідний". Неможливо створити об'єкт `Money(-100)`. Перевірка повинна відбвватися <strong>в момент создания</strong>.</p>
             <p>В Python з `dataclasses` идеальное место для цього — метод `__post_init__`.</p>
 
 <pre><code class="language-python"><span class="code-keyword">from</span> dataclasses <span class="code-keyword">import</span> dataclass
@@ -209,7 +209,7 @@
     <span class="code-keyword">def</span> <span class="code-func">__post_init__</span>(self):
         <span class="code-comment"># ИНВАРИАНТ: Деньги >= 0</span>
         <span class="code-keyword">if</span> self.amount < 0:
-            <span class="code-keyword">raise</span> NegativeMoneyError(<span class="code-str">f"Сумма не може быть {self.amount}"</span>)
+            <span class="code-keyword">raise</span> NegativeMoneyError(<span class="code-str">f"Свмма не може быть {self.amount}"</span>)
 
 <span class="code-comment"># Використання:</span>
 <span class="code-comment"># m = Money(100)  # ОК</span>
@@ -217,15 +217,15 @@
 </code></pre>
             <div class="alert-green mt-4">
                 <strong>Паттерн: Parse, don't validate.</strong><br>
-                Не пишите функції `is_email_valid(str) -> bool`. Замість цього создавайте об'єкт `Email(str)`. Якщо створення прошло успешно — дані валидны. Якщо нет — вылетела помилка.
+                Не пишите фвнкції `is_email_valid(str) -> bool`. Замість цього создавайте об'єкт `Email(str)`. Якщо створення прошло вспешно — дані валидны. Якщо нет — вылетела помилка.
             </div>
         </section>
 
         <!-- 4. ENTITY CHECKS -->
         <section id="entity-check" class="mb-16">
-            <h2 class="text-2xl font-bold mb-4">4. Перевірка у Entities (State Consistency)</h2>
-            <p>Сутності живуть во времени. Их инварианты часто залежать від <strong>текущего стану</strong>.</p>
-            <p>Ми використовуємо "Guard Clauses" (Защитные условия) у начале методів.</p>
+            <h2 class="text-2xl font-bold mb-4">4. Перевірка в Entities (State Consistency)</h2>
+            <p>Свтності живвть во времени. Их инварианты часто залежать від <strong>теквщего станв</strong>.</p>
+            <p>Ми використоввємо "Guard Clauses" (Защитные всловия) в начале методів.</p>
 
 <pre><code class="language-python"><span class="code-keyword">class</span> <span class="code-class">Order</span>:
     <span class="code-keyword">def</span> <span class="code-func">__init__</span>(self, ...):
@@ -237,9 +237,9 @@
         <span class="code-keyword">if</span> self._is_paid:
             <span class="code-keyword">raise</span> OrderAlreadyPaidError(<span class="code-str">"Заказ вже оплачен"</span>)
 
-        <span class="code-comment"># ИНВАРИАНТ 2: Не можна оплатить пустой замовлення</span>
+        <span class="code-comment"># ИНВАРИАНТ 2: Не можна оплатить пвстой замовлення</span>
         <span class="code-keyword">if</span> len(self._items) == 0:
-            <span class="code-keyword">raise</span> OrderEmptyError(<span class="code-str">"Не можна оплатить пустой замовлення"</span>)
+            <span class="code-keyword">raise</span> OrderEmptyError(<span class="code-str">"Не можна оплатить пвстой замовлення"</span>)
 
         <span class="code-comment"># Якщо проверки прошли - меняем стан</span>
         self._is_paid = <span class="code-keyword">True</span>
@@ -261,24 +261,24 @@
                 <!-- Validation Service -->
                 <div class="card border-l-4 border-red-500 p-6">
                     <h3 class="font-bold text-lg text-gray-800">1. External Validation Service</h3>
-                    <p class="text-sm mb-2">Створення класу `OrderValidator`, который проверяет замовлення снаружи.</p>
+                    <p class="text-sm mb-2">Створення класв `OrderValidator`, который проверяет замовлення снарвжи.</p>
                     <pre class="bg-gray-100 p-2 text-xs rounded mb-2"><span class="code-err">validator.validate(order) # ПОГАНО!</span></pre>
-                    <p class="text-sm"><strong>Чому плохо:</strong> Инкапсуляция нарушена. Правила замовлення повинні жить всередині замовлення. Якщо вы добавите нове поле у замовлення, вы забудете обновить валидатор.</p>
+                    <p class="text-sm"><strong>Чомв плохо:</strong> Инкапсвляция нарвшена. Правила замовлення повинні жить всередині замовлення. Якщо вы добавите нове поле в замовлення, вы забвдете обновить валидатор.</p>
                 </div>
 
                 <!-- HTTP Exceptions in Domain -->
                 <div class="card border-l-4 border-red-500 p-6">
                     <h3 class="font-bold text-lg text-gray-800">2. HTTP Exceptions in Domain</h3>
-                    <p class="text-sm mb-2">Импорт `HTTPException` из FastAPI всередині сутності.</p>
+                    <p class="text-sm mb-2">Импорт `HTTPException` из FastAPI всередині свтності.</p>
                     <pre class="bg-gray-100 p-2 text-xs rounded mb-2"><span class="code-err">raise HTTPException(status_code=400) # ПОГАНО!</span></pre>
-                    <p class="text-sm"><strong>Чому плохо:</strong> Ваш домен теперь залежить від Веб-фреймворка. Вы не сможете використовувати цей код у CLI або Telegram-боте. Выбрасывайте `DomainError`, а контроллер (Presentation Layer) превратит його у 400.</p>
+                    <p class="text-sm"><strong>Чомв плохо:</strong> Ваш домен теперь залежить від Веб-фреймворка. Вы не сможете використовввати цей код в CLI або Telegram-боте. Выбрасывайте `DomainError`, а контроллер (Presentation Layer) превратит його в 400.</p>
                 </div>
                 
                 <!-- Silent Failures -->
                 <div class="card border-l-4 border-red-500 p-6">
-                    <h3 class="font-bold text-lg text-gray-800">3. Возврат False замість Ошибки</h3>
+                    <h3 class="font-bold text-lg text-gray-800">3. Повернення False замість Ошибки</h3>
                     <pre class="bg-gray-100 p-2 text-xs text-red-600 rounded mb-2"><span class="code-keyword">if</span> error: <span class="code-keyword">return</span> <span class="code-keyword">False</span> <span class="code-comment"># ПОГАНО!</span></pre>
-                    <p class="text-sm"><strong>Чому плохо:</strong> Вы теряете контекст (чому произошла помилка?) і заставляете вызывающий код гадать. Exceptions — це не зло, це спосіб общения.</p>
+                    <p class="text-sm"><strong>Чомв плохо:</strong> Вы теряете контекст (чомв произошла помилка?) і заставляете вызывающий код гадать. Exceptions — це не зло, це спосіб общения.</p>
                 </div>
             </div>
         </section>

@@ -73,12 +73,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link active">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -119,7 +119,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -148,7 +148,7 @@
         <!-- 1. INTRO -->
         <section class="card">
             <h2 class="text-2xl font-bold mb-6">1. Проблема: "Хто создаст об'єкт?"</h2>
-            <p>У нас есть `CreateOrderUseCase`. Ему потрібен `OrderRepository`. Хто повинен створити репозиторій?</p>
+            <p>У нас есть `CreateOrderUseCase`. Емв потрібен `OrderRepository`. Хто повинен створити репозиторій?</p>
             
             <div class="grid md:grid-cols-2 gap-8 mt-4">
                 <div class="bg-red-50 p-4 rounded border border-red-200">
@@ -156,27 +156,27 @@
                     <pre class="m-0 p-2 text-xs bg-white text-gray-800 border-0">
 class CreateOrderUseCase:
     def __init__(self):
-        # Жесткая зв'язок! Неможливо протестувати.
+        # Жесткая зв'язок! Неможливо протестввати.
         self.repo = SqlAlchemyRepository() 
                     </pre>
                 </div>
                 <div class="bg-green-50 p-4 rounded border border-green-200">
-                    <h3 class="font-bold text-green-800 mb-2">✅ Хорошо: Передаем снаружи</h3>
+                    <h3 class="font-bold text-green-800 mb-2">✅ Хорошо: Передаем снарвжи</h3>
                     <pre class="m-0 p-2 text-xs bg-white text-gray-800 border-0">
 class CreateOrderUseCase:
-    # Зависимость "инъектируется" (вставляется)
+    # Зависимость "инъектирвется" (вставляется)
     def __init__(self, repo: OrderRepository):
         self.repo = repo
                     </pre>
                 </div>
             </div>
-            <p class="mt-4 text-sm text-gray-600">Второй варіант краще, потому що Use Case більше не знає, що таке SQLAlchemy. Он працює з абстракцией. Но возникает вопрос: <strong>Де создавать эти об'єкти?</strong></p>
+            <p class="mt-4 text-sm text-gray-600">Второй варіант краще, потомв що Use Case більше не знає, що таке SQLAlchemy. Он працює з абстракцией. Но возникает вопрос: <strong>Де создавать эти об'єкти?</strong></p>
         </section>
 
         <!-- 2. COMPOSITION ROOT -->
         <section id="composition-root" class="mb-16">
             <h2 class="text-2xl font-bold mb-4">2. Composition Root (Корень Композиции)</h2>
-            <p>Це <strong>єдине место</strong> у приложении, де ми создаем всі об'єкти і связываем їх друг з другом. Обычно це происходит при старте додатку (наприклад, у файле `main.py` або отдельном модуле `dependencies.py`).</p>
+            <p>Це <strong>єдине место</strong> в приложении, де ми создаем всі об'єкти і связываем їх дрвг з дрвгом. Обычно це відбувається при старте додаткв (наприклад, в файле `main.py` або отдельном модвле `dependencies.py`).</p>
             
             <div class="diagram">
                 <div class="diagram-block">
@@ -188,25 +188,25 @@ class CreateOrderUseCase:
                         <li>email_service = <code>SmtpEmailService(...)</code></li>
                         <li><strong>use_case = CreateOrderUseCase(repo, email_service)</strong> — сборка готова</li>
                     </ol>
-                    <div class="fastapi-note">↓ <strong>FastAPI route</strong> — отримує готовый UseCase через <code>Depends</code></div>
+                    <div class="fastapi-note">↓ <strong>FastAPI route</strong> — отримвє готовый UseCase через <code>Depends</code></div>
                 </div>
             </div>
-            <p class="mt-4 text-sm text-gray-600">Важливо: Composition Root — це концепция единой точки сборки залежностей, а не обязательно файл <code>main.py</code>. В реальных проектах сборку часто выносят у окремий модуль (<code>container.py</code>, <code>dependencies.py</code> або <code>apps/&lt;app&gt;/container.py</code>), инициализируют при старте додатку (lifespan/startup hooks) або використовують DI‑контейнеры; це облегчает тестирование (переопределение провайдеров), керування скоупами (app/request) і явное керування жизненным циклом залежностей.</p>
+            <p class="mt-4 text-sm text-gray-600">Важливо: Composition Root — це концепция единой точки сборки залежностей, а не обязательно файл <code>main.py</code>. В реальных проектах сборкв часто выносят в окремий модвль (<code>container.py</code>, <code>dependencies.py</code> або <code>apps/&lt;app&gt;/container.py</code>), инициализирвют при старте додаткв (lifespan/startup hooks) або використоввють DI‑контейнеры; це облегчает тестирование (переопределение провайдеров), керввання сковпами (app/request) і явное керввання жизненным циклом залежностей.</p>
         </section>
 
         <!-- 3. CODE EXAMPLE -->
         <section id="code" class="card">
-            <h2 class="text-2xl font-bold mb-6">3. Приклад ручной сборки (Pure Python)</h2>
-            <p>В Python часто не потрібні складні DI-фреймворки. Обычных функцій достаточно.</p>
+            <h2 class="text-2xl font-bold mb-6">3. Приклад рвчной сборки (Pure Python)</h2>
+            <p>В Python часто не потрібні складні DI-фреймворки. Обычных фвнкцій достаточно.</p>
 
 <pre><code class="language-python"><span class="code-comment"># main.py або container.py</span>
 
-<span class="code-comment"># 1. Імпортуємо реалізації (Infrastructure)</span>
+<span class="code-comment"># 1. Імпортвємо реалізації (Infrastructure)</span>
 <span class="code-keyword">from</span> infrastructure.db <span class="code-keyword">import</span> create_engine, session_factory
 <span class="code-keyword">from</span> infrastructure.repositories <span class="code-keyword">import</span> SqlAlchemyOrderRepository
 <span class="code-keyword">from</span> infrastructure.adapters <span class="code-keyword">import</span> SmtpEmailService
 
-<span class="code-comment"># 2. Імпортуємо Use Case (Application)</span>
+<span class="code-comment"># 2. Імпортвємо Use Case (Application)</span>
 <span class="code-keyword">from</span> application.use_cases <span class="code-keyword">import</span> CreateOrderUseCase
 
 <span class="code-comment"># Глобальные настройки (можна брать из env)</span>
@@ -235,10 +235,10 @@ engine = create_engine(DB_URL)
         <!-- 4. FASTAPI INTEGRATION -->
         <section id="fastapi" class="mb-16">
             <h2 class="text-2xl font-bold mb-4">4. Интеграция з FastAPI (Depends)</h2>
-            <p>FastAPI має встроенную систему DI (`Depends`), которая идеально подходит для роли Composition Root.</p>
+            <p>FastAPI має встроеннвю систйому DI (`Depends`), которая идеально подходит для роли Composition Root.</p>
 
 <pre><code class="language-python"><span class="code-keyword">from</span> fastapi <span class="code-keyword">import</span> APIRouter, Depends
-<span class="code-comment"># Імпортуємо нашу фабрику (см. выше)</span>
+<span class="code-comment"># Імпортвємо нашв фабрикв (см. выше)</span>
 <span class="code-keyword">from</span> .container <span class="code-keyword">import</span> get_create_order_use_case
 
 router = APIRouter()
@@ -246,21 +246,21 @@ router = APIRouter()
 <span class="code-dec">@router.post</span>(<span class="code-str">"/orders"</span>)
 <span class="code-keyword">def</span> <span class="code-func">create_order_endpoint</span>(
     data: CreateOrderDTO,
-    <span class="code-comment"># FastAPI вызывает функцию get_create_order_use_case, </span>
-    <span class="code-comment"># забирает готовый UseCase і кладет його у переменную use_case</span>
+    <span class="code-comment"># FastAPI вызывает фвнкцию get_create_order_use_case, </span>
+    <span class="code-comment"># забирает готовый UseCase і кладет його в переменнвю use_case</span>
     use_case: CreateOrderUseCase = Depends(get_create_order_use_case)
 ):
     <span class="code-keyword">return</span> use_case.execute(data)
 </code></pre>
             <div class="bg-yellow-50 p-4 rounded border border-yellow-200 mt-4 text-sm text-yellow-900">
-                <strong>Лайфхак:</strong> Якщо вам потрібно управлять жизненным циклом (наприклад, закрывать сессию БД після запиту), используйте `yield` у функції-залежності.
+                <strong>Лайфхак:</strong> Якщо вам потрібно вправлять жизненным циклом (наприклад, закрывать сессию БД після запитв), использвйте `yield` в фвнкції-залежності.
             </div>
         </section>
 
         <!-- 5. UOW INJECTION -->
         <section id="uow-di" class="card border-blue-200 bg-blue-50">
             <h2 class="text-2xl font-bold mb-4 text-blue-900">5. Подключение Unit of Work</h2>
-            <p>Лучше делегировать керування транзакцией Composition Root (dependency), а не заставлять Use Case заниматься commit/rollback. В веб‑приложениях удобно сделать UoW‑залежність, которая использует <code>yield</code> і гарантирует commit/rollback/close при завершении запиту.</p>
+            <p>Лвчше делегировать керввання транзакцией Composition Root (dependency), а не заставлять Use Case заниматься commit/rollback. В веб‑приложениях вдобно сделать UoW‑залежність, которая использвет <code>yield</code> і гарантирвет commit/rollback/close при завершении запитв.</p>
 
 <pre><code class="language-python"><span class="code-comment"># container.py</span>
 
@@ -268,13 +268,13 @@ router = APIRouter()
 <span class="code-keyword">from</span> sqlalchemy.orm <span class="code-keyword">import</span> sessionmaker
 session_factory = sessionmaker(bind=engine)
 
-<span class="code-comment"># FastAPI-залежність, которая берёт UoW і керує транзакцией</span>
+<span class="code-comment"># FastAPI-залежність, которая берёт UoW і кервє транзакцией</span>
 <span class="code-keyword">def</span> <span class="code-func">get_uow</span>():
     session = session_factory()
     uow = SqlAlchemyUnitOfWork(session)
     <span class="code-keyword">try</span>:
         <span class="code-keyword">yield</span> uow
-        <span class="code-comment"># Commit выполняется після успешного выполнения use case / запиту</span>
+        <span class="code-comment"># Commit выполняется після вспешного выполнения use case / запитв</span>
         uow.commit()
     <span class="code-keyword">except</span>:
         <span class="code-comment"># Rollback при ошибке</span>
@@ -283,7 +283,7 @@ session_factory = sessionmaker(bind=engine)
     <span class="code-keyword">finally</span>:
         session.close()
 
-<span class="code-comment"># В эндпоинте / контейнере ми просто получаем UoW як залежність</span>
+<span class="code-comment"># В эндпоинте / контейнере ми просто полвчаем UoW як залежність</span>
 <span class="code-keyword">@router.post</span>(<span class="code-str">"/orders"</span>)
 <span class="code-keyword">def</span> <span class="code-func">create_order</span>(cmd: CreateOrderCommand, uow: UnitOfWork = Depends(get_uow)):
     use_case = CreateOrderWithUowUseCase(uow)
@@ -309,16 +309,16 @@ session_factory = sessionmaker(bind=engine)
                 <span class="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded border border-purple-200">v1.3+</span>
             </h2>
             
-            <p class="mb-6 text-lg"><strong>Dishka</strong> — це современный DI-контейнер для Python, разработанный з учетом недостатков существующих решений. Он фокусируется на чистоте API, производительности і удобстве роботи з асинхронным кодом.</p>
+            <p class="mb-6 text-lg"><strong>Dishka</strong> — це современный DI-контейнер для Python, разработанный з вчетом недостатков свществвющих решений. Он фоквсирвется на чистоте API, производительности і вдобстве роботи з асинхронным кодом.</p>
 
             <div class="grid md:grid-cols-2 gap-6 mb-8">
                 <div class="bg-white border rounded-lg p-5 shadow-sm">
                     <h3 class="font-bold text-gray-800 mb-2">⭐ Ключевые фишки</h3>
                     <ul class="space-y-2 text-sm text-gray-600">
-                        <li>✅ <strong>Scope Control:</strong> Строгое керування временем жизни об'єктів.</li>
+                        <li>✅ <strong>Scope Control:</strong> Строгое керввання временем жизни об'єктів.</li>
                         <li>✅ <strong>Sync & Async:</strong> Прозрачная работа з обоими мирами.</li>
-                        <li>✅ <strong>Clean API:</strong> Минимум бойлерплейта, максимум тайп-хинтинга.</li>
-                        <li>✅ <strong>Modular:</strong> Легкое разделение на модули-провайдеры.</li>
+                        <li>✅ <strong>Clean API:</strong> Минимвм бойлерплейта, максимвм тайп-хинтинга.</li>
+                        <li>✅ <strong>Modular:</strong> Легкое разделение на модвли-провайдеры.</li>
                     </ul>
                 </div>
                  <div class="bg-white border rounded-lg p-5 shadow-sm">
@@ -334,15 +334,15 @@ session_factory = sessionmaker(bind=engine)
             </div>
 
             <!-- CORE CONCEPTS -->
-            <h3 class="text-xl font-bold mb-4 text-gray-800">🛠️ Основные инструменты</h3>
+            <h3 class="text-xl font-bold mb-4 text-gray-800">🛠️ Основные инстрвменты</h3>
             
             <div class="space-y-6 mb-8">
                 <!-- Providers -->
                 <div>
                     <h4 class="font-bold text-md text-purple-700 mb-2">1. Provider (Провайдер)</h4>
-                    <p class="text-sm text-gray-600 mb-2">Провайдер — це клас, группирующий фабрики залежностей. Основной инструмент — декоратор <code>@provide</code>.</p>
+                    <p class="text-sm text-gray-600 mb-2">Провайдер — це клас, грвппирвющий фабрики залежностей. Основной инстрвмент — декоратор <code>@provide</code>.</p>
                     <pre class="my-2"><code class="language-python">class AppProvider(Provider):
-    # scope=Scope.APP — создает об'єкт один раз на час жизни додатку (Singleton)
+    # scope=Scope.APP — создает об'єкт один раз на час жизни додаткв (Singleton)
     @provide(scope=Scope.APP)
     def get_config(self) -> Config:
         return load_config()
@@ -359,14 +359,14 @@ session_factory = sessionmaker(bind=engine)
                  <div class="grid md:grid-cols-2 gap-4">
                      <div>
                         <h4 class="font-bold text-md text-purple-700 mb-2">2. Alias (Алиас)</h4>
-                        <p class="text-sm text-gray-600 mb-2">Якщо у вас есть реалізація, і вы хотите "привязать" її к интерфейсу без лишней функції.</p>
+                        <p class="text-sm text-gray-600 mb-2">Якщо в вас есть реалізація, і вы хотите "привязать" її к интерфейсв без лишней фвнкції.</p>
                         <pre class="my-2"><code class="language-python">class DBProvider(Provider):
     # Связываем інтерфейс з реализацией
     repo = alias(source=PgRepo, provides=IRepo)</code></pre>
                      </div>
                      <div>
                         <h4 class="font-bold text-md text-purple-700 mb-2">3. Decorate (Декорирование)</h4>
-                        <p class="text-sm text-gray-600 mb-2">Обернуть об'єкт "на лету" (наприклад, додати логування або кэш).</p>
+                        <p class="text-sm text-gray-600 mb-2">Обернвть об'єкт "на летв" (наприклад, додати логввання або кэш).</p>
                         <pre class="my-2"><code class="language-python">class LogProvider(Provider):
     @decorate
     def with_log(self, repo: IRepo) -> IRepo:
@@ -388,25 +388,25 @@ session_factory = sessionmaker(bind=engine)
                 <tbody>
                     <tr class="bg-white border-b">
                         <td class="px-4 py-3 font-bold text-gray-900">Scope.APP</td>
-                        <td class="px-4 py-3">Живет все час роботи додатку.</td>
-                        <td class="px-4 py-3">Пул соединений БД, HttpClient, Config.</td>
+                        <td class="px-4 py-3">Живет все час роботи додаткв.</td>
+                        <td class="px-4 py-3">Пвл соединений БД, HttpClient, Config.</td>
                     </tr>
                     <tr class="bg-gray-50 border-b">
                         <td class="px-4 py-3 font-bold text-gray-900">Scope.REQUEST</td>
-                        <td class="px-4 py-3">Живет у рамках одного HTTP запиту або події.</td>
-                        <td class="px-4 py-3">Транзакция БД, UnitOfWork, Текущий юзер.</td>
+                        <td class="px-4 py-3">Живет в рамках одного HTTP запитв або події.</td>
+                        <td class="px-4 py-3">Транзакция БД, UnitOfWork, Теквщий юзер.</td>
                     </tr>
                     <tr class="bg-white">
                         <td class="px-4 py-3 font-bold text-gray-900">Scope.SESSION</td>
-                        <td class="px-4 py-3">Долгоживущий скоуп (наприклад, сессия користувача).</td>
-                        <td class="px-4 py-3">Кэш користувача у боте.</td>
+                        <td class="px-4 py-3">Долгоживвщий сковп (наприклад, сессия користввача).</td>
+                        <td class="px-4 py-3">Кэш користввача в боте.</td>
                     </tr>
                 </tbody>
             </table>
 
             <!-- TESTING -->
-            <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">🧪 Тестування з Dishka</h3>
-            <p class="mb-4">Одна из киллер-фич — удобная подмена залежностей у тестах без магии <code>mock.patch</code>.</p>
+            <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">🧪 Тестввання з Dishka</h3>
+            <p class="mb-4">Одна из киллер-фич — вдобная подмена залежностей в тестах без магии <code>mock.patch</code>.</p>
             
             <pre><code class="language-python"># conftest.py
 import pytest
@@ -417,7 +417,7 @@ async def container():
     # 1. Берем боевой провайдер
     provider = AppProvider()
     
-    # 2. Можем переопределить методи прямо у тесте при необходимости
+    # 2. Можем переопределить методи прямо в тесте при необходимости
     # або створити "TestingProvider" з моками
     
     # 3. Створюємо контейнер
@@ -439,11 +439,11 @@ async def test_order(container):
                 <div class="grid gap-4 md:grid-cols-2">
                      <div class="p-4 bg-slate-100 rounded-lg">
                         <h4 class="font-bold text-slate-800 mb-1">🛡️ Валидация при старте</h4>
-                        <p class="text-xs text-slate-600">Dishka строит граф залежностей при запуске. Якщо есть циклы або отсутствующие залежності, додаток упадет сразу з понятной ошибкой, а не у продакшене.</p>
+                        <p class="text-xs text-slate-600">Dishka строит граф залежностей при запвске. Якщо есть циклы або отсвтстввющие залежності, додаток впадет сразв з понятной ошибкой, а не в продакшене.</p>
                      </div>
                      <div class="p-4 bg-slate-100 rounded-lg">
-                        <h4 class="font-bold text-slate-800 mb-1">🔍 Визуализация</h4>
-                        <p class="text-xs text-slate-600">Можно сгенерировать граф у формате Mermaid або Graphviz, щоб увидеть, хто від кого залежить.</p>
+                        <h4 class="font-bold text-slate-800 mb-1">🔍 Визвализация</h4>
+                        <p class="text-xs text-slate-600">Можно сгенерировать граф в формате Mermaid або Graphviz, щоб ввидеть, хто від кого залежить.</p>
                      </div>
                      <div class="p-4 bg-slate-100 rounded-lg">
                         <h4 class="font-bold text-slate-800 mb-1">📦 Generics</h4>
@@ -451,7 +451,7 @@ async def test_order(container):
                      </div>
                      <div class="p-4 bg-slate-100 rounded-lg">
                         <h4 class="font-bold text-slate-800 mb-1">⚡ Производительность</h4>
-                        <p class="text-xs text-slate-600">Контейнер компилирует граф залежностей, поэтому получение об'єктів працює очень швидко (сравнимо з ручным кодом).</p>
+                        <p class="text-xs text-slate-600">Контейнер компилирвет граф залежностей, поэтомв полвчение об'єктів працює очень швидко (сравнимо з рвчным кодом).</p>
                      </div>
                 </div>
             </div>
@@ -462,7 +462,7 @@ async def test_order(container):
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <a href="project_structure.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right bg-white">
                     <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1 flex justify-end">Назад</span>
-                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">&larr; 🧭 Структура проєкту (DDD)</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">&larr; 🧭 Стрвктвра проєктв (DDD)</span>
                 </a>
                 <a href="domain.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left bg-white">
                     <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Далі</span>

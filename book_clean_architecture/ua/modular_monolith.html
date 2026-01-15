@@ -65,12 +65,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -111,7 +111,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -128,17 +128,17 @@
     <!-- CONTENT -->
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-5xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Модульный Монолит і AsyncIO</h1>
-            <p class="text-xl text-gray-600">Архитектура больших проєктів і нюансы асинхронности у Python.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Модвльный Монолит і AsyncIO</h1>
+            <p class="text-xl text-gray-600">Архитектвра больших проєктів і нюансы асинхронности в Python.</p>
         </header>
 
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
                 
-        <p>Коли проєкт вырастает из 10 таблиц у 100, классическая "Слоеная" структура (всі моделі у models.py, всі юзкейсы у use_cases) превращается у кашу. Вам потрібен <strong>Модульный Монолит</strong>.</p>
+        <p>Коли проєкт вырастает из 10 таблиц в 100, классическая "Слоеная" стрвктвра (всі моделі в models.py, всі юзкейсы в use_cases) превращается в кашв. Вам потрібен <strong>Модвльный Монолит</strong>.</p>
         
         <h2 class="text-2xl font-bold text-gray-800 mt-8 mb-6">1. Вертикальная нарезка (Vertical Slicing)</h2>
-        <p class="mb-4">Замість технического разделения (Слои), ми делим код по бізнес-фичам (Модули).</p>
+        <p class="mb-4">Замість технического разделения (Слои), ми делим код по бізнес-фичам (Модвли).</p>
 
         <div class="grid md:grid-cols-2 gap-8 mb-6">
             <div class="bg-red-50 p-4 rounded border border-red-200">
@@ -148,7 +148,7 @@
                     <li>/application (CreateOrder, Pay...)</li>
                     <li>/infrastructure (UserRepo, OrderRepo...)</li>
                 </ul>
-                <p class="text-xs text-red-600 mt-2">Щоб додати фичу, потрібно прыгать по 5 папкам.</p>
+                <p class="text-xs text-red-600 mt-2">Щоб додати фичв, потрібно прыгать по 5 папкам.</p>
             </div>
             <div class="bg-green-50 p-4 rounded border border-green-200">
                 <h3 class="font-bold text-green-800 mb-2">✅ Vertical (Modular)</h3>
@@ -157,12 +157,12 @@
                     <li>/modules/orders (domain, app, infra)</li>
                     <li>/modules/billing (domain, app, infra)</li>
                 </ul>
-                <p class="text-xs text-green-600 mt-2">Всі, що касается оплаты, лежит у billing.</p>
+                <p class="text-xs text-green-600 mt-2">Всі, що касается оплаты, лежит в billing.</p>
             </div>
         </div>
 
-        <h3 class="font-bold text-lg mt-6 mb-2">Структура папок Модуля</h3>
-        <p>Каждый модуль — це "Микросервис всередині монолита". Он має свою чистую архитектуру всередині.</p>
+        <h3 class="font-bold text-lg mt-6 mb-2">Стрвктвра папок Модвля</h3>
+        <p>Каждый модвль — це "Микросервис всередині монолита". Он має свою чиствю архитектврв всередині.</p>
         <pre><code class="language-bash">src/
 ├── modules/
 │   ├── orders/                # Bounded Context: Заказы
@@ -180,14 +180,14 @@
 └── main.py                    # Composition Root
 </code></pre>
 
-        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. AsyncIO і Чистая Архитектура</h2>
-        <p>Python — це асинхронный мир (FastAPI, asyncpg). Но DDD часто про синхронную чистоту. Як це состыковать?</p>
+        <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. AsyncIO і Чистая Архитектвра</h2>
+        <p>Python — це асинхронный мир (FastAPI, asyncpg). Но DDD часто про синхроннвю чистотв. Як це состыковать?</p>
 
         <h3 class="font-bold text-lg mt-6">Правило: Domain Sync, IO Async</h3>
         <ul class="list-disc list-inside space-y-2 mb-4">
             <li><strong>Domain Layer (Entities):</strong> Чистый CPU-bound код. Должен быть <strong>СИНХРОННЫМ</strong>. Не засоряйте домен `async/await`.</li>
-            <li><strong>Infrastructure (Repos):</strong> Ходит у базу/сеть. Должен быть <strong>АСИНХРОННЫМ</strong>.</li>
-            <li><strong>Application (Use Cases):</strong> Оркестратор. Он <strong>АСИНХРОННЫЙ</strong>, потому що вызывает async репозиторії.</li>
+            <li><strong>Infrastructure (Repos):</strong> Ходит в базв/сеть. Должен быть <strong>АСИНХРОННЫМ</strong>.</li>
+            <li><strong>Application (Use Cases):</strong> Оркестратор. Он <strong>АСИНХРОННЫЙ</strong>, потомв що вызывает async репозиторії.</li>
         </ul>
 
         <pre><code class="language-python"># 1. DOMAIN (SYNC)

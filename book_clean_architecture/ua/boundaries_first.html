@@ -36,12 +36,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -82,7 +82,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -98,18 +98,18 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Boundaries First Design</h1>
-            <p class="text-xl text-gray-600">Сначала границы, потім сутності. Главный принцип современного DDD.</p>
+            <p class="text-xl text-gray-600">Сначала границы, потім свтності. Главный принцип современного DDD.</p>
         </header>
 
         <section class="mb-16">
-            <h2 class="text-2xl font-bold mb-6">Чому "Entity First" це помилка?</h2>
+            <h2 class="text-2xl font-bold mb-6">Чомв "Entity First" це помилка?</h2>
             <p>Многие начинают проєкт з рисования диаграммы классов бази даних: "Вот таблиця User, вот Order...".</p>
             <div class="p-4 bg-red-100 border-l-4 border-red-500 mb-4 text-red-900 rounded">
                 Помилка: Це приводит к огромным "God Models". User становится свалкой полів для биллинга, доставки, авторизации і профиля.
             </div>
 
             <h2 class="text-2xl font-bold mt-12 mb-6">Подход Boundaries First</h2>
-            <p>"Границы первичны". Прежде ніж писати код сутності <code>User</code>, спросите: </p>
+            <p>"Границы первичны". Прежде ніж писати код свтності <code>User</code>, спросите: </p>
             <ul class="list-disc pl-6 space-y-2 mb-6">
                 <li>В каком контексте ми находимся?</li>
                 <li>Що означает "User" ДЛЯ ЭТОГО контекста?</li>
@@ -119,25 +119,25 @@
             <div class="grid md:grid-cols-2 gap-4">
                 <div class="border p-4 rounded bg-white">
                     <h4 class="font-bold border-b pb-2 mb-2">Context: Identity & Access</h4>
-                    <p class="text-sm">Тут "User" — це <strong>Login, Password, 2FA</strong>.</p>
+                    <p class="text-sm">Твт "User" — це <strong>Login, Password, 2FA</strong>.</p>
                 </div>
                 <div class="border p-4 rounded bg-white">
                     <h4 class="font-bold border-b pb-2 mb-2">Context: Sales</h4>
-                    <p class="text-sm">Тут "User" — це <strong>Customer, BuyerHistory</strong>.</p>
+                    <p class="text-sm">Твт "User" — це <strong>Customer, BuyerHistory</strong>.</p>
                 </div>
                 <div class="border p-4 rounded bg-white">
                     <h4 class="font-bold border-b pb-2 mb-2">Context: Shipping</h4>
-                    <p class="text-sm">Тут "User" — це <strong>Recipient, Address</strong>.</p>
+                    <p class="text-sm">Твт "User" — це <strong>Recipient, Address</strong>.</p>
                 </div>
             </div>
 
-            <p class="mt-8">Замість одного большого класу `User`, ми создаем три маленьких, независимых моделі, которые связаны только по ID. Це і есть Boundaries First.</p>
+            <p class="mt-8">Замість одного большого класв `User`, ми создаем три маленьких, независимых моделі, которые связаны только по ID. Це і есть Boundaries First.</p>
         </section>
 
         <div class="mt-12 pt-8 border-t border-gray-200">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                  <a href="cqrs_es.html" class="text-blue-600 font-bold hover:underline">&larr; CQRS & ES</a>
-                <a href="../index.html" class="text-blue-600 font-bold hover:underline">На главную &rarr;</a>
+                <a href="../index.html" class="text-blue-600 font-bold hover:underline">На главнвю &rarr;</a>
             </div>
         </div>
 

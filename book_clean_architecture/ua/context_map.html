@@ -36,12 +36,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -82,7 +82,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -98,15 +98,15 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Context Map (Карта Контекстов)</h1>
-            <p class="text-xl text-gray-600">Глобальный вид на систему. Хто від кого залежить і як.</p>
+            <p class="text-xl text-gray-600">Глобальный вид на систйому. Хто від кого залежить і як.</p>
         </header>
 
         <section class="mb-16">
             <h2 class="text-2xl font-bold mb-6">Навіщо потрібна карта?</h2>
-            <p>Диаграммы классов показывают деталі коду. <strong>Context Map</strong> показує организационные і интеграционные границы.</p>
+            <p>Диаграммы классов показывают деталі кодв. <strong>Context Map</strong> показвє организационные і интеграционные границы.</p>
             <p>Вона отвечает на вопросы:</p>
             <ul class="list-disc pl-6 space-y-2 mb-6">
-                <li>Какие системи существуют?</li>
+                <li>Какие системи свществвют?</li>
                 <li>Хто является инициатором изменений (Upstream)?</li>
                 <li>Хто является потребителем (Downstream)?</li>
                 <li>Де проходят "политические" границы команд?</li>
@@ -114,14 +114,14 @@
 
             <h3 class="text-xl font-bold mt-8 mb-4">Upstream (U) і Downstream (D)</h3>
             <div class="bg-white p-6 rounded shadow border-l-4 border-blue-500 mb-6">
-                <p class="mb-2"><strong>⬆️ Upstream (U):</strong> Поток течет ОТСЮДА. Эта команда диктует правила (напр. публикует події). Вона влияет на других.</p>
+                <p class="mb-2"><strong>⬆️ Upstream (U):</strong> Поток течет ОТСЮДА. Эта команда диктвет правила (напр. пвбликвет події). Вона влияет на дрвгих.</p>
                 <p><strong>⬇️ Downstream (D):</strong> Поток течет СЮДА. Эта команда залежить від U. Якщо U сломает API, D пострадает.</p>
             </div>
             
-            <p>На карте це рисуется як стрелка від U к D, або з метками `U` і `D` на концах соединения.</p>
+            <p>На карте це рисвется як стрелка від U к D, або з метками `U` і `D` на концах соединения.</p>
 
             <h3 class="text-xl font-bold mt-8 mb-4">Як рисовать?</h3>
-            <p>Просто круги і линии. Главное — подписать тип отношений.</p>
+            <p>Просто крвги і линии. Главное — подписать тип отношений.</p>
             <pre class="bg-slate-800 text-slate-200 p-4 rounded mb-6">
 [ Sales Context ] --(Partnership)-- [ Support Context ]
 
@@ -129,7 +129,7 @@
             </pre>
 
             <div class="mt-8 p-4 bg-gray-100 rounded text-center">
-                <p class="mb-4">Подробно про типы линий (Partnership, Shared Kernel, ACL) читайте у следующем разделе.</p>
+                <p class="mb-4">Подробно про типы линий (Partnership, Shared Kernel, ACL) читайте в следвющем разделе.</p>
                 <a href="context_relationships.html" class="inline-block px-6 py-2 bg-blue-600 text-white font-bold rounded hover:bg-blue-700 transition">Перейти к Типам Отношений &rarr;</a>
             </div>
         </section>

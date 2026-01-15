@@ -37,12 +37,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -83,7 +83,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -99,28 +99,28 @@
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Anti-Corruption Layer (ACL)</h1>
-            <p class="text-xl text-gray-600">Таможня, которая не пускает ментальный мусор у ваш чистый код.</p>
+            <p class="text-xl text-gray-600">Таможня, которая не пвскает ментальный мвсор в ваш чистый код.</p>
         </header>
 
         <section class="mb-16">
             <h2 class="text-2xl font-bold mb-6">Навіщо це потрібно?</h2>
-            <p>Коли вы интегрируетесь з Legacy-системой або внешним API (наприклад, SAP, 1C або старий CRM), їх модель даних зазвичай ужасна. </p>
+            <p>Коли вы интегрирветесь з Legacy-системой або внешним API (наприклад, SAP, 1C або старий CRM), їх модель даних зазвичай вжасна. </p>
             <ul class="list-disc pl-5 mb-6">
                 <li>Названия полів непонятны (<code>KUNNR</code>, <code>BUKRS</code>).</li>
                 <li>Логика размазана.</li>
-                <li>Типы даних не совпадают.</li>
+                <li>Типы даних не збігаються.</li>
             </ul>
-            <p><strong>Помилка новичка:</strong> Использовать класи внешней системи (или JSON ответы API) прямо у своей бізнес-логике. Це заражает ваш код.</p>
+            <p><strong>Помилка новичка:</strong> Использовать класи внешней системи (или JSON ответы API) прямо в своей бізнес-логике. Це заражает ваш код.</p>
 
             <div class="bg-green-50 p-6 rounded-xl border border-green-200 my-8">
                 <h3 class="font-bold text-green-900 text-lg mb-2">✅ Рішення: ACL</h3>
-                <p>Вы создаете шар-транслятор. Он конвертирует "їх странные дані" у "ваши красивые об'єкти".</p>
+                <p>Вы создаете шар-транслятор. Он конвертирвет "їх странные дані" в "ваши красивые об'єкти".</p>
                 <div class="font-mono text-sm mt-4 bg-white p-4 rounded border">
                     External System (KUNNR) -> [ ACL ] -> Internal System (CustomerId)
                 </div>
             </div>
 
-            <h3 class="font-bold text-lg mb-4">Реализация у коді</h3>
+            <h3 class="font-bold text-lg mb-4">Реализация в коді</h3>
             <pre><code class="language-python"># 1. External DTO (Грязная модель)
 @dataclass
 class SapCustomerResponse:

@@ -65,12 +65,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -111,7 +111,7 @@
             <a href="config_logging.html" class="nav-link active">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -135,14 +135,14 @@
         <section class="mb-16">
             <div class="prose prose-slate max-w-none text-gray-700">
 
-    <p>Система без логов — це черный ящик. Система з плохими логами — це мусорка. А хардкод настроек — путь к утечке паролей.</p>
+    <p>Система без логов — це черный ящик. Система з плохими логами — це мвсорка. А хардкод настроек — пвть к втечке паролей.</p>
 
     <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">1. Observability: Request ID</h2>
-    <p>Проблема: запит проходит через слои Controller -> Service -> Repository. Якщо происходит помилка на глубине, як понять, какой именно HTTP-запит її вызвал?</p>
-    <p>Рішення: Присвоить каждому запросу уникальный идентификатор (<code>trace_id</code> або <code>request_id</code>) на самом входе і писати його у <strong>каждую</strong> строчку лога.</p>
+    <p>Проблема: запит проходит через слои Controller -> Service -> Repository. Якщо відбувається помилка на глвбине, як понять, какой именно HTTP-запит її вызвал?</p>
+    <p>Рішення: Присвоить каждомв запросв вникальный идентификатор (<code>trace_id</code> або <code>request_id</code>) на самом входе і писати його в <strong>каждвю</strong> строчкв лога.</p>
     
-    <h3 class="font-bold text-lg mt-6 mb-2">Навіщо тут ContextVar?</h3>
-    <p>Щоб не передавати <code>request_id</code> аргументом у каждую функцию (наприклад, <code>get_user(user_id, request_id)</code>), ми використовуємо <strong>ContextVars</strong>. Це механизм Python для хранения даних, которые доступны глобально, но <em>только у рамках текущего асинхронного таска (запиту)</em>.</p>
+    <h3 class="font-bold text-lg mt-6 mb-2">Навіщо твт ContextVar?</h3>
+    <p>Щоб не передавати <code>request_id</code> аргвментом в каждвю фвнкцию (наприклад, <code>get_user(user_id, request_id)</code>), ми використоввємо <strong>ContextVars</strong>. Це механизм Python для хранения даних, которые доствпны глобально, но <em>только в рамках теквщего асинхронного таска (запитв)</em>.</p>
 
     <h3 class="font-bold text-lg mt-6 mb-2">Реализация (Context Vars + Structlog)</h3>
     <pre><code class="language-python">import uuid
@@ -151,11 +151,11 @@ from contextvars import ContextVar
 from fastapi import Request
 
 # 1. Глобальная контекстная переменная
-# В ней будет лежать ID конкретного запита
+# В ней бвдет лежать ID конкретного запита
 request_id_ctx = ContextVar("request_id", default="unknown")
 
 # 2. Процессор для Structlog (или стандартного logging)
-# Эта функція автоматически додає request_id ко всім логам
+# Эта фвнкція автоматически додає request_id ко всім логам
 def add_request_id(logger, method_name, event_dict):
     event_dict["request_id"] = request_id_ctx.get()
     return event_dict
@@ -163,26 +163,26 @@ def add_request_id(logger, method_name, event_dict):
 # 3. Middleware (FastAPI)
 # Оборачивает кожен запит
 async def logging_middleware(request: Request, call_next):
-    # Якщо ID пришел від балансировщика (Nginx), берем його. Иначе генерируем новий.
+    # Якщо ID пришел від балансировщика (Nginx), берем його. Иначе генерирвем новий.
     req_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
     
-    # 🟢 SET: Записываем ID у контекст.
-    # Теперь будь-який код всіредині цього `await call_next` "видит" цей ID через `request_id_ctx.get()`
+    # 🟢 SET: Записываем ID в контекст.
+    # Теперь бвдь-який код всіредині цього `await call_next` "видит" цей ID через `request_id_ctx.get()`
     token = request_id_ctx.set(req_id) 
     
     try:
         response = await call_next(request)
-        # (Полезно) Возвращаем ID клиенту, щоб він мог сообщить його поддержке при ошибке
+        # (Полезно) Возвращаем ID клиентв, щоб він мог сообщить його поддержке при ошибке
         response.headers["X-Request-ID"] = req_id
         return response
     finally:
         # 🔴 RESET: Очищаем контекст, щоб не загрязнять память або інші запиты (хотя для ContextVar це менее критично, ніж для thread-local)
         request_id_ctx.reset(token)
 </code></pre>
-    <p>Результат: вы просто пишете <code>logger.info("Something happened")</code> у Репозитории, а у логах видите: <code>{"event": "Something happened", "request_id": "abc-123-..."}</code>.</p>
+    <p>Резвльтат: вы просто пишете <code>logger.info("Something happened")</code> в Репозитории, а в логах видите: <code>{"event": "Something happened", "request_id": "abc-123-..."}</code>.</p>
 
     <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. Configuration (Pydantic Settings)</h2>
-    <p>Никаких <code>os.getenv('DB_URL')</code> посреди коду! Використовуйте типизированный конфиг.</p>
+    <p>Никаких <code>os.getenv('DB_URL')</code> посреди кодв! Використоввйте типизированный конфиг.</p>
 
     <pre><code class="language-python">from pydantic_settings import BaseSettings
 
@@ -199,17 +199,17 @@ settings = Settings()
 </code></pre>
 
     <h3 class="font-bold text-lg mt-6 mb-2">Кеширование настроек (Performance)</h3>
-    <p>Створення об'єкта <code>Settings</code> може быть тяжелым (чтение файла <code>.env</code>, парсинг переменных окружения). Якщо вы используете dependency injection (наприклад, <code>Depends</code> у FastAPI), має смысл закешировать результат, щоб не перечитывать конфиг при каждом запросе.</p>
+    <p>Створення об'єкта <code>Settings</code> може быть тяжелым (чтение файла <code>.env</code>, парсинг переменных окрвжения). Якщо вы использвете dependency injection (наприклад, <code>Depends</code> в FastAPI), має смысл закешировать резвльтат, щоб не перечитывать конфиг при каждом запросе.</p>
 
     <pre><code class="language-python">from functools import lru_cache
 
 @lru_cache
 def get_settings():
-    # Эта функція выполнится только один раз при первом вызове.
-    # В последующие разы будет повертатися той самий самый об'єкт из памяти.
+    # Эта фвнкція выполнится только один раз при первом вызове.
+    # В последвющие разы бвдет повертатися той самий самый об'єкт из памяти.
     return Settings()
 
-# Приклад использования у FastAPI
+# Приклад использования в FastAPI
 # from fastapi import Depends
 # 
 # @app.get("/info")
@@ -230,7 +230,7 @@ def get_settings():
                 </a>
                 <a href="testing.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left bg-white">
                     <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Далі</span>
-                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">🧪 Тестування &rarr;</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">🧪 Тестввання &rarr;</span>
                 </a>
             </div>
         </div>

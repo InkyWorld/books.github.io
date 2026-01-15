@@ -65,12 +65,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -111,7 +111,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -134,18 +134,18 @@
             </div>
             <h1 class="text-4xl font-extrabold text-red-900 leading-tight">Главные Антипатерни</h1>
             <p class="text-xl text-red-700 mt-4 font-light">
-                Як НЕ надо писати код. Ошибки, которые убивают проєкти через год.
+                Як НЕ надо писати код. Ошибки, которые вбивают проєкти через год.
             </p>
         </header>
 
         <!-- 1. ANEMIC DOMAIN -->
         <section id="anemic">
             <h2 class="text-3xl font-bold mb-6 text-gray-900">1. Anemic Domain (Анемічна модель)</h2>
-            <p class="mb-4">Самый распространенный грех. Це коли ваши класи `Order`, `User` — це просто контейнеры для даних (getters/setters), а вся логіка лежит у Сервисах.</p>
+            <p class="mb-4">Самый распространенный грех. Це коли ваши класи `Order`, `User` — це просто контейнеры для даних (getters/setters), а вся логіка лежит в Сервисах.</p>
             
             <div class="bad-card">
                 <h3 class="text-xl font-bold text-red-600 mb-2">❌ Як це выглядит (ПОГАНО)</h3>
-                <p class="text-sm mb-4">Сущность тупая. Use Case умный і робить микроменеджмент.</p>
+                <p class="text-sm mb-4">Свщность твпая. Use Case вмный і робить микроменеджмент.</p>
 <pre><code class="language-python"><span class="code-comment"># domain/entities.py</span>
 <span class="code-class">class</span> Order:
     self.items = []
@@ -155,21 +155,21 @@
 <span class="code-comment"># application/services.py</span>
 <span class="code-keyword">def</span> <span class="code-func">add_item_service</span>(order, item):
     order.items.append(item)
-    order.total += item.price <span class="code-comment"># Логика снаружи!</span>
-    if order.total > 1000:    <span class="code-comment"># Логика снаружи!</span>
+    order.total += item.price <span class="code-comment"># Логика снарвжи!</span>
+    if order.total > 1000:    <span class="code-comment"># Логика снарвжи!</span>
         order.status = "vip"
 </code></pre>
             </div>
 
             <div class="fix-card">
                 <h3 class="text-xl font-bold text-green-700 mb-2">✅ Як исправить (Rich Model)</h3>
-                <p class="text-sm mb-4">Перенесите поведение у дані. "Скажи, не спрашивай" (Tell, Don't Ask).</p>
+                <p class="text-sm mb-4">Перенесите поведение в дані. "Скажи, не спрашивай" (Tell, Don't Ask).</p>
 <pre><code class="language-python"><span class="code-comment"># domain/entities.py</span>
 <span class="code-class">class</span> Order:
     <span class="code-keyword">def</span> <span class="code-func">add_item</span>(self, item):
         self.items.append(item)
-        self._recalculate_total() <span class="code-comment"># Сущность сама знає, як считать</span>
-        self._check_vip_status()  <span class="code-comment"># Сущность сама обновляет статус</span>
+        self._recalculate_total() <span class="code-comment"># Свщность сама знає, як считать</span>
+        self._check_vip_status()  <span class="code-comment"># Свщность сама обновляет статвс</span>
 </code></pre>
             </div>
         </section>
@@ -177,7 +177,7 @@
         <!-- 2. GOD REPOSITORY -->
         <section id="god-repo" class="mt-16">
             <h2 class="text-3xl font-bold mb-6 text-gray-900">2. God Repository (Божественний Репозиторій)</h2>
-            <p class="mb-4">Коли репозиторій начинает робити все: отправлять почту, считать аналитику, форматировать даты.</p>
+            <p class="mb-4">Коли репозиторій начинает робити все: отправлять почтв, считать аналитикв, форматировать даты.</p>
 
             <div class="bad-card">
                 <h3 class="text-xl font-bold text-red-600 mb-2">❌ Помилка</h3>
@@ -195,13 +195,13 @@
 
         <!-- 3. LEAKING INFRA -->
         <section id="leaking" class="mt-16">
-            <h2 class="text-3xl font-bold mb-6 text-gray-900">3. Leaking Infrastructure (Протекающая Инфраструктура)</h2>
-            <p class="mb-4">Коли типы даних из БД або Веба проникают у бізнес-логіку.</p>
+            <h2 class="text-3xl font-bold mb-6 text-gray-900">3. Leaking Infrastructure (Протекающая Инфрастрвктвра)</h2>
+            <p class="mb-4">Коли типы даних из БД або Веба проникают в бізнес-логікв.</p>
 
             <div class="bad-card">
                 <h3 class="text-xl font-bold text-red-600 mb-2">❌ IUse Case залежить від Request</h3>
 <pre><code class="language-python"><span class="code-comment"># application/use_cases.py</span>
-<span class="code-keyword">from</span> flask <span class="code-keyword">import</span> Request <span class="code-comment"># Ужас! Привязка к фреймворку</span>
+<span class="code-keyword">from</span> flask <span class="code-keyword">import</span> Request <span class="code-comment"># Ужас! Привязка к фреймворкв</span>
 
 <span class="code-keyword">def</span> <span class="code-func">create_order</span>(request: Request):
     data = request.json <span class="code-comment"># Тестировать це без Flask невозможно</span>

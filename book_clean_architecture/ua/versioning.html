@@ -40,12 +40,12 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вступ</a>
+            <a href="index.html" class="nav-link">📘 Вствп</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
-            <div class="nav-section">Шари архітектури</div>
+            <div class="nav-section">Шари архітектври</div>
             <a href="domain.html" class="nav-link">🎯 Domain Layer</a>
             <a href="application.html" class="nav-link">⚙️ Application Layer</a>
             <a href="infrastructure.html" class="nav-link">🔧 Infrastructure Layer</a>
@@ -86,7 +86,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестування</a>
+            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -101,19 +101,19 @@
 
     <main class="flex-1 md:ml-72 p-8 md:p-12 max-w-4xl mx-auto">
         <header class="mb-12 pb-8 border-b border-gray-200">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Versioning (Версионирование)</h1>
-            <p class="text-xl text-gray-600">Optimistic Locking і разрешение конфликтов при збереженні агрегатов.</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">Versioning (Версіонування)</h1>
+            <p class="text-xl text-gray-600">Optimistic Locking і вирішення конфліктів при збереженні агрегатів.</p>
         </header>
 
         <section class="mb-12">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Проблема конкуренции</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Проблема конквренции</h2>
             <div class="prose max-w-none text-gray-700">
                 <p>
-                    Два менеджера, Alice і Bob, відкрили один і той самий Заказ одночасно. Alice перевела його у статус "Paid", а Bob, не знаючи про це, додав товар. 
+                    Два менеджера, Alice і Bob, відкрили один і той самий Заказ одночасно. Alice перевела його в статвс "Paid", а Bob, не знаючи про це, додав товар. 
                     Якщо Bob збереже замовлення після Alice, він затре її зміни (т.н. <em>Lost Update Problem</em>).
                 </p>
                 <div class="bg-red-50 border-l-4 border-red-500 p-4 my-4">
-                     <strong>Небезпека:</strong> Ми можемо отримати оплачене замовлення з новими неоплаченими товарами, порушивши інваріант узгодженості.
+                     <strong>Небезпека:</strong> Ми можемо отримати оплачене замовлення з новими неоплаченими товарами, порвшивши інваріант взгодженості.
                 </div>
             </div>
         </section>
@@ -122,10 +122,10 @@
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Optimistic Concurrency Control (OCC)</h2>
             <p class="mb-4">Рішення — додати поле <code>version</code> (int) в Агрегат.</p>
             <ul class="list-decimal list-inside space-y-2 mb-6">
-                <li>При читанні агрегата ми запам'ятовуємо `version_at_load = 5`.</li>
+                <li>При читанні агрегата ми запам'ятоввємо `version_at_load = 5`.</li>
                 <li>При збереженні ми кажемо БД: <br><code>UPDATE orders SET ..., version = 6 WHERE id = X AND version = 5</code>.</li>
                 <li>Якщо за це час хтось встиг змінити версію на 6, наш запит не оновить жодного рядка.</li>
-                <li>Application Layer ловить це і або кидає помилку користувачу, або перезавантажує агрегат і пробує знову (retry).</li>
+                <li>Application Layer ловить це і або кидає помилкв користввачв, або перезавантажвє агрегат і пробвє зновв (retry).</li>
             </ul>
 
             <h3 class="font-bold text-lg mb-2">Приклад реалізації</h3>
@@ -138,7 +138,7 @@ class Order(AggregateRoot):
 
     def add_item(self, item):
         self.items.append(item)
-        # Зверніть увагу: ми НЕ інкрементуємо версію тут вручну.
+        # Зверніть ввагв: ми НЕ інкрементвємо версію твт врвчнв.
         # Це обов'язок Репозиторію при збереженні.
 
 # В Repository (Infrastructure)
@@ -164,8 +164,8 @@ def save(self, order: Order):
         <section class="mb-12">
             <h2 class="text-2xl font-bold text-gray-800 mb-6">В Event Sourcing</h2>
             <p>
-                В Event Sourcing поле <code>ExpectedVersion</code> грає ту же роль. 
-                Коли вы намагаєтеся додати події у потік, вы говорите: "Я очікую, що зараз в потоці 10 подій". 
+                В Event Sourcing поле <code>ExpectedVersion</code> грає тв же роль. 
+                Коли вы намагаєтеся додати події в потік, вы говорите: "Я очіквю, що зараз в потоці 10 подій". 
                 Якщо там вже 11 (хтось додав подію), Event Store відхилить запис.
             </p>
         </section>
