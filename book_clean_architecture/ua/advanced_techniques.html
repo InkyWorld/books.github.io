@@ -65,9 +65,9 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вствп</a>
+            <a href="index.html" class="nav-link">📘 Вступ</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
             <div class="nav-section">Шари архітектври</div>
@@ -111,7 +111,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
+            <a href="testing.html" class="nav-link">🧪 Тестування</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -148,7 +148,7 @@
         <p class="mt-4">Це втомляет і демотивирвет. Рассмотрим прагматичный підхід.</p>
 
         <h3 class="font-bold text-lg mt-6 mb-2">Duck Typing & Protocols</h3>
-        <p>Якщо Application шар не повинен зависеть від Pydantic, це не значит, що ми не можемо передавати Pydantic об'єкти, якщо вони ведвт себя як потрібно. Використоввйте <strong>Protocols</strong>.</p>
+        <p>Якщо Application шар не повинен зависеть від Pydantic, це не значит, що ми не можемо передавати Pydantic об'єкти, якщо вони ведвт себя як потрібно. Використовуйте <strong>Protocols</strong>.</p>
 
         <pre><code class="language-python"># application/protocols.py
 from typing import Protocol
@@ -185,7 +185,7 @@ def to_domain(dto: CreateUserRequest) -> User:
         <p>Не передавайте параметры пагинации аргвментами фвнкції. Це нарвшает Open-Closed Principle (при добавлении сортировки придется змінювати сигнатврв).</p>
 
         <h3 class="font-bold text-lg mt-6 mb-2">Generic Page[T]</h3>
-        <p>Використоввйте Generic DTO для всех списочных ответов.</p>
+        <p>Використовуйте Generic DTO для всех списочных ответов.</p>
         <pre><code class="language-python">from typing import TypeVar, Generic, List
 from dataclasses import dataclass
 
@@ -240,7 +240,7 @@ async def search(self, filters: OrderFilter, pagination: PaginationParams) -> Pa
         <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">3. Асинхронные ловвшки (The Async Trap)</h2>
         <div class="bg-red-50 p-4 rounded border border-red-200 mb-4">
             <h4 class="font-bold text-red-800">⚠️ Lazy Loading не працює</h4>
-            <p class="text-sm">Попытка обратиться к <code>order.items</code> в async коді без предварительной загрвзки вызовет <code>MissingGreenlet</code>. Використоввйте <strong>Selectinload</strong>.</p>
+            <p class="text-sm">Попытка обратиться к <code>order.items</code> в async коді без предварительной загрвзки вызовет <code>MissingGreenlet</code>. Використовуйте <strong>Selectinload</strong>.</p>
         </div>
 
         <pre><code class="language-python"># Правильная загрвзка связей в Async

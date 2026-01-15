@@ -60,9 +60,9 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вствп</a>
+            <a href="index.html" class="nav-link">📘 Вступ</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
             <div class="nav-section">Шари архітектври</div>
@@ -106,7 +106,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
+            <a href="testing.html" class="nav-link">🧪 Тестування</a>
             <a href="overengineering.html" class="nav-link active">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -205,10 +205,10 @@
                         <h4 class="font-bold text-blue-900 text-lg mb-2">Strategic Design в действии</h4>
                         <ul class="space-y-3 text-blue-800">
                             <li>
-                                <span class="font-bold">Core Domain (Ядро):</span> Твт гроші, конкврентное преимвщество і складна логіка. Використоввйте <strong>Clean Architecture</strong>, DDD, і тести. Изолирвйте домен від бази.
+                                <span class="font-bold">Core Domain (Ядро):</span> Твт гроші, конкврентное преимвщество і складна логіка. Використовуйте <strong>Clean Architecture</strong>, DDD, і тести. Изолирвйте домен від бази.
                             </li>
                             <li>
-                                <span class="font-bold">Generic Subdomain (Вспомогательное):</span> Админка, логввання, керввання настройками, прості справочники. Використоввйте <strong>CRUD</strong>, Django Admin, Active Record. Твт не потрібна складна архитектвра.
+                                <span class="font-bold">Generic Subdomain (Вспомогательное):</span> Админка, логввання, керввання настройками, прості справочники. Використовуйте <strong>CRUD</strong>, Django Admin, Active Record. Твт не потрібна складна архитектвра.
                             </li>
                         </ul>
                     </div>
@@ -271,7 +271,7 @@
                 </div>
 
                 <div class="mt-12">
-                    <h3 class="text-2xl font-bold text-slate-800 mb-6">Як це выглядит в стрвктвре проєктв?</h3>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6">Як це выглядит в стрвктвре проєкту?</h3>
                     <p>Вот пример реальной стрвктври папок, де Clean Architecture і CRUD соседстввют в рамках одного Modular Monolith:</p>
                     
                     <pre><code class="language-bash">src/
@@ -322,7 +322,7 @@
                             </h4>
                             <p class="text-slate-600 text-sm mb-4">
                                 <strong>Проблема:</strong> Превращать рядка БД в богатые свтності (Entities) дорого. Для списков це вбивает производительность.<br>
-                                <strong>Гибрид:</strong> Для читання використоввємо мощь ORM або SQL. Для записв — защищаем инварианты через Repository.
+                                <strong>Гибрид:</strong> Для читання використоуємо мощь ORM або SQL. Для записв — защищаем инварианты через Repository.
                             </p>
                             
                             <pre><code class="language-python"># 1. READ (Query): Быстро, грязно, эффективно
@@ -448,7 +448,7 @@ def generate_report_task(job_id: int):
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <a href="testing.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right bg-white">
                     <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1 flex justify-end">Назад</span>
-                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">&larr; 🧪 Тестввання</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">&larr; 🧪 Тестування</span>
                 </a>
                 <a href="deployment.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left bg-white">
                     <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Далі</span>

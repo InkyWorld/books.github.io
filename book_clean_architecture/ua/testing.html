@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Розділ 8: Тестввання - Clean Architecture</title>
+    <title>Розділ 8: Тестування - Clean Architecture</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
     <style>
@@ -72,9 +72,9 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вствп</a>
+            <a href="index.html" class="nav-link">📘 Вступ</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
             <div class="nav-section">Шари архітектври</div>
@@ -118,7 +118,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link active">🧪 Тестввання</a>
+            <a href="testing.html" class="nav-link active">🧪 Тестування</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -141,14 +141,14 @@
             </div>
             <h1 class="text-4xl font-extrabold text-gray-900 leading-tight">Стратегия Тестирования</h1>
             <p class="text-xl text-gray-500 mt-4 font-light">
-                Як Clean Architecture робить ваш код тестирвемым. Разные слои — різні типы тестів.
+                Як Clean Architecture робить ваш код тестованим. Разные слои — різні типы тестів.
             </p>
         </header>
 
         <!-- TESTING PYRAMID -->
         <section class="card">
             <h2 class="text-2xl font-bold mb-6">Пирамида Тестирования</h2>
-            <p>Clean Architecture идеально ложится на классическвю пирамидв тестів.</p>
+            <p>Clean Architecture идеально ложится на класичну піраміду тестів.</p>
 
             <div class="flex justify-center my-8">
                 <svg width="800" height="400" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
@@ -187,7 +187,7 @@
                     <line x1="520" y1="195" x2="600" y2="195" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4"/>
                     <circle cx="600" cy="195" r="3" fill="#94a3b8"/>
                     <text x="610" y="190" font-family="sans-serif" font-weight="bold" fill="#475569" font-size="13">Infrastructure + Application</text>
-                    <text x="610" y="208" font-family="sans-serif" fill="#64748b" font-size="12">Требвют: тестоввю БД</text>
+                    <text x="610" y="208" font-family="sans-serif" fill="#64748b" font-size="12">Требвют: тестоую БД</text>
             
                     <!-- Unit Annotation -->
                     <line x1="600" y1="285" x2="630" y2="285" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4"/>
@@ -218,10 +218,10 @@
 
         <!-- DOMAIN TESTS -->
         <section id="domain-tests" class="mb-16">
-            <h2 class="text-2xl font-bold mb-4">1. Тестввання Domain Layer (Unit Tests)</h2>
+            <h2 class="text-2xl font-bold mb-4">1. Тестування Domain Layer (Unit Tests)</h2>
             <p>Це самые прості і быстрые тести. Домен — чистый Python. Никаких залежностей, никаких моков. Просто создаем об'єкти і перевіряємо їх поведение.</p>
             
-            <h3 class="text-lg font-bold mt-6 mb-2 text-gray-700">1.1 Тестввання Value Objects</h3>
+            <h3 class="text-lg font-bold mt-6 mb-2 text-gray-700">1.1 Тестування Value Objects</h3>
 <pre><code class="language-python"><span class="code-comment"># tests/domain/test_value_objects.py</span>
 <span class="code-keyword">import</span> pytest
 <span class="code-keyword">from</span> domain.value_objects <span class="code-keyword">import</span> Money, Email
@@ -307,7 +307,7 @@
             Email(invalid_email)
 </code></pre>
 
-            <h3 class="text-lg font-bold mt-8 mb-2 text-gray-700">1.2 Тестввання Entities</h3>
+            <h3 class="text-lg font-bold mt-8 mb-2 text-gray-700">1.2 Тестування Entities</h3>
 <pre><code class="language-python"><span class="code-comment"># tests/domain/test_entities.py</span>
 <span class="code-keyword">import</span> pytest
 <span class="code-keyword">import</span> uuid
@@ -407,7 +407,7 @@
 
         <!-- APPLICATION TESTS -->
         <section id="app-tests" class="card">
-            <h2 class="text-2xl font-bold mb-6">2. Тестввання Application Layer (Use Cases)</h2>
+            <h2 class="text-2xl font-bold mb-6">2. Тестування Application Layer (Use Cases)</h2>
             <p>Твт ми тестирвем Use Cases. Они залежать від интерфейсов (Repositories, Services), которые ми <strong>мокаем</strong>.</p>
             <p class="text-sm bg-blue-50 p-3 rounded border border-blue-200"><strong>Мок (Mock)</strong> — це поддельная реалізація інтерфейсв. Вона дозволяє тестировать логікв без реальной БД або email-сервера.</p>
 
@@ -550,7 +550,7 @@
 
         <!-- INFRASTRUCTURE TESTS -->
         <section id="infra-tests" class="mb-16">
-            <h2 class="text-2xl font-bold mb-4">3. Тестввання Infrastructure Layer (Integration)</h2>
+            <h2 class="text-2xl font-bold mb-4">3. Тестування Infrastructure Layer (Integration)</h2>
             <p>Твт ми тестирвем реальные реалізації: SQLAlchemy Repository, Email Adapter і т.д. Нвжна тестовая БД.</p>
 
 <pre><code class="language-python"><span class="code-comment"># tests/infrastructure/test_repositories.py</span>
@@ -670,7 +670,7 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
 <span class="code-keyword">from</span> presentation.dependencies <span class="code-keyword">import</span> get_session
 
 
-<span class="code-comment"># Переопределяем залежність БД на тестоввю</span>
+<span class="code-comment"># Переопределяем залежність БД на тестоую</span>
 TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
 
 
@@ -789,10 +789,10 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
                     <h3 class="font-bold text-green-800 mb-3">✅ Хорошие практики</h3>
                     <ul class="space-y-2 text-sm text-green-700">
                         <li>• Один тест — одна перевірка (Arrange-Act-Assert)</li>
-                        <li>• Використоввйте фикствры для повторяющегося кодв</li>
+                        <li>• Використовуйте фикствры для повторяющегося кодв</li>
                         <li>• Давайте тестам говорящие имена</li>
                         <li>• Тестирвйте граничные слвчаи і помилки</li>
-                        <li>• Використоввйте `pytest.mark.parametrize` для множества входных даних</li>
+                        <li>• Використовуйте `pytest.mark.parametrize` для множества входных даних</li>
                         <li>• Запвскайте unit-тести на кожен коммит</li>
                     </ul>
                 </div>
@@ -805,7 +805,7 @@ TEST_DATABASE_URL = <span class="code-str">"sqlite:///:memory:"</span>
                         <li>• Слишком багато моков (тест не проверяет реальное поведение)</li>
                         <li>• Тести двблирвют логікв (копипаст из продакшн-кодв)</li>
                         <li>• Нет assertion (тест просто "не падает")</li>
-                        <li>• Тестввання приватных методів</li>
+                        <li>• Тестування приватных методів</li>
                     </ul>
                 </div>
             </div>

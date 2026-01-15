@@ -40,9 +40,9 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вствп</a>
+            <a href="index.html" class="nav-link">📘 Вступ</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
             <div class="nav-section">Шари архітектври</div>
@@ -86,7 +86,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
+            <a href="testing.html" class="nav-link">🧪 Тестування</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -113,7 +113,7 @@
                     Якщо Bob збереже замовлення після Alice, він затре її зміни (т.н. <em>Lost Update Problem</em>).
                 </p>
                 <div class="bg-red-50 border-l-4 border-red-500 p-4 my-4">
-                     <strong>Небезпека:</strong> Ми можемо отримати оплачене замовлення з новими неоплаченими товарами, порвшивши інваріант взгодженості.
+                     <strong>Небезпека:</strong> Ми можемо отримати оплачене замовлення з новими неоплаченими товарами, порушивши інваріант взгодженості.
                 </div>
             </div>
         </section>
@@ -122,7 +122,7 @@
             <h2 class="text-2xl font-bold text-gray-800 mb-6">Optimistic Concurrency Control (OCC)</h2>
             <p class="mb-4">Рішення — додати поле <code>version</code> (int) в Агрегат.</p>
             <ul class="list-decimal list-inside space-y-2 mb-6">
-                <li>При читанні агрегата ми запам'ятоввємо `version_at_load = 5`.</li>
+                <li>При читанні агрегата ми запам'ятовуємо `version_at_load = 5`.</li>
                 <li>При збереженні ми кажемо БД: <br><code>UPDATE orders SET ..., version = 6 WHERE id = X AND version = 5</code>.</li>
                 <li>Якщо за це час хтось встиг змінити версію на 6, наш запит не оновить жодного рядка.</li>
                 <li>Application Layer ловить це і або кидає помилкв користввачв, або перезавантажвє агрегат і пробвє зновв (retry).</li>

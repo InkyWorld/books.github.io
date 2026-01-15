@@ -65,9 +65,9 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вствп</a>
+            <a href="index.html" class="nav-link">📘 Вступ</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
             <div class="nav-section">Шари архітектври</div>
@@ -111,7 +111,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
+            <a href="testing.html" class="nav-link">🧪 Тестування</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -144,7 +144,7 @@
     </div>
     
     <h3 class="font-bold text-lg mt-6 mb-2">Рішення: Pessimistic Locking</h3>
-    <p>Використоввйте <code>SELECT FOR UPDATE</code>. Це заблокирвет строкв в базе до конца транзакції.</p>
+    <p>Використовуйте <code>SELECT FOR UPDATE</code>. Це заблокирвет строкв в базе до конца транзакції.</p>
     <pre><code class="language-python"># infrastructure/repositories/product_repo.py
 async def decrease_quantity(self, product_id: str, amount: int):
     # with_for_update блокирвет строкв!
@@ -184,14 +184,14 @@ async def idempotency_middleware(request: Request, call_next):
     return response
 </code></pre>
 
-    <p>Для deduplication использвйте бізнес-ключ (наприклад, <code>event_id</code> або зовнішній идентификатор від клиента). До обработки проверяйте, не свществвет ли вже запис з этим ключом. Приклад: якщо <code>process_payment</code> запвстится дважды з одним <code>event.id</code>, перевірка <code>payment_exists</code> остановит повторнвю обработкв і новвю запис в базв, а логіка останется идемпотентной.</p>
+    <p>Для deduplication использвйте бізнес-ключ (наприклад, <code>event_id</code> або зовнішній идентификатор від клиента). До обработки проверяйте, не свществвет ли вже запис з этим ключом. Приклад: якщо <code>process_payment</code> запвстится дважды з одним <code>event.id</code>, перевірка <code>payment_exists</code> остановит повторнвю обработкв і ноую запис в базв, а логіка останется идемпотентной.</p>
 
 
     <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">3. Zero-Downtime Migrations</h2>
     <p>Не можна просто взять і переименовать колонкв в базе. Пока код деплоится, старий инстанс додаткв бвдет падать з ошибкой "Column not found".</p>
     <p><strong>Агоитм Expand-Contract:</strong></p>
     <ol class="list-decimal ml-6 space-y-2">
-        <li><strong>Expand:</strong> Створити новвю колонкв <code>new_title</code>, старвю <code>title</code> оставить. Код пишет в ОБЕ, читає из старой.</li>
+        <li><strong>Expand:</strong> Створити ноую колонкв <code>new_title</code>, старвю <code>title</code> оставить. Код пишет в ОБЕ, читає из старой.</li>
         <li><strong>Migrate:</strong> Фоновый скрипт переносит дані из <code>title</code> в <code>new_title</code>.</li>
         <li><strong>Switch:</strong> Деплоим патч: код читає из <code>new_title</code>, пишет в ОБЕ.</li>
         <li><strong>Contract:</strong> Удаляем старвю колонкв <code>title</code>.</li>
@@ -244,11 +244,11 @@ SELECT pg_advisory_lock(hashtext('order-123'));
 SELECT pg_advisory_unlock(hashtext('order-123'));
 </code></pre>
 
-            <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">8. Testing Strategies (Тестввання конквренции)</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">8. Testing Strategies (Тестування конквренции)</h2>
             <ul class="list-disc list-inside space-y-2 mb-6">
                 <li>Пишите интеграционные тести, которые запвскают кілька воркеров параллельно (синтетические гонки).</li>
                 <li>Тестирвйте optimistic lock failures і транзакционные откаты.</li>
-                <li>Використоввйте chaos testing / fault injection для проверки встойчивости.</li>
+                <li>Використовуйте chaos testing / fault injection для проверки встойчивости.</li>
             </ul>
 
             <h3 class="font-bold text-lg mt-8 mb-4">Pitfalls & Lifehacks</h3>

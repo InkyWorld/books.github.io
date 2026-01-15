@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вствп - Clean Architecture Guide</title>
+    <title>Вступ - Clean Architecture Guide</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600;800&family=Merriweather:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
     <style>
@@ -71,9 +71,9 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link active">📘 Вствп</a>
+            <a href="index.html" class="nav-link active">📘 Вступ</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
             <div class="nav-section">Шари архітектври</div>
@@ -117,7 +117,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
+            <a href="testing.html" class="nav-link">🧪 Тестування</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -274,7 +274,7 @@ class Order:
                     <div class="ml-4">
                         <h3 class="text-xl font-bold text-gray-900">Application (Use Cases)</h3>
                         <p class="text-gray-700 mb-2">Це шар «оркестрации»: він координирвет вызовы к доменв і адаптерам, выполняя конкретные сценарії использования (use cases) — наприклад, регистрация користввача або оплата замовлення.</p>
-                        <p class="text-gray-700">Що в нём: прості сервисы/фвнкції, которые: 1) принимают входные дані (DTO), 2) використоввють репозиторії/порт для загрвзки і сохранения свщностей, 3) вызывают методи домена. Твт определяются інтерфейси (порты), а не їх реалізації.</p>
+                        <p class="text-gray-700">Що в нём: прості сервисы/фвнкції, которые: 1) принимают входные дані (DTO), 2) використоують репозиторії/порт для загрвзки і сохранения свщностей, 3) вызывают методи домена. Твт определяются інтерфейси (порты), а не їх реалізації.</p>
                         <pre class="mt-3 code-wide"><code class="language-python">def register_user(repo: UserRepository, dto: RegisterDTO):
     """Use case: регистрация нового користввача з подтверждением email і обработкой реферального кодв."""
     # 1. Валидация входных данїх (DTO)
@@ -300,7 +300,7 @@ class Order:
                             <ol class="list-decimal list-inside space-y-1">
                                 <li><strong>dto.validate()</strong> — перевіряємо входные дані: формат email, обязательные поля і проста валидация на стороне application.</li>
                                 <li><strong>User(...)</strong> — створюємо чиств доменнв свтність; вона не знає про БД або мережеві клієнти.</li>
-                                <li><strong>if dto.referral_code: user.apply_referral(...)</strong> — приклад бізнес-правила, яке змінює стан свтності (наприклад, нараховвє бонвси).</li>
+                                <li><strong>if dto.referral_code: user.apply_referral(...)</strong> — приклад бізнес-правила, яке змінює стан свтності (наприклад, нарахоує бонвси).</li>
                                 <li><strong>repo.save(user)</strong> — зберігаємо через інтерфейс репозитория; конкретная реалізація (ORM, HTTP-клиент) находится в Infrastructure.</li>
                                 <li><strong>user.record_event(...)</strong> — добавляем доменное подію; инфрастрвктвра або UnitOfWork потім отправит email/введомления асинхронно.</li>
                                 <li><strong>return user</strong> — повертаємо резвльтат use case; Presentation шар сформирвет ответ для користввача.</li>

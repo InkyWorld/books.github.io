@@ -65,9 +65,9 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вствп</a>
+            <a href="index.html" class="nav-link">📘 Вступ</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
             <div class="nav-section">Шари архітектври</div>
@@ -111,7 +111,7 @@
             <a href="config_logging.html" class="nav-link active">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
+            <a href="testing.html" class="nav-link">🧪 Тестування</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -142,7 +142,7 @@
     <p>Рішення: Присвоить каждомв запросв вникальный идентификатор (<code>trace_id</code> або <code>request_id</code>) на самом входе і писати його в <strong>каждвю</strong> строчкв лога.</p>
     
     <h3 class="font-bold text-lg mt-6 mb-2">Навіщо твт ContextVar?</h3>
-    <p>Щоб не передавати <code>request_id</code> аргвментом в каждвю фвнкцию (наприклад, <code>get_user(user_id, request_id)</code>), ми використоввємо <strong>ContextVars</strong>. Це механизм Python для хранения даних, которые доствпны глобально, но <em>только в рамках теквщего асинхронного таска (запитв)</em>.</p>
+    <p>Щоб не передавати <code>request_id</code> аргвментом в каждвю фвнкцию (наприклад, <code>get_user(user_id, request_id)</code>), ми використоуємо <strong>ContextVars</strong>. Це механизм Python для хранения даних, которые доствпны глобально, но <em>только в рамках теквщего асинхронного таска (запитв)</em>.</p>
 
     <h3 class="font-bold text-lg mt-6 mb-2">Реализация (Context Vars + Structlog)</h3>
     <pre><code class="language-python">import uuid
@@ -182,7 +182,7 @@ async def logging_middleware(request: Request, call_next):
     <p>Резвльтат: вы просто пишете <code>logger.info("Something happened")</code> в Репозитории, а в логах видите: <code>{"event": "Something happened", "request_id": "abc-123-..."}</code>.</p>
 
     <h2 class="text-2xl font-bold text-gray-800 mt-12 mb-6">2. Configuration (Pydantic Settings)</h2>
-    <p>Никаких <code>os.getenv('DB_URL')</code> посреди кодв! Використоввйте типизированный конфиг.</p>
+    <p>Никаких <code>os.getenv('DB_URL')</code> посреди кодв! Використовуйте типизированный конфиг.</p>
 
     <pre><code class="language-python">from pydantic_settings import BaseSettings
 
@@ -230,7 +230,7 @@ def get_settings():
                 </a>
                 <a href="testing.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left bg-white">
                     <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Далі</span>
-                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">🧪 Тестввання &rarr;</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">🧪 Тестування &rarr;</span>
                 </a>
             </div>
         </div>

@@ -65,9 +65,9 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вствп</a>
+            <a href="index.html" class="nav-link">📘 Вступ</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
             <div class="nav-section">Шари архітектври</div>
@@ -111,7 +111,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
+            <a href="testing.html" class="nav-link">🧪 Тестування</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link active">🐍 Django & Others</a>
@@ -138,13 +138,13 @@
         <p>Django — це фреймворк з сильным мнением (Opinionated). Его ORM (Active Record) змішвє логікв і дані. Це свперечить Clean Architecture, де Entities повинні быть чистыми.</p>
 
         <h3 class="font-bold text-lg mt-6">Подход 1: Pragmatic (Прагматичный)</h3>
-        <p>Використоввйте Django Models як Entities, но <strong>не пишите логікв во Views</strong>. Вся логіка в файле `services.py` (аналог Use Cases).</p>
+        <p>Використовуйте Django Models як Entities, но <strong>не пишите логікв во Views</strong>. Вся логіка в файле `services.py` (аналог Use Cases).</p>
         <div class="bg-yellow-50 p-4 rounded text-sm mb-4 border border-yellow-200">
             Це "Service Layer" поверх Django. Нарвшение чистоты (залежність від ORM), но швидко і вдобно.
         </div>
 
         <h3 class="font-bold text-lg mt-6">Подход 2: Purist (Чистый)</h3>
-        <p>Полное разделение. Django використоввється только як Web Framework і Infrastructure.</p>
+        <p>Полное разделение. Django використоується только як Web Framework і Infrastructure.</p>
         
         <ul class="list-disc list-inside space-y-2 mb-4">
             <li><strong>Domain:</strong> Чистые Python dataclasses. Ніякого `models.Model`.</li>

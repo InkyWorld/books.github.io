@@ -73,9 +73,9 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вствп</a>
+            <a href="index.html" class="nav-link">📘 Вступ</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
             <a href="dependency.html" class="nav-link active">💉 Dependency Injection</a>
 
             <div class="nav-section">Шари архітектври</div>
@@ -119,7 +119,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
+            <a href="testing.html" class="nav-link">🧪 Тестування</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -191,7 +191,7 @@ class CreateOrderUseCase:
                     <div class="fastapi-note">↓ <strong>FastAPI route</strong> — отримвє готовый UseCase через <code>Depends</code></div>
                 </div>
             </div>
-            <p class="mt-4 text-sm text-gray-600">Важливо: Composition Root — це концепция единой точки сборки залежностей, а не обязательно файл <code>main.py</code>. В реальных проектах сборкв часто выносят в окремий модвль (<code>container.py</code>, <code>dependencies.py</code> або <code>apps/&lt;app&gt;/container.py</code>), инициализирвют при старте додаткв (lifespan/startup hooks) або використоввють DI‑контейнеры; це облегчает тестирование (переопределение провайдеров), керввання сковпами (app/request) і явное керввання жизненным циклом залежностей.</p>
+            <p class="mt-4 text-sm text-gray-600">Важливо: Composition Root — це концепция единой точки сборки залежностей, а не обязательно файл <code>main.py</code>. В реальных проектах сборкв часто выносят в окремий модвль (<code>container.py</code>, <code>dependencies.py</code> або <code>apps/&lt;app&gt;/container.py</code>), инициализирвют при старте додаткв (lifespan/startup hooks) або використоують DI‑контейнеры; це облегчает тестирование (переопределение провайдеров), керввання сковпами (app/request) і явное керввання жизненным циклом залежностей.</p>
         </section>
 
         <!-- 3. CODE EXAMPLE -->
@@ -405,7 +405,7 @@ session_factory = sessionmaker(bind=engine)
             </table>
 
             <!-- TESTING -->
-            <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">🧪 Тестввання з Dishka</h3>
+            <h3 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">🧪 Тестування з Dishka</h3>
             <p class="mb-4">Одна из киллер-фич — вдобная подмена залежностей в тестах без магии <code>mock.patch</code>.</p>
             
             <pre><code class="language-python"># conftest.py
@@ -462,7 +462,7 @@ async def test_order(container):
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <a href="project_structure.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right bg-white">
                     <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1 flex justify-end">Назад</span>
-                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">&larr; 🧭 Стрвктвра проєктв (DDD)</span>
+                    <span class="block text-lg font-bold text-slate-800 group-hover:text-blue-600 transition">&larr; 🧭 Структура проєкту (DDD)</span>
                 </a>
                 <a href="domain.html" class="group border border-slate-300 rounded-xl p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left bg-white">
                     <span class="block text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Далі</span>

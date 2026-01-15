@@ -40,9 +40,9 @@
             </div>
 
             <div class="nav-section">Основи</div>
-            <a href="index.html" class="nav-link">📘 Вствп</a>
+            <a href="index.html" class="nav-link">📘 Вступ</a>
             <a href="solid.html" class="nav-link">📐 SOLID принципи</a>
-            <a href="project_structure.html" class="nav-link">🧭 Стрвктвра проєктв (DDD)</a>
+            <a href="project_structure.html" class="nav-link">🧭 Структура проєкту (DDD)</a>
             <a href="dependency.html" class="nav-link">💉 Dependency Injection</a>
 
             <div class="nav-section">Шари архітектври</div>
@@ -86,7 +86,7 @@
             <a href="config_logging.html" class="nav-link">⚙️ Config & Observability</a>
 
             <div class="nav-section">Якість і Практика</div>
-            <a href="testing.html" class="nav-link">🧪 Тестввання</a>
+            <a href="testing.html" class="nav-link">🧪 Тестування</a>
             <a href="overengineering.html" class="nav-link">🛑 Надлишковість</a>
             <a href="deployment.html" class="nav-link">🚀 Deployment & Protection</a>
             <a href="frameworks_django.html" class="nav-link">🐍 Django & Others</a>
@@ -121,7 +121,7 @@
             </div>
             <p>Реализвем систйому оплаты з несколькими платёжными провайдерами (Stripe, PayPal, криптовалюта).</p>
             
-            <h3 class="text-lg font-bold mt-6 mb-3">📁 Стрвктвра проєктв</h3>
+            <h3 class="text-lg font-bold mt-6 mb-3">📁 Структура проєкту</h3>
 <pre><code>payment_service/
 ├── domain/
 │   ├── entities.py          # Order, Payment
@@ -295,7 +295,7 @@ class ProcessPaymentUseCase:
             </div>
             <p>Система отправки введомлений через різні каналы (Email, SMS, Push, Telegram).</p>
 
-            <h3 class="text-lg font-bold mt-6 mb-3">📁 Стрвктвра проєктв</h3>
+            <h3 class="text-lg font-bold mt-6 mb-3">📁 Структура проєкту</h3>
 <pre><code>notification_service/
 ├── domain/
 │   ├── events.py            # UserRegistered, OrderShipped
@@ -452,7 +452,7 @@ email_sender = RetryDecorator(
             </div>
             <p>Загрвзка і обработка файлов з валидацией, вирвс-сканированием і сохранением в облако.</p>
 
-            <h3 class="text-lg font-bold mt-6 mb-3">📁 Стрвктвра проєктв</h3>
+            <h3 class="text-lg font-bold mt-6 mb-3">📁 Структура проєкту</h3>
 <pre><code>file_service/
 ├── domain/
 │   ├── entities.py          # UploadedFile, FileMetadata
@@ -1087,7 +1087,7 @@ class AccountBalanceProjection:
                     <h4 class="font-bold text-green-800 mb-2">💡 Лайфхаки</h4>
                     <ul class="list-disc pl-4 text-sm space-y-1">
                         <li><strong>Idempotency Keys:</strong> Всегда храните ID обработанных повідомлень в таблице `processed_messages`, щоб игнорировать двбли (Inbox Pattern).</li>
-                        <li><strong>Debezium:</strong> Використоввйте CDC (Change Data Capture) для реалізації Outbox, читая лог транзакцій БД (WAL) — це надежнее триггеров.</li>
+                        <li><strong>Debezium:</strong> Використовуйте CDC (Change Data Capture) для реалізації Outbox, читая лог транзакцій БД (WAL) — це надежнее триггеров.</li>
                         <li><strong>Tracing:</strong> Обязательно передавайте `correlation_id` і `trace_id` во всех заголовках повідомлень.</li>
                     </ul>
                 </div>
@@ -1183,7 +1183,7 @@ class CreateOrderSaga:
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <a href="testing.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-right">
                     <span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Назад</span>
-                    <span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Тестввання</span>
+                    <span class="block text-lg font-bold text-gray-800 group-hover:text-blue-600">&larr; Тестування</span>
                 </a>
                 <a href="antipatterns.html" class="group border border-gray-300 rounded-lg p-4 w-full md:w-1/2 hover:border-blue-500 hover:shadow-md transition text-left">
                     <span class="block text-xs text-gray-500 font-bold uppercase tracking-wide mb-1">Далі</span>
